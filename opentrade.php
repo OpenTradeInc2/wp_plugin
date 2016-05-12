@@ -1,4 +1,3 @@
-
 <?php
 remove_action( 'shutdown', 'wp_ob_end_flush_all', 1 );
 require_once( ABSPATH . "wp-includes/pluggable.php" );
@@ -33,12 +32,35 @@ License: GPL2
      */
 
     add_action( 'admin_menu', 'admin_menu' );
-    $db_open_trade = new wpdb( 'root', 'root','opentrade_custom' , 'localhost:13306' );
+    $db_open_trade = new wpdb( 'root', 'root','opentrade_custom' , 'localhost:3306' );
 
     function admin_menu(){
         add_menu_page(__( 'Open Trade 2.0', 'textdomain' ), 'Open Trade 2.0', 'manage_options', 'open-trade-menu', 'open_trade_admin' , 'dashicons-migrate', 6 );
         add_submenu_page('open-trade-menu', 'Load Inventory', 'Load Inventory', 'manage_options', 'open-trade-menu' );
         add_submenu_page('open-trade-menu', 'Pending Approval', 'Pending Approval', 'manage_options', 'my-menu2', 'wpdocs_pending_approval_submenu_page_callback' );
+        validateCategories();
+    }
+
+    function validateCategories(){
+
+        global $db_open_trade;
+
+        $categories = $db_open_trade->get_results("SELECT DISTINCT `category`
+                                                    FROM `opentrade_custom`.`ot_custom_inventory_file_items`;");
+
+        foreach ($categories as $category){
+            $term = term_exists($category->category, 'product_cat');
+            if ($term == 0 && $term == null) {
+
+                wp_insert_category(
+                    array(
+                        'cat_name' 				=> $category->category,
+                        'category_description'	=> 'This is category for open trade',
+                        'category_nicename' 		=> $category->category,
+                        'taxonomy' 				=> 'product_cat'
+                    ));
+            }
+        }
     }
 
     function wpdocs_pending_approval_submenu_page_callback() {
@@ -48,6 +70,16 @@ License: GPL2
         <h4>Open Trade 2.0</h4>
         <h3>Pending Approval Files</h3>
         <br>
+            <?php
+            if( isset($_GET['message-success']) ) {
+                ?>
+                <div id="message" class="updated">
+                    <p><strong><?php _e($_GET['message-success']) ?></strong></p>
+                </div>
+                <br>
+                <?php
+            }
+            ?>
         <form action="" method="post" enctype="multipart/form-data">
         <div class="alignleft actions bulkactions">
             <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
@@ -252,9 +284,8 @@ License: GPL2
         }
 
         if (count($errors) === 0) {
-            $fullDate = getdate();
-            $formatDate = date("Ymdhis");
 
+            $formatDate = date("Ymdhis");
             $user_dir = $target_dir.$current_user->user_login;
 
             if(!file_exists($user_dir)){
@@ -288,7 +319,7 @@ License: GPL2
 
                 if (isset($_POST['idProduct'])) {
                     $idProductsFile = $_POST["idProduct"];
-                    approveProductsFiles($idProductsFile);
+                    $result = approveProductsFiles($idProductsFile);
                 } else {
                     phpAlert('Please select a file to approve!');
                 }
@@ -296,6 +327,53 @@ License: GPL2
             } else if ($selectOption == 'reject') {
 
             }
+        }
+    }
+
+    function updateCompletedFile($idProductsFile, $result){
+
+        global $db_open_trade;
+
+        $isConnected = $db_open_trade->check_connection();
+
+        if($result){
+            $status = "file-process-success";
+        }else{
+            $status = "file-process-error";
+        }
+
+        if($isConnected){
+            $db_open_trade->query("UPDATE `ot_custom_inventory_file`
+                                   SET
+                                   `status` = '$status'
+                                   WHERE `inventory_id`=".$idProductsFile);
+        }
+    }
+
+    function updateCompletedProduct($idProduct, $result){
+
+        global $db_open_trade;
+
+        $isConnected = $db_open_trade->check_connection();
+
+        if($result){
+            $status = "product-process-success";
+        }else{
+            $status = "product-process-error";
+        }
+
+        global $current_user;
+        $current_user =  wp_get_current_user();
+
+        $formatDate = date("Ymdhis");
+
+        if($isConnected){
+            $db_open_trade->query("UPDATE `ot_custom_inventory_file_items`
+                                       SET
+                                       `status` = '$status',
+                                       `edited_date` = '$formatDate',
+                                       `edited_by` = $current_user->ID
+                                       WHERE `inventory_file_item_id`=".$idProduct);
         }
     }
 
@@ -309,12 +387,14 @@ License: GPL2
         if($isConnected){
         
             foreach ($idProductsFile as $productFileID) {
-
                 $products = getProducts($db_open_trade, $productFileID);
-
                 foreach ($products as $product){
-                    $overallProcess = createOrUpdateProduct($product);
+                    if(!createOrUpdateProduct($product)){
+                        $overallProcess = false;
+                    }
                 }
+                updateCompletedFile($productFileID, $overallProcess);
+                $_GET['message-success'] ='File successfully approved.';
             }
         }
 
@@ -323,7 +403,7 @@ License: GPL2
 
     function getProducts($db_open_trade, $productFileID){
 
-        $products = $db_open_trade->get_results("SELECT `inventory_file_item_id`, `inventory_file_id`, `sku_id`, `sku_description`, `product_line`, `lot_number`, `issue_type`, `li_specialist`, `warehouse`, `city`, `zipcode`, `lmd`, `id_month`, `days_under_current_path`, `quantity_libs`, `sum_quantity`, `total_cost`, `added_by`, `added_date`,`edited_date`, `edited_by`,`deleted`, `status`
+        $products = $db_open_trade->get_results("SELECT `inventory_file_item_id`, `inventory_file_id`, `sku_id`, `sku_description`, `product_line`, `lot_number`, `issue_type`, `li_specialist`, `warehouse`, `city`, `zipcode`, `lmd`, `id_month`, `days_under_current_path`, `quantity_libs`, `sum_quantity`, `total_cost`, `added_by`, `added_date`,`edited_date`, `edited_by`,`deleted`, `status`, `category` 
                                                  FROM `ot_custom_inventory_file_items`
                                                  WHERE `inventory_file_id` = " . $productFileID);
 
@@ -332,13 +412,13 @@ License: GPL2
 
     function createOrUpdateProduct($product){
 
-        $result = true;
-
         if(isNewProduct($product)){
             $result = createPost($product);
         }else{
-            updateProduct($product);
+            $result = updateProduct($product);
         }
+
+        updateCompletedProduct($product->inventory_file_item_id,$result);
 
         return $result;
     }
@@ -398,14 +478,17 @@ License: GPL2
 
             $post_id = wp_insert_post( $post, $wp_error );
 
-            /*if($post_id){
-                $attach_id = get_post_meta($product->parent_id, "_thumbnail_id", true);
-                add_post_meta($post_id, '_thumbnail_id', $attach_id);
-            }*/
+            //registerTaxonomy();
 
-            //wp_set_object_terms( $post_id, 'Races', 'product_cat' );
-            //wp_set_object_terms($post_id, 'simple', 'product_type');
+           // $g = get_taxonomies();
 
+            //$term = term_exists($product->category, 'product_cat');
+
+            //if ($term !== 0 && $term !== null) {
+                //wp_set_object_terms( $post_id, $term->term_id, 'product_cat' );
+            //}
+
+            wp_set_object_terms($post_id, 'simple', 'product_type');
             update_post_meta( $post_id, '_visibility', 'visible' );
             update_post_meta( $post_id, '_stock_status', 'instock');
             update_post_meta( $post_id, 'total_sales', '0');
@@ -437,6 +520,58 @@ License: GPL2
         return true;
     }
 
+    function registerTaxonomy(){
+
+        $permalinks = get_option( 'woocommerce_permalinks' );
+
+        register_taxonomy( 'product_type',
+            apply_filters( 'woocommerce_taxonomy_objects_product_type', array( 'product' ) ),
+            apply_filters( 'woocommerce_taxonomy_args_product_type', array(
+                'hierarchical'      => false,
+                'show_ui'           => false,
+                'show_in_nav_menus' => false,
+                'query_var'         => is_admin(),
+                'rewrite'           => false,
+                'public'            => false
+            ) )
+        );
+
+        register_taxonomy( 'product_cat',
+            apply_filters( 'woocommerce_taxonomy_objects_product_cat', array( 'product' ) ),
+            apply_filters( 'woocommerce_taxonomy_args_product_cat', array(
+                'hierarchical'          => true,
+                'update_count_callback' => '_wc_term_recount',
+                'label'                 => __( 'Product Categories', 'woocommerce' ),
+                'labels' => array(
+                    'name'              => __( 'Product Categories', 'woocommerce' ),
+                    'singular_name'     => __( 'Product Category', 'woocommerce' ),
+                    'menu_name'         => _x( 'Categories', 'Admin menu name', 'woocommerce' ),
+                    'search_items'      => __( 'Search Product Categories', 'woocommerce' ),
+                    'all_items'         => __( 'All Product Categories', 'woocommerce' ),
+                    'parent_item'       => __( 'Parent Product Category', 'woocommerce' ),
+                    'parent_item_colon' => __( 'Parent Product Category:', 'woocommerce' ),
+                    'edit_item'         => __( 'Edit Product Category', 'woocommerce' ),
+                    'update_item'       => __( 'Update Product Category', 'woocommerce' ),
+                    'add_new_item'      => __( 'Add New Product Category', 'woocommerce' ),
+                    'new_item_name'     => __( 'New Product Category Name', 'woocommerce' )
+                ),
+                'show_ui'               => true,
+                'query_var'             => true,
+                'capabilities'          => array(
+                    'manage_terms' => 'manage_product_terms',
+                    'edit_terms'   => 'edit_product_terms',
+                    'delete_terms' => 'delete_product_terms',
+                    'assign_terms' => 'assign_product_terms',
+                ),
+                'rewrite'               => array(
+                    'slug'         => empty( $permalinks['category_base'] ) ? _x( 'product-category', 'slug', 'woocommerce' ) : $permalinks['category_base'],
+                    'with_front'   => false,
+                    'hierarchical' => true,
+                ),
+            ) )
+        );
+    }
+
     function updateProduct($product){
         global $wpdb;
 
@@ -444,12 +579,16 @@ License: GPL2
         $postMeta = get_post_meta($productID, '_stock', true);
         $totalStock =$postMeta + $product->sum_quantity;
 
-        $result = $wpdb->query("UPDATE `wp_postmeta`
+        $result =$wpdb->query("UPDATE `wp_postmeta`
                                 SET
                                 `meta_value` = ".$totalStock."
                                 WHERE `post_id` = ".$productID." and `meta_key` = '_stock';");
 
-        return $result;
+        if($result == 1){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     function getProductID($product){
@@ -471,7 +610,6 @@ License: GPL2
         if(validateHeaders($allDataInSheet)){
 
             $products = getProductsList($allDataInSheet, $arrayCount);
-
             saveProducts($products, $filename, $arrayCount, $current_user, $formatDate);
 
             $_GET['message-success']='Upload success, please approve the file to update de inventory.';
@@ -481,7 +619,6 @@ License: GPL2
         }else{
             $_GET['message-error']= 'The Format File not contain the headers required.';
         }
-
         $_GET['products-list'] = $products;
     }
 
@@ -549,13 +686,17 @@ License: GPL2
         if (!in_array('TC', $headers)) {
             $result = false;
         }
+        if (!in_array('Category', $headers)) {
+            $result = false;
+        }
+
         return $result;
     }
 
     function getProductsList($allDataInSheet, $arrayCount){
 
         $products = array();
-        for ($i = 2; $i <= $arrayCount; $i++) {
+        for ($i = 2; $i <= $arrayCount+1; $i++) {
             $product = array();
             $skuID = trim($allDataInSheet[$i]["A"]);
             $product[1] = $skuID;
@@ -585,6 +726,8 @@ License: GPL2
             $product[13] = $qty;
             $tc = trim($allDataInSheet[$i]["N"]);
             $product[14]=$tc;
+            $category = trim($allDataInSheet[$i]["O"]);
+            $product[15]=$category;
 
             $products[$i-1]=$product;
         }
@@ -599,6 +742,7 @@ License: GPL2
         $isConnected = $db_open_trade->check_connection();
 
         if($isConnected){
+
             $db_open_trade->query("INSERT INTO ot_custom_inventory_file 
                                   (`file_md5`,`items_count`,`added_by`,`added_date`,`deleted`,`status`) 
                                   VALUES 
@@ -609,9 +753,9 @@ License: GPL2
 
                 $price = str_replace("$", "", $product[14]);
                 $db_open_trade->query("INSERT INTO ot_custom_inventory_file_items 
-                                                  (`inventory_file_id`, `sku_id`, `sku_description`, `product_line`, `lot_number`, `issue_type`, `li_specialist`, `warehouse`, `city`, `zipcode`, `lmd`, `id_month`, `days_under_current_path`, `quantity_libs`, `sum_quantity`, `total_cost`, `added_by`, `added_date`, `deleted`, `status` ) 
+                                                  (`inventory_file_id`, `sku_id`, `sku_description`, `product_line`, `lot_number`, `issue_type`, `li_specialist`, `warehouse`, `city`, `zipcode`, `lmd`, `id_month`, `days_under_current_path`, `quantity_libs`, `sum_quantity`, `total_cost`, `added_by`, `added_date`, `deleted`, `status`, `category`) 
                                        VALUES 
-                                                  ('$idProductFile','$product[1]','$product[2]','$product[3]','$product[4]','$product[5]','$product[6]','$product[7]','$product[8]','$product[9]','$product[10]','$product[11]','$product[12]',0 ,$product[13],$price,'$current_user', '$formatDate',0 , 'pending_approval')");
+                                                  ('$idProductFile','$product[1]','$product[2]','$product[3]','$product[4]','$product[5]','$product[6]','$product[7]','$product[8]','$product[9]','$product[10]','$product[11]','$product[12]',0 ,$product[13],$price,'$current_user', '$formatDate',0 , 'pending_approval', '$product[15]')");
             }
         }
     }
