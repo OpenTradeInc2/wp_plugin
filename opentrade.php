@@ -32,35 +32,11 @@ License: GPL2
      */
 
     add_action( 'admin_menu', 'admin_menu' );
-    $db_open_trade = new wpdb( 'root', 'root','opentrade_custom' , 'localhost:3306' );
 
     function admin_menu(){
         add_menu_page(__( 'Open Trade 2.0', 'textdomain' ), 'Open Trade 2.0', 'manage_options', 'open-trade-menu', 'open_trade_admin' , 'dashicons-migrate', 6 );
         add_submenu_page('open-trade-menu', 'Load Inventory', 'Load Inventory', 'manage_options', 'open-trade-menu' );
-        add_submenu_page('open-trade-menu', 'Pending Approval', 'Pending Approval', 'manage_options', 'my-menu2', 'wpdocs_pending_approval_submenu_page_callback' );
-        validateCategories();
-    }
-
-    function validateCategories(){
-
-        global $db_open_trade;
-
-        $categories = $db_open_trade->get_results("SELECT DISTINCT `category`
-                                                    FROM `opentrade_custom`.`ot_custom_inventory_file_items`;");
-
-        foreach ($categories as $category){
-            $term = term_exists($category->category, 'product_cat');
-            if ($term == 0 && $term == null) {
-
-                wp_insert_category(
-                    array(
-                        'cat_name' 				=> $category->category,
-                        'category_description'	=> 'This is category for open trade',
-                        'category_nicename' 		=> $category->category,
-                        'taxonomy' 				=> 'product_cat'
-                    ));
-            }
-        }
+        add_submenu_page('open-trade-menu', 'Pending Approval', 'Pending Approval', 'manage_options', 'open-trade-approve', 'wpdocs_pending_approval_submenu_page_callback' );
     }
 
     function wpdocs_pending_approval_submenu_page_callback() {
@@ -77,6 +53,13 @@ License: GPL2
                     <p><strong><?php _e($_GET['message-success']) ?></strong></p>
                 </div>
                 <br>
+                <?php
+            }
+            if( isset($_GET['message-error']) ) {
+                ?>
+                <div id="message" class="error">
+                    <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                </div>
                 <?php
             }
             ?>
@@ -114,12 +97,12 @@ License: GPL2
             </tfoot>
             <tbody>
             <?php
-            global $db_open_trade;
+            global $wpdb;
 
-            $isConnected = $db_open_trade->check_connection();
+            $isConnected = $wpdb->check_connection();
 
             if($isConnected){
-                $products_files =  $db_open_trade->get_results("SELECT `inventory_id`, `file_md5`, `items_count`, `added_date` FROM `ot_custom_inventory_file` WHERE `status` = 'pending_approval'");
+                $products_files =  $wpdb->get_results("SELECT `inventory_id`, `file_md5`, `items_count`, `added_date` FROM `ot_custom_inventory_file` WHERE `status` = 'pending_approval'");
                 foreach ($products_files as $product_file) {
                     ?>
                     <tr>
@@ -151,6 +134,21 @@ License: GPL2
             <h3>Load New Inventory List</h3>
             <br>
             <form action="" method="post" enctype="multipart/form-data">
+                Please select distributor:
+                <select name="selectDistributor" id="bulk-action-selector-top">
+                    <option value="-1">Distributors</option>
+                    <?php
+                        global $wpdb;
+                        $isConnected = $wpdb->check_connection();
+                        if($isConnected){
+                            $distributors =  $wpdb->get_results("SELECT `distributor_id`, `distributor_name` FROM `ot_custom_distributor`");
+                            foreach ($distributors as $distributor) {
+                                echo "<option value=\"$distributor->distributor_id\" class=\"hide-if-no-js\">$distributor->distributor_name</option>";
+                            }
+                        }
+                    ?>
+                </select>
+                <br>
                 Please select file to upload:
                 <input type="file" name="fileToUpload" id="fileToUpload" accept=".xlsx, .xls">
                 <input type="submit" value="Upload File" name="uploadFileSubmit">
@@ -243,7 +241,7 @@ License: GPL2
     }
 
     function phpAlert($msg) {
-        echo '<script type="text/javascript">alert("' . $msg . '")</script>';
+        $_GET['message-error'] = $msg;
     }
 
     function viewDetails(){
@@ -257,50 +255,56 @@ License: GPL2
 
     if(isset($_POST["uploadFileSubmit"])) {
 
-        $target_dir = plugin_dir_path(__FILE__) . "uploads/";
+        if (isset($_POST["selectDistributor"])) {
+            $distributorID = $_POST['selectDistributor'];
 
-        $filename = $_FILES['fileToUpload']['name'];
-        $fileType = pathinfo($filename, PATHINFO_EXTENSION);
+            if ($distributorID == -1) {
+                phpAlert('Please select one distributor!');
+            } else {
 
-        $errors = array();
-        $maxsize = 2097152;
+                $target_dir = plugin_dir_path(__FILE__) . "uploads/";
 
-        if ($fileType != 'xlsx' && $fileType != 'xls') {
-            $errors[] = 'Invalid file type. Only xlsx and xls types are accepted.';
-        }
+                $filename = $_FILES['fileToUpload']['name'];
+                $fileType = pathinfo($filename, PATHINFO_EXTENSION);
 
-        if (($_FILES['fileToUpload']['size'] >= $maxsize) || ($_FILES["fileToUpload"]["size"] == 0)) {
-            $errors[] = 'File too large. File must be less than 2 megabytes.';
-        }
+                $errors = array();
+                $maxsize = 2097152;
 
-        global $current_user;
-        if (is_user_logged_in())
-        {
-            $current_user =  wp_get_current_user();
-        }
-        else
-        {
-            $errors[] = 'User not fount.';
-        }
+                if ($fileType != 'xlsx' && $fileType != 'xls') {
+                    $errors[] = 'Invalid file type. Only xlsx and xls types are accepted.';
+                }
 
-        if (count($errors) === 0) {
+                if (($_FILES['fileToUpload']['size'] >= $maxsize) || ($_FILES["fileToUpload"]["size"] == 0)) {
+                    $errors[] = 'File too large. File must be less than 2 megabytes.';
+                }
 
-            $formatDate = date("Ymdhis");
-            $user_dir = $target_dir.$current_user->user_login;
+                global $current_user;
+                if (is_user_logged_in()) {
+                    $current_user = wp_get_current_user();
+                } else {
+                    $errors[] = 'User not fount.';
+                }
 
-            if(!file_exists($user_dir)){
-                mkdir($user_dir);
+                if (count($errors) === 0) {
+
+                    $formatDate = date("Ymdhis");
+                    $user_dir = $target_dir . $current_user->user_login;
+
+                    if (!file_exists($user_dir)) {
+                        mkdir($user_dir);
+                    }
+
+                    $fullPatch = $user_dir . '/' . $formatDate . '_' . $_FILES["fileToUpload"]['name'];
+
+                    if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], $fullPatch)) {
+                        processFile($fullPatch, $filename, $current_user->ID, $formatDate, $distributorID);
+                    } else {
+                        $_GET['message-error'] = 'File was not uploaded';
+                    }
+                } else {
+                    $_GET['message-error'] = $errors[0];
+                }
             }
-
-            $fullPatch = $user_dir . '/' . $formatDate . '_' . $_FILES["fileToUpload"]['name'];
-
-            if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], $fullPatch)) {
-                processFile($fullPatch, $filename,$current_user->ID,$formatDate);
-            }else{
-                $_GET['message-error']= 'File was not uploaded';
-            }
-        } else {
-            $_GET['message-error'] = $errors[0];
         }
     }
 
@@ -325,16 +329,16 @@ License: GPL2
                 }
 
             } else if ($selectOption == 'reject') {
-
+                phpAlert('Pending implementation.');
             }
         }
     }
 
     function updateCompletedFile($idProductsFile, $result){
 
-        global $db_open_trade;
+        global $wpdb;
 
-        $isConnected = $db_open_trade->check_connection();
+        $isConnected = $wpdb->check_connection();
 
         if($result){
             $status = "file-process-success";
@@ -343,7 +347,7 @@ License: GPL2
         }
 
         if($isConnected){
-            $db_open_trade->query("UPDATE `ot_custom_inventory_file`
+            $wpdb->query("UPDATE `ot_custom_inventory_file`
                                    SET
                                    `status` = '$status'
                                    WHERE `inventory_id`=".$idProductsFile);
@@ -352,9 +356,9 @@ License: GPL2
 
     function updateCompletedProduct($idProduct, $result){
 
-        global $db_open_trade;
+        global $wpdb;
 
-        $isConnected = $db_open_trade->check_connection();
+        $isConnected = $wpdb->check_connection();
 
         if($result){
             $status = "product-process-success";
@@ -368,7 +372,7 @@ License: GPL2
         $formatDate = date("Ymdhis");
 
         if($isConnected){
-            $db_open_trade->query("UPDATE `ot_custom_inventory_file_items`
+            $wpdb->query("UPDATE `ot_custom_inventory_file_items`
                                        SET
                                        `status` = '$status',
                                        `edited_date` = '$formatDate',
@@ -379,15 +383,15 @@ License: GPL2
 
     function approveProductsFiles($idProductsFile){
 
-        global $db_open_trade;
+        global $wpdb;
 
-        $isConnected = $db_open_trade->check_connection();
+        $isConnected = $wpdb->check_connection();
         $overallProcess = true;
 
         if($isConnected){
         
             foreach ($idProductsFile as $productFileID) {
-                $products = getProducts($db_open_trade, $productFileID);
+                $products = getProducts($wpdb, $productFileID);
                 foreach ($products as $product){
                     if(!createOrUpdateProduct($product)){
                         $overallProcess = false;
@@ -401,9 +405,9 @@ License: GPL2
         return $overallProcess;
     }
 
-    function getProducts($db_open_trade, $productFileID){
+    function getProducts($wpdb, $productFileID){
 
-        $products = $db_open_trade->get_results("SELECT `inventory_file_item_id`, `inventory_file_id`, `sku_id`, `sku_description`, `product_line`, `lot_number`, `issue_type`, `li_specialist`, `warehouse`, `city`, `zipcode`, `lmd`, `id_month`, `days_under_current_path`, `quantity_libs`, `sum_quantity`, `total_cost`, `added_by`, `added_date`,`edited_date`, `edited_by`,`deleted`, `status`, `category` 
+        $products = $wpdb->get_results("SELECT `inventory_file_item_id`, `inventory_file_id`, `sku_id`, `sku_description`, `product_line`, `lot_number`, `issue_type`, `li_specialist`, `warehouse`, `city`, `zipcode`, `lmd`, `id_month`, `days_under_current_path`, `quantity_libs`, `sum_quantity`, `total_cost`, `added_by`, `added_date`,`edited_date`, `edited_by`,`deleted`, `status`, `category`, `distributor_id` 
                                                  FROM `ot_custom_inventory_file_items`
                                                  WHERE `inventory_file_id` = " . $productFileID);
 
@@ -430,8 +434,8 @@ License: GPL2
         $result = false;
 
         $totalProducts = $wpdb->get_results("SELECT count(post.`ID`) as total
-         FROM `wp_posts` as post
-         INNER JOIN `wp_postmeta` as post_meta on post.`ID`= post_meta.`post_id`
+         FROM `".$wpdb->prefix."posts` as post
+         INNER JOIN `".$wpdb->prefix."postmeta` as post_meta on post.`ID`= post_meta.`post_id`
          WHERE post.`post_content`='".$product->sku_description."' and post_meta.`meta_value` in('".$product->sku_id."');");
 
         if($totalProducts[0]->total == 0){
@@ -478,15 +482,7 @@ License: GPL2
 
             $post_id = wp_insert_post( $post, $wp_error );
 
-            //registerTaxonomy();
-
-           // $g = get_taxonomies();
-
-            //$term = term_exists($product->category, 'product_cat');
-
-            //if ($term !== 0 && $term !== null) {
-                //wp_set_object_terms( $post_id, $term->term_id, 'product_cat' );
-            //}
+            setCategory($post_id, $product);
 
             wp_set_object_terms($post_id, 'simple', 'product_type');
             update_post_meta( $post_id, '_visibility', 'visible' );
@@ -520,56 +516,69 @@ License: GPL2
         return true;
     }
 
-    function registerTaxonomy(){
+    function setCategory($post_id, $product){
 
-        $permalinks = get_option( 'woocommerce_permalinks' );
+        global $wpdb;
 
-        register_taxonomy( 'product_type',
-            apply_filters( 'woocommerce_taxonomy_objects_product_type', array( 'product' ) ),
-            apply_filters( 'woocommerce_taxonomy_args_product_type', array(
-                'hierarchical'      => false,
-                'show_ui'           => false,
-                'show_in_nav_menus' => false,
-                'query_var'         => is_admin(),
-                'rewrite'           => false,
-                'public'            => false
-            ) )
-        );
+        $product_type = term_exists('simple', 'product_type');
+        $category = term_exists($product->category, 'product_cat');
 
-        register_taxonomy( 'product_cat',
-            apply_filters( 'woocommerce_taxonomy_objects_product_cat', array( 'product' ) ),
-            apply_filters( 'woocommerce_taxonomy_args_product_cat', array(
-                'hierarchical'          => true,
-                'update_count_callback' => '_wc_term_recount',
-                'label'                 => __( 'Product Categories', 'woocommerce' ),
-                'labels' => array(
-                    'name'              => __( 'Product Categories', 'woocommerce' ),
-                    'singular_name'     => __( 'Product Category', 'woocommerce' ),
-                    'menu_name'         => _x( 'Categories', 'Admin menu name', 'woocommerce' ),
-                    'search_items'      => __( 'Search Product Categories', 'woocommerce' ),
-                    'all_items'         => __( 'All Product Categories', 'woocommerce' ),
-                    'parent_item'       => __( 'Parent Product Category', 'woocommerce' ),
-                    'parent_item_colon' => __( 'Parent Product Category:', 'woocommerce' ),
-                    'edit_item'         => __( 'Edit Product Category', 'woocommerce' ),
-                    'update_item'       => __( 'Update Product Category', 'woocommerce' ),
-                    'add_new_item'      => __( 'Add New Product Category', 'woocommerce' ),
-                    'new_item_name'     => __( 'New Product Category Name', 'woocommerce' )
-                ),
-                'show_ui'               => true,
-                'query_var'             => true,
-                'capabilities'          => array(
-                    'manage_terms' => 'manage_product_terms',
-                    'edit_terms'   => 'edit_product_terms',
-                    'delete_terms' => 'delete_product_terms',
-                    'assign_terms' => 'assign_product_terms',
-                ),
-                'rewrite'               => array(
-                    'slug'         => empty( $permalinks['category_base'] ) ? _x( 'product-category', 'slug', 'woocommerce' ) : $permalinks['category_base'],
-                    'with_front'   => false,
-                    'hierarchical' => true,
-                ),
-            ) )
-        );
+        if ($product_type !== 0 && $product_type !== null) {
+            insertTermRelationships($wpdb,$post_id,$product_type[term_id]);
+        }else{
+            $termID = insertTerm($wpdb, 'simple', 'product_type');
+            insertTermRelationships($wpdb,$post_id,$termID);
+        }
+
+        if ($category !== 0 && $category !== null) {
+            insertTermRelationships($wpdb,$post_id,$category[term_id]);
+        }else{
+            $termID = insertTerm($wpdb, $product->category, 'product_cat');
+            insertTermRelationships($wpdb,$post_id,$termID);
+        }
+
+    }
+
+    function insertTermRelationships($wpdb,$post_id,$term_id){
+
+        $wpdb->query("INSERT INTO `".$wpdb->prefix."term_relationships`
+                         (`object_id`,
+                         `term_taxonomy_id`,
+                         `term_order`)
+                         VALUES
+                         (".$post_id.",
+                          ".$term_id.",
+                          0);");
+    }
+
+    function insertTerm($wpdb, $term, $taxonomy){
+
+        $wpdb->query("INSERT INTO `".$wpdb->prefix."terms`
+                        (`name`,
+                        `slug`,
+                        `term_group`)
+                      VALUES
+                        ('".$term."',
+                        '".str_replace(" ", "-",strtolower($term))."',
+                        0);");
+
+        $termID=$wpdb->insert_id;
+
+        $wpdb->query("INSERT INTO `".$wpdb->prefix."term_taxonomy`
+                        (`term_id`,
+                        `taxonomy`,
+                        `description`,
+                        `parent`,
+                        `count`)
+                      VALUES
+                        (".$termID.",
+                        '".$taxonomy."',
+                        'This is category for open trade',
+                        0,
+                        0);");
+
+        return $termID;
+
     }
 
     function updateProduct($product){
@@ -579,7 +588,7 @@ License: GPL2
         $postMeta = get_post_meta($productID, '_stock', true);
         $totalStock =$postMeta + $product->sum_quantity;
 
-        $result =$wpdb->query("UPDATE `wp_postmeta`
+        $result =$wpdb->query("UPDATE `".$wpdb->prefix."postmeta`
                                 SET
                                 `meta_value` = ".$totalStock."
                                 WHERE `post_id` = ".$productID." and `meta_key` = '_stock';");
@@ -595,14 +604,14 @@ License: GPL2
         global $wpdb;
 
         $result = $wpdb->get_results("SELECT post.`ID` as ID
-         FROM `wp_posts` as post
-         INNER JOIN `wp_postmeta` as post_meta on post.`ID`= post_meta.`post_id`
+         FROM `".$wpdb->prefix."posts` as post
+         INNER JOIN `".$wpdb->prefix."postmeta` as post_meta on post.`ID`= post_meta.`post_id`
          WHERE post.`post_content`='".$product->sku_description."' and post_meta.`meta_value` in('".$product->sku_id."');");
 
         return $result[0]->ID;
     }
 
-    function processFile($fullPatch, $filename, $current_user, $formatDate){
+    function processFile($fullPatch, $filename, $current_user, $formatDate, $distributorID){
 
         $allDataInSheet = readContentFile($fullPatch);
         $arrayCount = count($allDataInSheet)-1;
@@ -610,7 +619,7 @@ License: GPL2
         if(validateHeaders($allDataInSheet)){
 
             $products = getProductsList($allDataInSheet, $arrayCount);
-            saveProducts($products, $filename, $arrayCount, $current_user, $formatDate);
+            saveProducts($products, $filename, $arrayCount, $current_user, $formatDate, $distributorID);
 
             $_GET['message-success']='Upload success, please approve the file to update de inventory.';
             $_GET['message-file-name'] = $filename;
@@ -735,27 +744,27 @@ License: GPL2
         return $products;
     }
 
-    function saveProducts($products, $filename, $arrayCount, $current_user, $formatDate){
+    function saveProducts($products, $filename, $arrayCount, $current_user, $formatDate, $distributorID){
 
-        global $db_open_trade;
+        global $wpdb;
 
-        $isConnected = $db_open_trade->check_connection();
+        $isConnected = $wpdb->check_connection();
 
         if($isConnected){
 
-            $db_open_trade->query("INSERT INTO ot_custom_inventory_file 
+            $wpdb->query("INSERT INTO ot_custom_inventory_file 
                                   (`file_md5`,`items_count`,`added_by`,`added_date`,`deleted`,`status`) 
                                   VALUES 
                                   ('$filename', '$arrayCount', '$current_user', '$formatDate',0 , 'pending_approval')");
-            $idProductFile = $db_open_trade->insert_id;
+            $idProductFile = $wpdb->insert_id;
 
             foreach ($products as $product){
 
                 $price = str_replace("$", "", $product[14]);
-                $db_open_trade->query("INSERT INTO ot_custom_inventory_file_items 
-                                                  (`inventory_file_id`, `sku_id`, `sku_description`, `product_line`, `lot_number`, `issue_type`, `li_specialist`, `warehouse`, `city`, `zipcode`, `lmd`, `id_month`, `days_under_current_path`, `quantity_libs`, `sum_quantity`, `total_cost`, `added_by`, `added_date`, `deleted`, `status`, `category`) 
+                $wpdb->query("INSERT INTO ot_custom_inventory_file_items 
+                                                  (`inventory_file_id`, `sku_id`, `sku_description`, `product_line`, `lot_number`, `issue_type`, `li_specialist`, `warehouse`, `city`, `zipcode`, `lmd`, `id_month`, `days_under_current_path`, `quantity_libs`, `sum_quantity`, `total_cost`, `added_by`, `added_date`, `deleted`, `status`, `category`,`distributor_id`) 
                                        VALUES 
-                                                  ('$idProductFile','$product[1]','$product[2]','$product[3]','$product[4]','$product[5]','$product[6]','$product[7]','$product[8]','$product[9]','$product[10]','$product[11]','$product[12]',0 ,$product[13],$price,'$current_user', '$formatDate',0 , 'pending_approval', '$product[15]')");
+                                                  ('$idProductFile','$product[1]','$product[2]','$product[3]','$product[4]','$product[5]','$product[6]','$product[7]','$product[8]','$product[9]','$product[10]','$product[11]','$product[12]',0 ,$product[13],$price,'$current_user', '$formatDate',0 , 'pending_approval', '$product[15]',$distributorID)");
             }
         }
     }
