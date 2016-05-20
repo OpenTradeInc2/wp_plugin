@@ -1,6 +1,13 @@
 <?php
 remove_action( 'shutdown', 'wp_ob_end_flush_all', 1 );
 require_once( ABSPATH . "wp-includes/pluggable.php" );
+include plugin_dir_path(__FILE__) . '/includes/admin.php';
+include plugin_dir_path(__FILE__) . '/includes/file-upload.php';
+include plugin_dir_path(__FILE__) . '/includes/process-file.php';
+include plugin_dir_path(__FILE__) . '/includes/products-admin.php';
+include plugin_dir_path(__FILE__) . '/Classes/PHPExcel/IOFactory.php';
+set_include_path(plugin_dir_path(__FILE__) . 'Classes/');
+
 /*
 Plugin Name: Open Trade 2.0
 Plugin URI: http://URI_De_La_P?gina_Que_Describe_el_Plugin_y_Actualizaciones
@@ -37,122 +44,22 @@ License: GPL2
         add_menu_page(__( 'Open Trade 2.0', 'textdomain' ), 'Open Trade 2.0', 'manage_options', 'open-trade-menu', 'open_trade_admin' , 'dashicons-migrate', 6 );
         add_submenu_page('open-trade-menu', 'Load Inventory', 'Load Inventory', 'manage_options', 'open-trade-menu' );
         add_submenu_page('open-trade-menu', 'Pending Approval', 'Pending Approval', 'manage_options', 'open-trade-approve', 'wpdocs_pending_approval_submenu_page_callback' );
-    }
+        add_submenu_page('open-trade-menu', 'Distributors', 'Distributors', 'manage_options', 'open-trade-distributors', 'wpdocs_distributors_submenu_page_callback' );
 
-    function wpdocs_pending_approval_submenu_page_callback() {
-
-        ?>
-        <div class="wrap">
-        <h4>Open Trade 2.0</h4>
-        <h3>Pending Approval Files</h3>
-        <br>
-            <?php
-            if( isset($_GET['message-success']) ) {
-                ?>
-                <div id="message" class="updated">
-                    <p><strong><?php _e($_GET['message-success']) ?></strong></p>
-                </div>
-                <br>
-                <?php
-            }
-            if( isset($_GET['message-error']) ) {
-                ?>
-                <div id="message" class="error">
-                    <p><strong><?php _e($_GET['message-error']) ?></strong></p>
-                </div>
-                <?php
-            }
-            ?>
-        <form action="" method="post" enctype="multipart/form-data">
-        <div class="alignleft actions bulkactions">
-            <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
-            <select name="selectAction" id="bulk-action-selector-top">
-                <option value="-1">Actions</option>
-                <option value="approve" class="hide-if-no-js">Approve</option>
-                <option value="reject">Reject</option>
-                <input id="doaction" class="button action" value="Apply" type="submit" name="actionFileSubmit">
-            </select>
-        </div>
-        <br class="clear">
-        <table class="widefat" name="tablePendingFiles" id="idTablePendingFiles">
-            <thead>
-            <tr>
-                <th><input type="checkbox"></th>
-                <th>File Name</th>
-                <th>Quantity of Products</th>
-                <th>Upload Date</th>
-                <th>Status</th>
-                <th>Details</th>
-            </tr>
-            </thead>
-            <tfoot>
-            <tr>
-                <th></th>
-                <th>File Name</th>
-                <th>Quantity of Products</th>
-                <th>Upload Date</th>
-                <th>Status</th>
-                <th>Details</th>
-            </tr>
-            </tfoot>
-            <tbody>
-            <?php
-            global $wpdb;
-
-            $isConnected = $wpdb->check_connection();
-
-            if($isConnected){
-                $products_files =  $wpdb->get_results("SELECT `inventory_id`, `file_md5`, `items_count`, `added_date` FROM `ot_custom_inventory_file` WHERE `status` = 'pending_approval'");
-                foreach ($products_files as $product_file) {
-                    ?>
-                    <tr>
-                        <?php
-                        echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idProduct[]\" value=". $product_file->inventory_id ."></td>";
-                        echo "<td>" . $product_file->file_md5 . "</td>";
-                        echo "<td>" . $product_file->items_count . "</td>";
-                        echo "<td>" . $product_file->added_date . "</td>";
-                        echo "<td>Pending Approval</td>";
-                        echo "<td>".captcha()."</td>";
-                        ?>
-                    </tr>
-                    <?php
-                }
-            }
-            ?>
-            </tbody>
-        </table>
-        </form>
-        </div>
-        <?php
     }
 
     function open_trade_admin()
     {
-        ?>
-        <div class="wrap">
-            <h4>Open Trade 2.0</h4>
-            <h3>Load New Inventory List</h3>
-            <br>
-            <form action="" method="post" enctype="multipart/form-data">
-                Please select distributor:
-                <select name="selectDistributor" id="bulk-action-selector-top">
-                    <option value="-1">Distributors</option>
-                    <?php
-                        global $wpdb;
-                        $isConnected = $wpdb->check_connection();
-                        if($isConnected){
-                            $distributors =  $wpdb->get_results("SELECT `distributor_id`, `distributor_name` FROM `ot_custom_distributor`");
-                            foreach ($distributors as $distributor) {
-                                echo "<option value=\"$distributor->distributor_id\" class=\"hide-if-no-js\">$distributor->distributor_name</option>";
-                            }
-                        }
-                    ?>
-                </select>
-                <br>
-                Please select file to upload:
-                <input type="file" name="fileToUpload" id="fileToUpload" accept=".xlsx, .xls">
-                <input type="submit" value="Upload File" name="uploadFileSubmit">
-            </form>
+    ?>
+    <div class="wrap">
+        <h4>Open Trade 2.0</h4>
+        <h3>Load New Inventory List</h3>
+        <br>
+        <form action="" method="post" enctype="multipart/form-data">
+            Please select file to upload:
+            <input type="file" name="fileToUpload" id="fileToUpload" accept=".xlsx, .xls">
+            <input type="submit" value="Upload File" name="actionUploadFile">
+        </form>
 
         <?php
 
@@ -231,541 +138,709 @@ License: GPL2
             </table>
             <?php
         }
-    ?>
+        ?>
     </div>
     <?php
-    }
+}
 
-    function captcha(){
-        return 'Prueba';
-    }
+    function wpdocs_pending_approval_submenu_page_callback() {
+        if( isset($_GET['view-details']) and $_GET['view-details'] == true ) {
+            ?>
+            <div class="wrap">
+                <h4>Open Trade 2.0</h4>
+                <h3>File Detail</h3>
+                <form action="" method="post" enctype="multipart/form-data">
+                <input id="actionDetails" class="button action" value="Back File List" type="submit" name="actionBackFileList">
+                </form>
+                <?php
+                global $wpdb;
 
-    function phpAlert($msg) {
-        $_GET['message-error'] = $msg;
-    }
+                $idProductFile = $_GET['view-details-idProductFile'];
 
-    function viewDetails(){
-    ?>
-        <div class="wrap">
-        <h4>Open Trade 2.0</h4>
-        <h3>Detail</h3>
-        <br>
-    <?php
-    }
+                if (isset($_GET['view-details-idProductFile'])) {
+                    $fileInformation = $wpdb->get_results("SELECT files.*, user.user_login FROM `ot_custom_inventory_file` as files INNER JOIN `".$wpdb->prefix."users` as user ON `added_by` = user.ID   WHERE `inventory_id` = ".$idProductFile.";");
+                    $products = $wpdb->get_results("SELECT * FROM `ot_custom_inventory_file_items` WHERE `inventory_file_id` = $idProductFile;");
+                    $newProducts = 0;
+                    $updateProducts = 0;
+                    foreach ($products as $product){
 
-    if(isset($_POST["uploadFileSubmit"])) {
-
-        if (isset($_POST["selectDistributor"])) {
-            $distributorID = $_POST['selectDistributor'];
-
-            if ($distributorID == -1) {
-                phpAlert('Please select one distributor!');
-            } else {
-
-                $target_dir = plugin_dir_path(__FILE__) . "uploads/";
-
-                $filename = $_FILES['fileToUpload']['name'];
-                $fileType = pathinfo($filename, PATHINFO_EXTENSION);
-
-                $errors = array();
-                $maxsize = 2097152;
-
-                if ($fileType != 'xlsx' && $fileType != 'xls') {
-                    $errors[] = 'Invalid file type. Only xlsx and xls types are accepted.';
-                }
-
-                if (($_FILES['fileToUpload']['size'] >= $maxsize) || ($_FILES["fileToUpload"]["size"] == 0)) {
-                    $errors[] = 'File too large. File must be less than 2 megabytes.';
-                }
-
-                global $current_user;
-                if (is_user_logged_in()) {
-                    $current_user = wp_get_current_user();
-                } else {
-                    $errors[] = 'User not fount.';
-                }
-
-                if (count($errors) === 0) {
-
-                    $formatDate = date("Ymdhis");
-                    $user_dir = $target_dir . $current_user->user_login;
-
-                    if (!file_exists($user_dir)) {
-                        mkdir($user_dir);
+                    if(isNewProduct($product)){
+                        $newProducts++;
+                    }else{
+                        $updateProducts++;
                     }
-
-                    $fullPatch = $user_dir . '/' . $formatDate . '_' . $_FILES["fileToUpload"]['name'];
-
-                    if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], $fullPatch)) {
-                        processFile($fullPatch, $filename, $current_user->ID, $formatDate, $distributorID);
-                    } else {
-                        $_GET['message-error'] = 'File was not uploaded';
-                    }
-                } else {
-                    $_GET['message-error'] = $errors[0];
                 }
-            }
+                ?>
+                <table class="widefat">
+                    <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th>Products Number</th>
+                        <th>New Products</th>
+                        <th>Update Products</th>
+                        <th>Added by</th>
+                        <th>Added Date</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <td><?php _e($fileInformation[0]->file_md5) ?></td>
+                        <td><?php _e($fileInformation[0]->items_count) ?></td>
+                        <td><?php _e($newProducts) ?></td>
+                        <td><?php _e($updateProducts) ?></td>
+                        <td><?php _e($fileInformation[0]->user_login) ?></td>
+                        <td><?php _e($fileInformation[0]->added_date) ?></td>
+                        <td>Pending Approval</td>
+                    </tbody>
+                </table>
+                <br>
+                <h3>Product List</h3>
+                <?php
+                }
+                ?>
+                <table class="widefat">
+                    <thead>
+                    <tr>
+                        <th>SKU ID</th>
+                        <th>SKU Description</th>
+                        <th>Product Line</th>
+                        <th>Issue Type</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Category</th>
+                        <th>Warehouse</th>
+                        <th>City</th>
+                        <th>Distributor</th>
+                        <th>New Product</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th>SKU ID</th>
+                        <th>SKU Description</th>
+                        <th>Product Line</th>
+                        <th>Issue Type</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Category</th>
+                        <th>Warehouse</th>
+                        <th>City</th>
+                        <th>Distributor</th>
+                        <th>New Product</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    <?php
+                    foreach ($products as $product) {
+                        $isNewProduct = 'No';
+                        if(isNewProduct($product)){
+                            $isNewProduct = 'Yes';
+                        }
+                        $distributor = $wpdb->get_results("SELECT * FROM `ot_custom_distributor` WHERE `distributor_id` = $product->distributor_id;");
+                        ?>
+                        <tr>
+                            <?php
+                            echo "<td>" . $product->sku_id . "</td>";
+                            echo "<td>" . $product->sku_description . "</td>";
+                            echo "<td>" . $product->product_line . "</td>";
+                            echo "<td>" . $product->issue_type . "</td>";
+                            echo "<td>" . $product->sum_quantity . "</td>";
+                            echo "<td>$" . $product->total_cost . "</td>";
+                            echo "<td>" . $product->category . "</td>";
+                            echo "<td>" . $product->warehouse . "</td>";
+                            echo "<td>" . $product->city . "</td>";
+                            echo "<td>" . $distributor[0]->distributor_name . "</td>";
+                            echo "<td>" . $isNewProduct . "</td>";
+                            ?>
+                        </tr>
+                        <?php
+                    }
+                    ?>
+                    </tbody>
+                </table>
+            </div>
+             <?php
+
+        }
+        else {
+            ?>
+            <div class="wrap">
+                <h4>Open Trade 2.0</h4>
+                <h3>Pending Approval Files</h3>
+                <br>
+            <?php
+                if (isset($_GET['message-success'])) {
+                    ?>
+                    <div id="message" class="updated">
+                        <p><strong><?php _e($_GET['message-success']) ?></strong></p>
+                    </div>
+                    <br>
+                    <?php
+                }
+                if (isset($_GET['message-error'])) {
+                    ?>
+                    <div id="message" class="error">
+                        <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                    </div>
+                    <?php
+                }
+                ?>
+                <form action="" method="post" enctype="multipart/form-data">
+                    <div class="alignleft actions bulkactions">
+                        <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
+                        <select name="selectAction" id="bulk-action-selector-top">
+                            <option value="-1">Actions</option>
+                            <option value="approve" class="hide-if-no-js">Approve</option>
+                            <option value="reject">Reject</option>
+                            <input id="doaction" class="button action" value="Apply" type="submit" name="actionProducts">
+                        </select>
+                    </div>
+                    <br class="clear">
+                    <table class="widefat" name="tablePendingFiles" id="idTablePendingFiles">
+                        <thead>
+                        <tr>
+                            <th><input type="checkbox"></th>
+                            <th>File Name</th>
+                            <th>Quantity of Products</th>
+                            <th>Upload Date</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <th></th>
+                            <th>File Name</th>
+                            <th>Quantity of Products</th>
+                            <th>Upload Date</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                        <?php
+                        global $wpdb;
+
+                        $isConnected = $wpdb->check_connection();
+
+                        if ($isConnected) {
+                            $products_files = $wpdb->get_results("SELECT `inventory_id`, `file_md5`, `items_count`, `added_date` FROM `ot_custom_inventory_file` WHERE `status` = 'pending_approval' ORDER BY `added_date` DESC");
+                            foreach ($products_files as $product_file) {
+                                ?>
+                                <tr>
+                                    <?php
+                                    echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idProduct[]\" value=" . $product_file->inventory_id . "></td>";
+                                    echo "<td>" . $product_file->file_md5 . "</td>";
+                                    echo "<td>" . $product_file->items_count . "</td>";
+                                    echo "<td>" . $product_file->added_date . "</td>";
+                                    echo "<td>Pending Approval</td>";
+                                    echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idProductFile\" value=\"$product_file->inventory_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionViewDetails\"></form></td>";
+                                    ?>
+                                </tr>
+                                <?php
+                            }
+                        }
+                        ?>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+            <?php
         }
     }
 
-    if(isset($_POST["viewDetailsSubmit"])){
-        viewDetails();
+    function wpdocs_distributors_submenu_page_callback(){
+        if( isset($_GET['view-new-distributor']) and $_GET['view-new-distributor'] == true ){
+            ?>
+            <div class="wrap">
+                <h4>Open Trade 2.0</h4>
+                <h3>Add New Distributor</h3>
+                <br>
+                <?php
+                if (isset($_GET['message-error'])) {
+                    ?>
+                    <div id="message" class="error">
+                        <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                    </div>
+                    <?php
+                }
+                ?>
+                <form action="" method="post" enctype="multipart/form-data">
+                    Name:
+                    <input type="text" name="nameDistributor">
+                    <input id="doAction" class="button action" value="Create" type="submit" name="actionCreateDistributor">
+                </form>
+            </div>
+            <?php
+        }
+        else if( isset($_GET['view-user-distributor']) and $_GET['view-user-distributor'] == true ){
+            ?>
+            <div class="wrap">
+                <h4>Open Trade 2.0</h4>
+                <h3>User List</h3>
+                <h4>Users assigned to distributor</h4>
+                <form action="" method="post" enctype="multipart/form-data">
+                    <div class="alignleft actions bulkactions">
+                        <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
+                        <select name="selectActionAssignedUsers" id="bulk-action-selector-top">
+                            <option value="-1">Actions</option>
+                            <option value="delete" class="hide-if-no-js">Delete</option>
+                            <!--<option value="deactivate">Deactivate</option>-->
+                            <input id="doAction" class="button action" value="Apply" type="submit" name="actionBulkAssignedUsers">
+                            <input class="button action" value="Add New User" type="submit" name="actionNewUser">
+                        </select>
+                    </div>
+                <input type="hidden" name="idDistributor" value="<?php _e($_GET['idDistributor']) ?>">
+                <table class="widefat">
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox"></th>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Added By</th>
+                        <th>Added Date</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th><input type="checkbox"></th>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Added By</th>
+                        <th>Added Date</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    <?php
+                    global $wpdb;
+
+                    if($wpdb->check_connection()){
+                        $distributorID = $_GET['idDistributor'];
+                        $users =  $wpdb->get_results("SELECT
+                                                            cdu.`distributor_user_userid`,                                                     
+                                                            users.`user_login`,
+                                                            users.`display_name`,
+                                                            users.`user_email`,                                                           
+                                                            (SELECT `user_login` FROM `".$wpdb->prefix."users` WHERE `ID` = cdu.`distributor_user_added_by`) as distributor_user_added_by,
+                                                            cdu.`distributor_user_added_date`
+                                                       FROM `ot_custom_distributor_user` as cdu
+                                                       INNER JOIN `".$wpdb->prefix."users` as users ON users.`ID` = cdu.`distributor_user_userid`
+                                                       WHERE cdu.`distributor_user_distributor_id` = ".$distributorID.";");
+                        foreach ($users as $user) {
+                            ?>
+                            <tr>
+                                <?php
+                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idAssignedUsers[]\" value=" . $user->distributor_user_userid . "></td>";
+                                echo "<td>" . $user->distributor_user_userid . "</td>";
+                                echo "<td>" . $user->user_login . "</td>";
+                                echo "<td>" . $user->display_name . "</td>";
+                                echo "<td>" . $user->user_email . "</td>";
+                                echo "<td>" . $user->distributor_user_added_by . "</td>";
+                                echo "<td>" . $user->distributor_user_added_date . "</td>";
+                                ?>
+                            </tr>
+                            <?php
+                        }
+                    }
+                    ?>
+                    </tbody>
+                </table>
+                </form>
+                <br>
+                <h4>Unassigned users</h4>
+                <?php
+                if (isset($_GET['message-error'])) {
+                    ?>
+                    <div id="message" class="error">
+                        <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                    </div>
+                    <?php
+                }
+                ?>
+                <form action="" method="post" enctype="multipart/form-data">
+                    <div class="alignleft actions bulkactions">
+                        <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
+                        <select name="selectActionUsers" id="bulk-action-selector-top">
+                            <option value="-1">Actions</option>
+                            <option value="add" class="hide-if-no-js">Add</option>
+                            <!--<option value="deactivate">Deactivate</option>-->
+                            <input id="doAction" class="button action" value="Apply" type="submit" name="actionBulkUsers">
+                        </select>
+                    </div>
+                    <input type="hidden" name="idDistributor" value="<?php _e($_GET['idDistributor']) ?>">
+                <table class="widefat">
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox"></th>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Added Date</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th><input type="checkbox"></th>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Added Date</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    <?php
+                    global $wpdb;
+
+                    if($wpdb->check_connection()){
+                        $users =  $wpdb->get_results("SELECT users.*
+                                                      FROM `".$wpdb->prefix."users` as users  
+                                                      WHERE users.`ID` not in (SELECT `distributor_user_userid` FROM `ot_custom_distributor_user`);");
+                        foreach ($users as $user) {
+                            ?>
+                            <tr>
+                                <?php
+                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idUsers[]\" value=" . $user->ID . "></td>";
+                                echo "<td>" . $user->ID . "</td>";
+                                echo "<td>" . $user->user_login . "</td>";
+                                echo "<td>" . $user->display_name . "</td>";
+                                echo "<td>" . $user->user_email . "</td>";
+                                echo "<td>" . $user->user_registered . "</td>";
+                                ?>
+                            </tr>
+                            <?php
+                        }
+                    }
+                    ?>
+                    </tbody>
+                </table>
+                </form>
+            </div>
+            <?php
+        }
+        else if( isset($_GET['view-add-new-user']) and $_GET['view-add-new-user'] == true ){
+            ?><div class="wrap">
+                <h4>Open Trade 2.0</h4>
+                <h3>Add New User</h3>
+                <form action="" method="post" enctype="multipart/form-data">
+                <input id="actionu" class="button action" value="Back User List" type="submit" name="actionBackUserList">
+                <input type="hidden" name="idDistributor" value="<?php _e($_POST['idDistributor']) ?>">
+                <p>Create a new user and add them to this distributor.</p>
+                <?php
+                if (isset($_GET['message-error'])) {
+                    ?>
+                    <div id="message" class="error">
+                        <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                    </div>
+                    <?php
+                }
+                ?>
+                <table>
+                <thead>
+                <tr>
+                    <th scope="row"><label for="user_login">Username <span class="description">(required)</span></label></th>
+                    <td><input name="user_login" id="user_login" value="<?php echo $_POST['user_login'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="email">Email <span class="description">(required)</span></label></th>
+                    <td><input name="email" id="email" value="<?php echo $_POST['email'];?>" type="email"></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="first_name">First Name </label></th>
+                    <td><input name="first_name" id="first_name" value="<?php echo $_POST['first_name'];?>" type="text"></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="last_name">Last Name </label></th>
+                    <td><input name="last_name" id="last_name" value="<?php echo $_POST['last_name'];?>" type="text"></td>
+                </tr>
+                <tr>
+                    <th scope="row"></th>
+                    <td><input name="actionCreateUser" id="createusersub" class="button button-primary" value="Add New User" type="submit"></td>
+                </tr>
+                </thead>
+                </table>
+                </form>
+            </div>
+            <?php
+        }
+        else
+        {
+            ?>
+            <div class="wrap">
+                <h4>Open Trade 2.0</h4>
+                <h3>Distributors List</h3>
+                <br>
+                <?php
+                if (isset($_GET['message-error'])) {
+                    ?>
+                    <div id="message" class="error">
+                        <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                    </div>
+                    <?php
+                }
+                ?>
+                <form action="" method="post" enctype="multipart/form-data">
+                <div class="alignleft actions bulkactions">
+                    <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
+                        <select name="selectActionDistributors" id="bulk-action-selector-top">
+                            <option value="-1">Actions</option>
+                            <option value="delete" class="hide-if-no-js">Delete</option>
+                            <!--<option value="deactivate">Deactivate</option>-->
+                            <input id="doAction" class="button action" value="Apply" type="submit" name="actionBulkDistributors">
+                            <input id="doAction" class="button action" value="New Distributor" type="submit" name="actionNewDistributor">
+                        </select>
+                </div>
+                <table class="widefat">
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox"></th>
+                        <th>ID</th>
+                        <th>Distributor</th>
+                        <th>Added By</th>
+                        <th>Added Date</th>
+                        <th>Users</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th><input type="checkbox"></th>
+                        <th>ID</th>
+                        <th>Distributor</th>
+                        <th>Added By</th>
+                        <th>Added Date</th>
+                        <th>Users</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    <?php
+                    global $wpdb;
+
+                    if($wpdb->check_connection()){
+                        $distributors =  $wpdb->get_results("SELECT dist.`distributor_id`, dist.`distributor_name`, user.`user_nicename` as `added_by`, dist.`added_date` FROM `ot_custom_distributor` as dist INNER JOIN `".$wpdb->prefix."users` as user ON dist.`added_by` = user.`ID` ;");
+                        foreach ($distributors as $distributor) {
+                            ?>
+                            <tr>
+                                <?php
+                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idDistributors[]\" value=" . $distributor->distributor_id . "></td>";
+                                echo "<td>" . $distributor->distributor_id . "</td>";
+                                echo "<td>" . $distributor->distributor_name . "</td>";
+                                echo "<td>" . $distributor->added_by . "</td>";
+                                echo "<td>" . $distributor->added_date . "</td>";
+                                echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idDistributor\" value=\"$distributor->distributor_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionViewUsers\"></form></td>";
+                                ?>
+                            </tr>
+                            <?php
+                        }
+                    }
+                    ?>
+                    </tbody>
+                </table>
+                </form>
+            </div>
+            <?php
+        }
     }
 
-    if(isset($_POST["actionFileSubmit"])){
+    if(isset($_POST["actionUploadFile"])) {
+
+        $distributorID = getCurrentDistributor();
+
+        if ($distributorID == -1) {
+            errorMessage('Please select one distributor!');
+        } else {
+
+            $errors = validateFile($_FILES['fileToUpload']);
+
+            if (count($errors) === 0) {
+
+                $formatDate = getFormatDate();
+                $current_user = getCurrentUser();
+                $target_dir = plugin_dir_path(__FILE__) . "uploads/";
+                $fullPatch = getFullPatch($target_dir, $_FILES["fileToUpload"], $formatDate, $current_user);
+                $filename = ($_FILES["fileToUpload"]['name']);
+                $userID = $current_user->ID;
+                if(uploadFile($_FILES["fileToUpload"], $fullPatch)){
+
+                    $products = readAndProcessFile($fullPatch,$filename , $userID, $formatDate, $distributorID);
+
+                    $_GET['products-list'] = $products;
+
+                }else{
+                    $_GET['message-error'] = 'File was not uploaded';
+                }
+            } else {
+                $_GET['message-error'] = $errors[0];
+            }
+        }
+
+    }
+    
+    if(isset($_POST["actionViewDetails"])){
+        if(isset($_POST["idProductFile"])){
+            $_GET['view-details'] = true;
+            $_GET['view-details-idProductFile'] = $_POST['idProductFile'];
+        }
+    }
+
+    if(isset($_POST["actionProducts"])){
 
         if(isset($_POST["selectAction"])) {
             $selectOption = $_POST['selectAction'];
 
             if ($selectOption == -1) {
-                phpAlert('Please select one action!');
+                errorMessage('Please select one action!');
             } else if ($selectOption == 'approve') {
 
                 if (isset($_POST['idProduct'])) {
                     $idProductsFile = $_POST["idProduct"];
                     $result = approveProductsFiles($idProductsFile);
                 } else {
-                    phpAlert('Please select a file to approve!');
+                    errorMessage('Please select a file to approve!');
                 }
 
             } else if ($selectOption == 'reject') {
-                phpAlert('Pending implementation.');
+                errorMessage('Pending implementation.');
             }
         }
     }
 
-    function updateCompletedFile($idProductsFile, $result){
+    if(isset($_POST["actionBackFileList"])){
+        $_GET['view-details'] = false;
+    }
 
-        global $wpdb;
+    if(isset($_POST["actionNewDistributor"])){
+        $_GET['view-new-distributor'] = true;
+    }
 
-        $isConnected = $wpdb->check_connection();
-
-        if($result){
-            $status = "file-process-success";
+    if(isset($_POST["actionCreateDistributor"])){
+        if(isset($_POST["nameDistributor"]) and $_POST["nameDistributor"] !== ""){
+            createDistributor($_POST['nameDistributor']) ;
+            $_GET['view-new-distributor'] = false;
         }else{
-            $status = "file-process-error";
-        }
-
-        if($isConnected){
-            $wpdb->query("UPDATE `ot_custom_inventory_file`
-                                   SET
-                                   `status` = '$status'
-                                   WHERE `inventory_id`=".$idProductsFile);
+            $_GET['message-error'] = "Please set valid name!";
+            $_GET['view-new-distributor'] = true;
         }
     }
 
-    function updateCompletedProduct($idProduct, $result){
-
-        global $wpdb;
-
-        $isConnected = $wpdb->check_connection();
-
-        if($result){
-            $status = "product-process-success";
-        }else{
-            $status = "product-process-error";
-        }
-
-        global $current_user;
-        $current_user =  wp_get_current_user();
-
-        $formatDate = date("Ymdhis");
-
-        if($isConnected){
-            $wpdb->query("UPDATE `ot_custom_inventory_file_items`
-                                       SET
-                                       `status` = '$status',
-                                       `edited_date` = '$formatDate',
-                                       `edited_by` = $current_user->ID
-                                       WHERE `inventory_file_item_id`=".$idProduct);
-        }
-    }
-
-    function approveProductsFiles($idProductsFile){
-
-        global $wpdb;
-
-        $isConnected = $wpdb->check_connection();
-        $overallProcess = true;
-
-        if($isConnected){
-        
-            foreach ($idProductsFile as $productFileID) {
-                $products = getProducts($wpdb, $productFileID);
-                foreach ($products as $product){
-                    if(!createOrUpdateProduct($product)){
-                        $overallProcess = false;
-                    }
+    if(isset($_POST["actionBulkDistributors"])){
+        if(isset($_POST['selectActionDistributors']) and $_POST['selectActionDistributors'] !== "-1"){
+            if (isset($_POST['idDistributors'])) {
+                $idDistributors = $_POST["idDistributors"];
+                foreach ($idDistributors as $idDistributor){
+                    deleteDistributor($idDistributor);
                 }
-                updateCompletedFile($productFileID, $overallProcess);
-                $_GET['message-success'] ='File successfully approved.';
+            }
+            else{
+                $_GET['message-error']="Please select a distributor!";
             }
         }
-
-        return $overallProcess;
-    }
-
-    function getProducts($wpdb, $productFileID){
-
-        $products = $wpdb->get_results("SELECT `inventory_file_item_id`, `inventory_file_id`, `sku_id`, `sku_description`, `product_line`, `lot_number`, `issue_type`, `li_specialist`, `warehouse`, `city`, `zipcode`, `lmd`, `id_month`, `days_under_current_path`, `quantity_libs`, `sum_quantity`, `total_cost`, `added_by`, `added_date`,`edited_date`, `edited_by`,`deleted`, `status`, `category`, `distributor_id` 
-                                                 FROM `ot_custom_inventory_file_items`
-                                                 WHERE `inventory_file_id` = " . $productFileID);
-
-        return $products;
-    }
-
-    function createOrUpdateProduct($product){
-
-        if(isNewProduct($product)){
-            $result = createPost($product);
-        }else{
-            $result = updateProduct($product);
-        }
-
-        updateCompletedProduct($product->inventory_file_item_id,$result);
-
-        return $result;
-    }
-
-    function isNewProduct($product){
-
-        global $wpdb;
-
-        $result = false;
-
-        $totalProducts = $wpdb->get_results("SELECT count(post.`ID`) as total
-         FROM `".$wpdb->prefix."posts` as post
-         INNER JOIN `".$wpdb->prefix."postmeta` as post_meta on post.`ID`= post_meta.`post_id`
-         WHERE post.`post_content`='".$product->sku_description."' and post_meta.`meta_value` in('".$product->sku_id."');");
-
-        if($totalProducts[0]->total == 0){
-            $result = true;
-        }
-
-        return $result;
-    }
-
-    function createPost($product){
-
-        global $current_user;
-
-        if (is_user_logged_in())
-        {
-            $current_user =  wp_get_current_user();
-
-            $wp_error = '';
-            $user_id = $current_user->ID;
-            $price = str_replace("$", "", $product->total_cost);
-
-            $product_line  = array( 'name' => 'Product Line', 'value' => $product->product_line, 'position'=>'2', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $lot  = array( 'name' => 'Lot #', 'value' => $product->lot_number, 'position'=>'1', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $issue_type  = array( 'name' => 'Issue Type', 'value' => $product->issue_type, 'position'=>'2', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $specialist = array( 'name' => 'LI Specialist', 'value' => $product->li_specialist, 'position'=>'3', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $warehouse = array( 'name' => 'Warehouse', 'value' => $product->warehouse, 'position'=>'4', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $city = array( 'name' => 'City', 'value' => $product->city, 'position'=>'5', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $zipCode = array( 'name' => 'Zip Code', 'value' => $product->zipcode, 'position'=>'5', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $lmd = array( 'name' => 'LMD', 'value' => $product->lmd, 'position'=>'6', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $id_month = array( 'name' => 'ID Month', 'value' => $product->id_month, 'position'=>'7', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $days_under_current_path = array( 'name' => 'Days Under Current Path', 'value' => $product->days_under_current_path, 'position'=>'8', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-
-            $product_attributes = array($product_line, $lot, $issue_type, $specialist, $warehouse, $city, $zipCode, $lmd, $id_month, $days_under_current_path);
-
-            $post = array(
-                'post_author' => $user_id,
-                'post_content' => $product->sku_description,
-                'post_status' => "publish",
-                'post_title' => $product->sku_description,
-                'post_parent' => '',
-                'post_type' => "product",
-                'post_name' => $product->sku_id
-            );
-
-            $post_id = wp_insert_post( $post, $wp_error );
-
-            setCategory($post_id, $product);
-
-            wp_set_object_terms($post_id, 'simple', 'product_type');
-            update_post_meta( $post_id, '_visibility', 'visible' );
-            update_post_meta( $post_id, '_stock_status', 'instock');
-            update_post_meta( $post_id, 'total_sales', '0');
-            update_post_meta( $post_id, '_downloadable', 'no');
-            update_post_meta( $post_id, '_virtual', 'no');
-            update_post_meta( $post_id, '_regular_price', $price );
-            update_post_meta( $post_id, '_sale_price', $price );
-            update_post_meta( $post_id, '_purchase_note', "" );
-            update_post_meta( $post_id, '_featured', "no" );
-            update_post_meta( $post_id, '_weight', "" );
-            update_post_meta( $post_id, '_length', "" );
-            update_post_meta( $post_id, '_width', "" );
-            update_post_meta( $post_id, '_height', "" );
-            update_post_meta($post_id, '_sku', $product->sku_id);
-            update_post_meta( $post_id, '_product_attributes', $product_attributes);
-            update_post_meta( $post_id, '_sale_price_dates_from', "" );
-            update_post_meta( $post_id, '_sale_price_dates_to', "" );
-            update_post_meta( $post_id, '_price', $price );
-            update_post_meta( $post_id, '_sold_individually', "yes" );
-            update_post_meta( $post_id, '_manage_stock', "yes" );
-            update_post_meta( $post_id, '_backorders', "no" );
-            update_post_meta( $post_id, '_stock', $product->sum_quantity );
-        }
-        else
-        {
-            $errors[] = 'User not fount.';
-        }
-
-        return true;
-    }
-
-    function setCategory($post_id, $product){
-
-        global $wpdb;
-
-        $product_type = term_exists('simple', 'product_type');
-        $category = term_exists($product->category, 'product_cat');
-
-        if ($product_type !== 0 && $product_type !== null) {
-            insertTermRelationships($wpdb,$post_id,$product_type[term_id]);
-        }else{
-            $termID = insertTerm($wpdb, 'simple', 'product_type');
-            insertTermRelationships($wpdb,$post_id,$termID);
-        }
-
-        if ($category !== 0 && $category !== null) {
-            insertTermRelationships($wpdb,$post_id,$category[term_id]);
-        }else{
-            $termID = insertTerm($wpdb, $product->category, 'product_cat');
-            insertTermRelationships($wpdb,$post_id,$termID);
-        }
-
-    }
-
-    function insertTermRelationships($wpdb,$post_id,$term_id){
-
-        $wpdb->query("INSERT INTO `".$wpdb->prefix."term_relationships`
-                         (`object_id`,
-                         `term_taxonomy_id`,
-                         `term_order`)
-                         VALUES
-                         (".$post_id.",
-                          ".$term_id.",
-                          0);");
-    }
-
-    function insertTerm($wpdb, $term, $taxonomy){
-
-        $wpdb->query("INSERT INTO `".$wpdb->prefix."terms`
-                        (`name`,
-                        `slug`,
-                        `term_group`)
-                      VALUES
-                        ('".$term."',
-                        '".str_replace(" ", "-",strtolower($term))."',
-                        0);");
-
-        $termID=$wpdb->insert_id;
-
-        $wpdb->query("INSERT INTO `".$wpdb->prefix."term_taxonomy`
-                        (`term_id`,
-                        `taxonomy`,
-                        `description`,
-                        `parent`,
-                        `count`)
-                      VALUES
-                        (".$termID.",
-                        '".$taxonomy."',
-                        'This is category for open trade',
-                        0,
-                        0);");
-
-        return $termID;
-
-    }
-
-    function updateProduct($product){
-        global $wpdb;
-
-        $productID = getProductID($product);
-        $postMeta = get_post_meta($productID, '_stock', true);
-        $totalStock =$postMeta + $product->sum_quantity;
-
-        $result =$wpdb->query("UPDATE `".$wpdb->prefix."postmeta`
-                                SET
-                                `meta_value` = ".$totalStock."
-                                WHERE `post_id` = ".$productID." and `meta_key` = '_stock';");
-
-        if($result == 1){
-            return true;
-        }else{
-            return false;
+        else{
+            $_GET['message-error']="Please select one action!";
         }
     }
 
-    function getProductID($product){
-        global $wpdb;
-
-        $result = $wpdb->get_results("SELECT post.`ID` as ID
-         FROM `".$wpdb->prefix."posts` as post
-         INNER JOIN `".$wpdb->prefix."postmeta` as post_meta on post.`ID`= post_meta.`post_id`
-         WHERE post.`post_content`='".$product->sku_description."' and post_meta.`meta_value` in('".$product->sku_id."');");
-
-        return $result[0]->ID;
+    if(isset($_POST["actionViewUsers"])){
+        if(isset($_POST['idDistributor'])){
+            $_GET['idDistributor'] = $_POST['idDistributor'];
+            $_GET['view-user-distributor'] = true;
+        }
     }
 
-    function processFile($fullPatch, $filename, $current_user, $formatDate, $distributorID){
-
-        $allDataInSheet = readContentFile($fullPatch);
-        $arrayCount = count($allDataInSheet)-1;
-
-        if(validateHeaders($allDataInSheet)){
-
-            $products = getProductsList($allDataInSheet, $arrayCount);
-            saveProducts($products, $filename, $arrayCount, $current_user, $formatDate, $distributorID);
-
-            $_GET['message-success']='Upload success, please approve the file to update de inventory.';
-            $_GET['message-file-name'] = $filename;
-            $_GET['message-total-products'] = $arrayCount;
-
-        }else{
-            $_GET['message-error']= 'The Format File not contain the headers required.';
-        }
-        $_GET['products-list'] = $products;
-    }
-
-    function readContentFile($fullPatch){
-
-        set_include_path(plugin_dir_path(__FILE__) . 'Classes/');
-        include plugin_dir_path(__FILE__) . '/Classes/PHPExcel/IOFactory.php';
-
-        try {
-            $objPHPExcel = PHPExcel_IOFactory::load($fullPatch);
-        } catch (Exception $e) {
-            $_GET['message-error']='Error loading file "' . pathinfo($fullPatch, PATHINFO_BASENAME) . '": ' . $e->getMessage();
-        }
-
-        $allDataInSheet = $objPHPExcel->getActiveSheet()->toArray(null, true, true, true);
-
-        return $allDataInSheet;
-
-    }
-
-    function validateHeaders($allDataInSheet){
-
-        $headers = $allDataInSheet[1];
-        $result = true;
-
-        if (!in_array('SKU ID', $headers)) {
-            $result = false;
-        }
-        if (!in_array('SKU Description', $headers)) {
-            $result = false;
-        }
-        if (!in_array('Product Line', $headers)) {
-            $result = false;
-        }
-        if (!in_array('Lot#', $headers)) {
-            $result = false;
-        }
-        if (!in_array('Issue Type', $headers)) {
-            $result = false;
-        }
-        if (!in_array('LI Specialist', $headers)) {
-            $result = false;
-        }
-        if (!in_array('Warehouse', $headers)) {
-            $result = false;
-        }
-        if (!in_array('City', $headers)) {
-            $result = false;
-        }
-        if (!in_array('Zip Code', $headers)) {
-            $result = false;
-        }
-        if (!in_array('LMD', $headers)) {
-            $result = false;
-        }
-        if (!in_array('ID Month', $headers)) {
-            $result = false;
-        }
-        if (!in_array('Days Under Current Path', $headers)) {
-            $result = false;
-        }
-        if (!in_array('Qty', $headers)) {
-            $result = false;
-        }
-        if (!in_array('TC', $headers)) {
-            $result = false;
-        }
-        if (!in_array('Category', $headers)) {
-            $result = false;
-        }
-
-        return $result;
-    }
-
-    function getProductsList($allDataInSheet, $arrayCount){
-
-        $products = array();
-        for ($i = 2; $i <= $arrayCount+1; $i++) {
-            $product = array();
-            $skuID = trim($allDataInSheet[$i]["A"]);
-            $product[1] = $skuID;
-            $skuDescription = trim($allDataInSheet[$i]["B"]);
-            $product[2] = $skuDescription;
-            $productLine = trim($allDataInSheet[$i]["C"]);
-            $product[3] = $productLine;
-            $lot = trim($allDataInSheet[$i]["D"]);
-            $product[4] = $lot;
-            $issueType = trim($allDataInSheet[$i]["E"]);
-            $product[5] = $issueType;
-            $liSpecialist = trim($allDataInSheet[$i]["F"]);
-            $product[6] = $liSpecialist;
-            $warehouse = trim($allDataInSheet[$i]["G"]);
-            $product[7] = $warehouse;
-            $city = trim($allDataInSheet[$i]["H"]);
-            $product[8] = $city;
-            $zipCode = trim($allDataInSheet[$i]["I"]);
-            $product[9] = $zipCode;
-            $lmd = trim($allDataInSheet[$i]["J"]);
-            $product[10] = $lmd;
-            $idMonth = trim($allDataInSheet[$i]["K"]);
-            $product[11] = $idMonth;
-            $daysUnderCurrentPath = trim($allDataInSheet[$i]["L"]);
-            $product[12] = $daysUnderCurrentPath;
-            $qty = trim($allDataInSheet[$i]["M"]);
-            $product[13] = $qty;
-            $tc = trim($allDataInSheet[$i]["N"]);
-            $product[14]=$tc;
-            $category = trim($allDataInSheet[$i]["O"]);
-            $product[15]=$category;
-
-            $products[$i-1]=$product;
-        }
-
-        return $products;
-    }
-
-    function saveProducts($products, $filename, $arrayCount, $current_user, $formatDate, $distributorID){
-
-        global $wpdb;
-
-        $isConnected = $wpdb->check_connection();
-
-        if($isConnected){
-
-            $wpdb->query("INSERT INTO ot_custom_inventory_file 
-                                  (`file_md5`,`items_count`,`added_by`,`added_date`,`deleted`,`status`) 
-                                  VALUES 
-                                  ('$filename', '$arrayCount', '$current_user', '$formatDate',0 , 'pending_approval')");
-            $idProductFile = $wpdb->insert_id;
-
-            foreach ($products as $product){
-
-                $price = str_replace("$", "", $product[14]);
-                $wpdb->query("INSERT INTO ot_custom_inventory_file_items 
-                                                  (`inventory_file_id`, `sku_id`, `sku_description`, `product_line`, `lot_number`, `issue_type`, `li_specialist`, `warehouse`, `city`, `zipcode`, `lmd`, `id_month`, `days_under_current_path`, `quantity_libs`, `sum_quantity`, `total_cost`, `added_by`, `added_date`, `deleted`, `status`, `category`,`distributor_id`) 
-                                       VALUES 
-                                                  ('$idProductFile','$product[1]','$product[2]','$product[3]','$product[4]','$product[5]','$product[6]','$product[7]','$product[8]','$product[9]','$product[10]','$product[11]','$product[12]',0 ,$product[13],$price,'$current_user', '$formatDate',0 , 'pending_approval', '$product[15]',$distributorID)");
+    if(isset($_POST["actionBulkUsers"])){
+        if(isset($_POST['selectActionUsers']) and $_POST['selectActionUsers'] !== "-1"){
+            if (isset($_POST['idUsers'])) {
+                $idUsers = $_POST["idUsers"];
+                $idDistributor = $_POST['idDistributor'];
+                foreach ($idUsers as $idUser){
+                    addUserDistributor($idUser,$idDistributor);
+                }
+                $_GET['view-user-distributor'] = true;
+                $_GET['idDistributor'] = $idDistributor;
+            }
+            else{
+                $_GET['message-error']="Please select a user!";
+                $_GET['view-user-distributor'] = true;
             }
         }
+        else{
+            $_GET['message-error']="Please select one action!";
+            $_GET['view-user-distributor'] = true;
+        }
+        
     }
+
+    if(isset($_POST["actionBulkAssignedUsers"])){
+        if(isset($_POST['selectActionAssignedUsers']) and $_POST['selectActionAssignedUsers'] !== "-1"){
+            if (isset($_POST['idAssignedUsers'])) {
+                $idUsers = $_POST["idAssignedUsers"];
+                $idDistributor = $_POST['idDistributor'];
+                foreach ($idUsers as $idUser){
+                    deleteUserDistributor($idUser,$idDistributor);
+                }
+                $_GET['view-user-distributor'] = true;
+                $_GET['idDistributor'] = $idDistributor;
+            }
+            else{
+                $_GET['message-error']="Please select a user!";
+                $_GET['view-user-distributor'] = true;
+            }
+        }
+        else{
+            $_GET['message-error']="Please select one action!";
+            $_GET['view-user-distributor'] = true;
+        }
+
+    }
+
+    if(isset($_POST["actionNewUser"])){
+        $_GET['view-add-new-user'] = true;
+    }
+
+    if(isset($_POST["actionCreateUser"])){
+
+        if(isset($_POST["user_login"]) and $_POST["user_login"] !== ""){
+
+            $userLogin = get_user_by('login', $_POST["user_login"]);
+
+            if(!$userLogin){
+                if(isset($_POST["email"]) and $_POST["email"] !== ""){
+                    $email =email_exists($_POST["email"]);
+                    if(!$email){
+                        $fullName = $_POST["first_name"]." ".$_POST["last_name"];
+                        createUser($_POST["user_login"],$_POST["email"],$fullName,$_POST['idDistributor']);
+                        $_GET['idDistributor'] = $_POST['idDistributor'];
+                        $_GET['view-user-distributor'] = true;
+                    }else{
+                        $_GET['message-error']="Email already exists!";
+                        $_GET['view-add-new-user'] = true;
+                    }
+                }else{
+                    $_GET['message-error']="Email is required!";
+                    $_GET['view-add-new-user'] = true;
+                }
+
+            }else{
+                $_GET['message-error']="User Name already exists!";
+                $_GET['view-add-new-user'] = true;
+            }
+
+        }else{
+            $_GET['message-error']="User Name is required!";
+            $_GET['view-add-new-user'] = true;
+        }
+
+    }
+
+    if(isset($_POST["actionBackUserList"])){
+        if(isset($_POST['idDistributor'])){
+            $_GET['idDistributor'] = $_POST['idDistributor'];
+            $_GET['view-user-distributor'] = true;
+        }
+    }
+
 ?>
