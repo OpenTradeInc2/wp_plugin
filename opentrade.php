@@ -302,6 +302,7 @@ License: GPL2
                             <th><input type="checkbox"></th>
                             <th>File Name</th>
                             <th>Quantity of Products</th>
+                            <th>Added By</th>
                             <th>Upload Date</th>
                             <th>Status</th>
                             <th>Details</th>
@@ -312,6 +313,7 @@ License: GPL2
                             <th></th>
                             <th>File Name</th>
                             <th>Quantity of Products</th>
+                            <th>Added By</th>
                             <th>Upload Date</th>
                             <th>Status</th>
                             <th>Details</th>
@@ -324,7 +326,7 @@ License: GPL2
                         $isConnected = $wpdb->check_connection();
 
                         if ($isConnected) {
-                            $products_files = $wpdb->get_results("SELECT `inventory_id`, `file_md5`, `items_count`, `added_date` FROM `ot_custom_inventory_file` WHERE `status` = 'pending_approval' ORDER BY `added_date` DESC");
+                            $products_files = $wpdb->get_results("SELECT `inventory_id`, `file_md5`, `items_count`, `added_date`, users.`user_login` as added_by FROM `ot_custom_inventory_file` INNER JOIN `".$wpdb->prefix."users` as users ON `added_by` = users.`ID`  WHERE `status` = 'pending_approval' ORDER BY `added_date` DESC");
                             foreach ($products_files as $product_file) {
                                 ?>
                                 <tr>
@@ -332,6 +334,7 @@ License: GPL2
                                     echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idProduct[]\" value=" . $product_file->inventory_id . "></td>";
                                     echo "<td>" . $product_file->file_md5 . "</td>";
                                     echo "<td>" . $product_file->items_count . "</td>";
+                                    echo "<td>" . $product_file->added_by . "</td>";
                                     echo "<td>" . $product_file->added_date . "</td>";
                                     echo "<td>Pending Approval</td>";
                                     echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idProductFile\" value=\"$product_file->inventory_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionViewDetails\"></form></td>";
@@ -378,8 +381,9 @@ License: GPL2
             <div class="wrap">
                 <h4>Open Trade 2.0</h4>
                 <h3>User List</h3>
-                <h4>Users assigned to distributor</h4>
                 <form action="" method="post" enctype="multipart/form-data">
+                <input id="actionu" class="button action" value="Back Distributor List" type="submit" name="actionBackDistributorList">
+                <h4>Users assigned to distributor</h4>
                     <div class="alignleft actions bulkactions">
                         <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
                         <select name="selectActionAssignedUsers" id="bulk-action-selector-top">
@@ -843,4 +847,7 @@ License: GPL2
         }
     }
 
+    if(isset($_POST["actionBackDistributorList"])){
+
+    }
 ?>
