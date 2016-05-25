@@ -29,8 +29,18 @@
             )
         );
 
+        update_user_meta($user_id, 'first_name', $fullName);
+
+        $role =get_role( 'open-trade-contributor' );
+
+        if($role == null){
+            $newRole =get_role( 'administrator' );
+            add_role('open-trade-contributor', 'OT Role', $newRole->capabilities);
+            $role =get_role( 'open-trade-contributor' );
+        }
+
         $user = new WP_User( $user_id );
-        $user->set_role( 'open-trade-contributor' );
+        $user->set_role( $role->name );
 
         addUserDistributor($user_id, $distributorID);
 

@@ -40,16 +40,20 @@ License: GPL2
 
     add_action( 'admin_init', 'my_remove_menu_pages' );
     function my_remove_menu_pages() {
-        global $user_ID;
+
         if ( current_user_can( 'open-trade-contributor' ) ) {
             remove_menu_page( 'tools.php' ); // Tools
             remove_menu_page( 'users.php' ); // Users
+            remove_menu_page( 'index.php' ); // Dashboard
+            remove_menu_page( 'edit.php' ); // post
+            remove_menu_page( 'upload.php' ); //media
+            remove_menu_page( 'edit.php?post_type=page' ); //pages
+            remove_menu_page( 'edit-comments.php' );// comments
+            remove_menu_page( 'woocommerce' ); //woocommerce
+            remove_menu_page( 'themes.php' ); //themes
+            remove_menu_page( 'plugins.php' ); //plugins
+            remove_menu_page( 'options-general.php' ); //settings
 
-            remove_submenu_page( 'index.php' ); // Dashboard - Updates
-            remove_submenu_page( 'edit.php' ); // Posts - Tags
-
-            remove_submenu_page( 'themes.php'); // Appearance - Editor
-            remove_submenu_page( 'plugins.php' ); // Plugins - Editor
         }
     }
 
@@ -60,7 +64,6 @@ License: GPL2
         add_submenu_page('open-trade-menu', 'Load Inventory', 'Load Inventory', 'manage_options', 'open-trade-menu' );
         add_submenu_page('open-trade-menu', 'Pending Approval', 'Pending Approval', 'manage_options', 'open-trade-approve', 'wpdocs_pending_approval_submenu_page_callback' );
         add_submenu_page('open-trade-menu', 'Distributors', 'Distributors', 'manage_options', 'open-trade-distributors', 'wpdocs_distributors_submenu_page_callback' );
-
     }
 
     function open_trade_admin()
@@ -71,9 +74,35 @@ License: GPL2
         <h3>Load New Inventory List</h3>
         <br>
         <form action="" method="post" enctype="multipart/form-data">
-            Please select file to upload:
-            <input type="file" name="fileToUpload" id="fileToUpload" accept=".xlsx, .xls">
-            <input type="submit" value="Upload File" name="actionUploadFile">
+            <table>
+                <thead>
+                <tr>
+                    <th scope="row"><label for="selectDistributor">Please select distributor: <span class="description">(required)</span></label></th>
+                    <td><select name="selectDistributor" id="selectDistributor">
+                            <option value="-1">Distributors</option>
+                            <?php
+                            global $wpdb;
+
+                            if($wpdb->check_connection()){
+                                $distributors =  $wpdb->get_results("SELECT `distributor_id`, `distributor_name` FROM `ot_custom_distributor`");
+                                foreach ($distributors as $distributor) {
+                                    echo "<option value=\"$distributor->distributor_id\">$distributor->distributor_name</option>";
+                                }
+                            }
+                            ?>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="fileToUpload">Please select file to upload: <span class="description">(required)</span></label></th>
+                    <td><input type="file" name="fileToUpload" id="fileToUpload" accept=".xlsx, .xls" /></td>
+                </tr>
+                <tr>
+                    <th scope="row"></th>
+                    <td><input type="submit" value="Upload File" name="actionUploadFile"></td>
+                </tr>
+                </thead>
+            </table>
         </form>
 
         <?php
@@ -814,7 +843,7 @@ License: GPL2
                                 <?php
                                 echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idDistributors[]\" value=" . $distributor->distributor_id . "></td>";
                                 echo "<td>" . $distributor->distributor_id . "</td>";
-                                echo "<td>" . $distributor->distributor_name . "</td>";
+                                echo "<td>" . $distributor->distributor_name . "<div class=\"row-actions\"><span class=\"edit\"><a href=\"http://localhost:8585/wordpress/wp-admin/user-edit.php?user_id=2&amp;wp_http_referer=%2Fwordpress%2Fwp-admin%2Fusers.php\">Edit</a>|</span><span class=\"delete\"><a class=\"submitdelete\" href=\"users.php?action=delete&amp;user=2&amp;_wpnonce=dac838b4d3\">Delete</a></span></div></td>";
                                 echo "<td>" . $distributor->location . "</td>";
                                 echo "<td>" . $distributor->tax_id . "</td>";
                                 echo "<td>" . $distributor->added_by . "</td>";
@@ -837,7 +866,7 @@ License: GPL2
 
     if(isset($_POST["actionUploadFile"])) {
 
-        $distributorID = getCurrentDistributor();
+        $distributorID = $_POST['selectDistributor'];
 
         if ($distributorID == -1) {
             errorMessage('Please select one distributor!');
