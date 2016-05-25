@@ -38,6 +38,21 @@ License: GPL2
      * Register a main menu page.
      */
 
+    add_action( 'admin_init', 'my_remove_menu_pages' );
+    function my_remove_menu_pages() {
+        global $user_ID;
+        if ( current_user_can( 'open-trade-contributor' ) ) {
+            remove_menu_page( 'tools.php' ); // Tools
+            remove_menu_page( 'users.php' ); // Users
+
+            remove_submenu_page( 'index.php' ); // Dashboard - Updates
+            remove_submenu_page( 'edit.php' ); // Posts - Tags
+
+            remove_submenu_page( 'themes.php'); // Appearance - Editor
+            remove_submenu_page( 'plugins.php' ); // Plugins - Editor
+        }
+    }
+
     add_action( 'admin_menu', 'admin_menu' );
 
     function admin_menu(){
@@ -49,7 +64,7 @@ License: GPL2
     }
 
     function open_trade_admin()
-    {
+    {       
     ?>
     <div class="wrap">
         <h4>Open Trade 2.0</h4>
@@ -369,9 +384,24 @@ License: GPL2
                 }
                 ?>
                 <form action="" method="post" enctype="multipart/form-data">
-                    Name:
-                    <input type="text" name="nameDistributor">
-                    <input id="doAction" class="button action" value="Create" type="submit" name="actionCreateDistributor">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th scope="row"><label for="nameDistributor">Name: <span class="description">(required)</span></label></th>
+                            <td><input name="nameDistributor" id="nameDistributor" value="<?php echo $_POST['nameDistributor'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="locationDistributor">Location: </label></th>
+                            <td><textarea rows="4" cols="50" name="locationDistributor"><?php echo $_POST['locationDistributor'];?></textarea></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="locationDistributor">Tax Id: </label></th>
+                            <td><input type="text" name="taxIdDistributor" value="<?php echo $_POST['taxIdDistributor'];?>"></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"></th>
+                            <td><input id="doAction" class="button action" value="Create" type="submit" name="actionCreateDistributor"></td>
+                        </tr>
                 </form>
             </div>
             <?php
@@ -572,6 +602,152 @@ License: GPL2
             </div>
             <?php
         }
+        else if( isset($_GET['view-warehouse-list']) and $_GET['view-warehouse-list'] == true ){
+            ?><div class="wrap">
+            <h4>Open Trade 2.0</h4>
+            <h3>Warehouse List</h3>
+            <br>
+            <?php
+            if (isset($_GET['message-error'])) {
+                ?>
+                <div id="message" class="error">
+                    <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                </div>
+                <?php
+            }
+            ?>
+            <form action="" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="idDistributor" value="<?php _e($_POST['idDistributor']) ?>">
+                <div class="alignleft actions bulkactions">
+                    <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
+                    <select name="selectActionWarehouse" id="bulk-action-selector-top">
+                        <option value="-1">Actions</option>
+                        <option value="delete" class="hide-if-no-js">Delete</option>
+                        <!--<option value="deactivate">Deactivate</option>-->
+                        <input id="doAction" class="button action" value="Apply" type="submit" name="actionBulkWarehouse">
+                        <input id="doAction" class="button action" value="New Warehouse" type="submit" name="actionNewWarehouse">
+                    </select>
+                </div>
+                <table class="widefat">
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox"></th>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>ZipCode</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>Location</th>
+                        <th>City</th>
+                        <th>Added By</th>
+                        <th>Added Date</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th><input type="checkbox"></th>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>ZipCode</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>Location</th>
+                        <th>City</th>
+                        <th>Added By</th>
+                        <th>Added Date</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    <?php
+                    global $wpdb;
+
+                    if($wpdb->check_connection()){
+                        $idDistributor = $_POST['idDistributor'];
+                        $warehouses =  $wpdb->get_results("SELECT cwl.`warehouse_id`, cw.`warehouse_name`, cwl.`zipcode`, cwl.`latitude`, cwl.`longitude`, cwl.`location`, cwl.`city`, user.`user_login`, cwl.`added_date`
+                                                             FROM `ot_custom_warehouse_location` as cwl 
+                                                             INNER JOIN `ot_custom_warehouse` AS cw ON cwl.`warehouse_id` = cw.`warehouse_id`
+                                                             INNER JOIN `ot_custom_distributor_warehouse` AS cdw ON cdw.`warehouse_id` = cw.`warehouse_id`
+                                                             INNER JOIN `".$wpdb->prefix."users` as user ON cw.`added_by` = user.`ID`
+                                                             WHERE cdw.`distributor_id` = ".$idDistributor.";");
+                        foreach ($warehouses as $warehouse) {
+                            ?>
+                            <tr>
+                                <?php
+                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idWarehouses[]\" value=" . $warehouse->warehouse_id . "></td>";
+                                echo "<td>" . $warehouse->warehouse_id . "</td>";
+                                echo "<td>" . $warehouse->warehouse_name . "</td>";
+                                echo "<td>" . $warehouse->zipcode . "</td>";
+                                echo "<td>" . $warehouse->latitude . "</td>";
+                                echo "<td>" . $warehouse->longitude . "</td>";
+                                echo "<td>" . $warehouse->location . "</td>";
+                                echo "<td>" . $warehouse->city . "</td>";
+                                echo "<td>" . $warehouse->user_login . "</td>";
+                                echo "<td>" . $warehouse->added_date . "</td>";
+                                ?>
+                            </tr>
+                            <?php
+                        }
+                    }
+                    ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <?php
+        }
+        else if( isset($_GET['view-add-new-warehouse']) and $_GET['view-add-new-warehouse'] == true ){
+            ?><div class="wrap">
+            <h4>Open Trade 2.0</h4>
+            <h3>Add New Warehouse</h3>
+            <form action="" method="post" enctype="multipart/form-data">
+                <input id="actionu" class="button action" value="Back Warehouse List" type="submit" name="actionBackWarehouseList">
+                <input type="hidden" name="idDistributor" value="<?php _e($_POST['idDistributor']) ?>">
+                <p>Create a new warehouse and add them to this distributor.</p>
+                <?php
+                if (isset($_GET['message-error'])) {
+                    ?>
+                    <div id="message" class="error">
+                        <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                    </div>
+                    <?php
+                }
+                ?>
+                <table>
+                    <thead>
+                    <tr>
+                        <th scope="row"><label for="name">Name <span class="description">(required)</span></label></th>
+                        <td><input name="name" id="name" value="<?php echo $_POST['name'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="zipcode">Zip Code</label></th>
+                        <td><input name="zipcode" id="zipcode" value="<?php echo $_POST['zipcode'];?>" type="text"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="latitude">Latitude </label></th>
+                        <td><input name="latitude" id="latitude" value="<?php echo $_POST['latitude'];?>" type="text"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="longitude">longitude </label></th>
+                        <td><input name="longitude" id="longitude" value="<?php echo $_POST['longitude'];?>" type="text"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="location">location </label></th>
+                        <td><textarea rows="4" cols="50" name="location"><?php echo $_POST['location'];?></textarea></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="city">City </label></th>
+                        <td><input name="city" id="city" value="<?php echo $_POST['city'];?>" type="text"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"></th>
+                        <td><input name="actionCreateWarehouse" id="createusersub" class="button button-primary" value="Add New Warehouse" type="submit"></td>
+                    </tr>
+                    </thead>
+                </table>
+            </form>
+            </div>
+            <?php
+        }
         else
         {
             ?>
@@ -605,9 +781,12 @@ License: GPL2
                         <th><input type="checkbox"></th>
                         <th>ID</th>
                         <th>Distributor</th>
+                        <th>Location</th>
+                        <th>Tax ID</th>
                         <th>Added By</th>
                         <th>Added Date</th>
                         <th>Users</th>
+                        <th>Warehouses</th>
                     </tr>
                     </thead>
                     <tfoot>
@@ -615,9 +794,12 @@ License: GPL2
                         <th><input type="checkbox"></th>
                         <th>ID</th>
                         <th>Distributor</th>
+                        <th>Location</th>
+                        <th>Tax ID</th>
                         <th>Added By</th>
                         <th>Added Date</th>
                         <th>Users</th>
+                        <th>Warehouses</th>
                     </tr>
                     </tfoot>
                     <tbody>
@@ -625,7 +807,7 @@ License: GPL2
                     global $wpdb;
 
                     if($wpdb->check_connection()){
-                        $distributors =  $wpdb->get_results("SELECT dist.`distributor_id`, dist.`distributor_name`, user.`user_nicename` as `added_by`, dist.`added_date` FROM `ot_custom_distributor` as dist INNER JOIN `".$wpdb->prefix."users` as user ON dist.`added_by` = user.`ID` ;");
+                        $distributors =  $wpdb->get_results("SELECT dist.`distributor_id`, dist.`distributor_name`, dist.`location`,dist.`tax_id`, user.`user_nicename` as `added_by`, dist.`added_date` FROM `ot_custom_distributor` as dist INNER JOIN `".$wpdb->prefix."users` as user ON dist.`added_by` = user.`ID` ;");
                         foreach ($distributors as $distributor) {
                             ?>
                             <tr>
@@ -633,9 +815,12 @@ License: GPL2
                                 echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idDistributors[]\" value=" . $distributor->distributor_id . "></td>";
                                 echo "<td>" . $distributor->distributor_id . "</td>";
                                 echo "<td>" . $distributor->distributor_name . "</td>";
+                                echo "<td>" . $distributor->location . "</td>";
+                                echo "<td>" . $distributor->tax_id . "</td>";
                                 echo "<td>" . $distributor->added_by . "</td>";
                                 echo "<td>" . $distributor->added_date . "</td>";
                                 echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idDistributor\" value=\"$distributor->distributor_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionViewUsers\"></form></td>";
+                                echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idDistributor\" value=\"$distributor->distributor_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionViewWarehouse\"></form></td>";
                                 ?>
                             </tr>
                             <?php
@@ -723,7 +908,7 @@ License: GPL2
 
     if(isset($_POST["actionCreateDistributor"])){
         if(isset($_POST["nameDistributor"]) and $_POST["nameDistributor"] !== ""){
-            createDistributor($_POST['nameDistributor']) ;
+            createDistributor($_POST['nameDistributor'],$_POST['locationDistributor'],$_POST['taxIdDistributor']) ;
             $_GET['view-new-distributor'] = false;
         }else{
             $_GET['message-error'] = "Please set valid name!";
@@ -849,5 +1034,51 @@ License: GPL2
 
     if(isset($_POST["actionBackDistributorList"])){
 
+    }
+
+    if(isset($_POST["actionViewWarehouse"])){
+        if(isset($_POST['idDistributor'])){
+            $_GET['idDistributor'] = $_POST['idDistributor'];
+            $_GET['view-warehouse-list'] = true;
+        }
+    }
+
+    if(isset($_POST["actionNewWarehouse"])){
+        $_GET['view-add-new-warehouse'] = true;
+        $_GET['idDistributor'] = $_POST['idDistributor'];
+    }
+
+    if(isset($_POST["actionCreateWarehouse"])){
+        if(isset($_POST["name"]) and $_POST["name"] !== ""){
+            createWarehouse($_POST["name"],$_POST["zipcode"],$_POST["latitude"],$_POST["longitude"],$_POST["location"],$_POST["city"],$_POST['idDistributor']);
+            $_GET['idDistributor'] = $_POST['idDistributor'];
+            $_GET['view-warehouse-list'] = true;
+
+        }else{
+            $_GET['message-error']="Name is required!";
+            $_GET['view-add-new-warehouse'] = true;
+        }
+    }
+
+    if(isset($_POST["actionBulkWarehouse"])){
+        if(isset($_POST['selectActionWarehouse']) and $_POST['selectActionWarehouse'] !== "-1"){
+            if (isset($_POST['idWarehouses'])) {
+                $idWarehouses = $_POST["idWarehouses"];
+                $idDistributor = $_POST['idDistributor'];
+                foreach ($idWarehouses as $idWarehouse){
+                    deleteWarehouse($idWarehouse, $idDistributor);
+                }
+                $_GET['view-warehouse-list'] = true;
+                $_GET['idDistributor'] = $idDistributor;
+            }
+            else{
+                $_GET['message-error']="Please select a warehouse!";
+                $_GET['view-warehouse-list'] = true;
+            }
+        }
+        else{
+            $_GET['message-error']="Please select one action!";
+            $_GET['view-warehouse-list'] = true;
+        }
     }
 ?>

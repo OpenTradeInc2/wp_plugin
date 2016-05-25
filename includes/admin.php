@@ -30,7 +30,7 @@
         );
 
         $user = new WP_User( $user_id );
-        $user->set_role( 'contributor' );
+        $user->set_role( 'open-trade-contributor' );
 
         addUserDistributor($user_id, $distributorID);
 
@@ -56,4 +56,3 @@
         }
         return $result;
     }
-

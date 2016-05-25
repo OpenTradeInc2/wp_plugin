@@ -335,16 +335,16 @@
         return sprintf($sPrintString, $mStretch);
     }
 
-    function createDistributor($distributorName){
+    function createDistributor($distributorName,$locationDistributor, $taxIdDistributor){
         global $wpdb;
 
         if($wpdb->check_connection()){
             $userId = getCurrentUser()->ID;
             $date = getFormatDate();
             $wpdb->query("INSERT INTO `ot_custom_distributor`
-                        (`distributor_name`, `added_by`, `added_date`)
+                        (`distributor_name`, `location`,`tax_id`, `added_by`, `added_date`)
                         VALUES
-                        ('".$distributorName."', ".$userId.", '".$date."');");
+                        ('".$distributorName."', '".$locationDistributor."', '".$taxIdDistributor."', ".$userId.", '".$date."');");
         }
     }
 
@@ -385,6 +385,67 @@
         if($wpdb->check_connection()){            
             $wpdb->query("DELETE FROM `ot_custom_distributor_user`
                           WHERE `distributor_user_userid` = ".$userId." and `distributor_user_distributor_id` =".$distributorID.";");
+        }
+    }
+
+    function createWarehouse($name, $zipCode, $latitude,$longitude, $location, $city, $distributorID){
+
+        global $wpdb;
+
+        if($wpdb->check_connection()){
+
+            $wpdb->query("INSERT INTO `ot_custom_warehouse`
+                                (`warehouse_name`,
+                                `added_by`,
+                                `added_date`)
+                             VALUES
+                            ('".$name."', 
+                            ".getCurrentUser()->ID.",
+                            '".getFormatDate()."');");
+
+            $warehouseId = $wpdb->insert_id;
+
+            $wpdb->query("INSERT INTO `ot_custom_warehouse_location`
+                                (`warehouse_id`,
+                                `zipcode`,
+                                `latitude`,
+                                `longitude`,
+                                `location`,
+                                `city`,
+                                `added_by`,
+                                `added_date`)
+                              VALUES
+                                (".$warehouseId.",
+                                '".$zipCode."',
+                                '".$latitude."',
+                                '".$longitude."',
+                                '".$location."',
+                                '".$city."',
+                                ".getCurrentUser()->ID.",
+                                '".getFormatDate()."');");
+
+            $wpdb->query("INSERT INTO `ot_custom_distributor_warehouse`
+                                (`distributor_id`,
+                                `warehouse_id`,
+                                `added_by`,
+                                `added_date`)
+                              VALUES
+                                (".$distributorID.",
+                                ".$warehouseId.",
+                                ".getCurrentUser()->ID.",
+                                '".getFormatDate()."');");
+
+            return true;
+        }
+        return false;
+    }
+
+    function deleteWarehouse($warehouseId, $distributorID){
+        global $wpdb;
+
+        if($wpdb->check_connection()){
+            $wpdb->query("DELETE FROM `ot_custom_distributor_warehouse`
+                              WHERE `warehouse_id` = ".$warehouseId." and `distributor_id` =".$distributorID.";");
         }
     }
 
