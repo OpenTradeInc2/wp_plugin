@@ -17,9 +17,11 @@
         return $formatDate;
     }
 
-    function createUser($userName, $email, $fullName, $distributorID){
+    function createUser($userName, $email, $first_name, $lastName, $distributorID){
         $random_password = wp_generate_password( $length=12, $include_standard_special_chars=false );
         $user_id = wp_create_user( $userName, $random_password, $email );
+
+        $fullName = $first_name." ".$lastName;
 
         wp_update_user(
             array(
@@ -29,7 +31,8 @@
             )
         );
 
-        update_user_meta($user_id, 'first_name', $fullName);
+        update_user_meta($user_id, 'first_name', $first_name);
+        update_user_meta($user_id, 'last_name', $lastName);
 
         $role =get_role( 'open-trade-contributor' );
 
@@ -65,4 +68,32 @@
             }
         }
         return $result;
+    }
+
+    function getDistributorByID($idDistributor){
+        global $wpdb;
+        $distributor = null;
+        if($wpdb->check_connection()){
+            $distributor = $wpdb->get_results("SELECT * FROM `ot_custom_distributor` WHERE `distributor_id` = ".$idDistributor.";",true);            
+        }
+        return $distributor[0];
+    }
+
+    function getWarehouseByID($idWarehouse){
+        global $wpdb;
+        $warehouse = null;
+        if($wpdb->check_connection()){
+            $warehouse = $wpdb->get_results("SELECT
+                                                w.`warehouse_name`,
+                                                wl.`location_id`,
+                                                wl.`warehouse_id`,
+                                                wl.`zipcode`,
+                                                wl.`latitude`,
+                                                wl.`longitude`,
+                                                wl.`location`,
+                                                wl.`city`
+                                            FROM `ot_custom_warehouse_location` AS wl INNER JOIN `ot_custom_warehouse` as w ON wl.`warehouse_id` = w.`warehouse_id`
+                                            WHERE w.`warehouse_id` = ".$idWarehouse.";",true);
+        }
+        return $warehouse[0];
     }

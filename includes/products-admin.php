@@ -449,3 +449,41 @@
         }
     }
 
+    function updateDistributor($distributorId,$locationDistributor, $taxIdDistributor){
+        global $wpdb;
+
+        if($wpdb->check_connection()){
+            $userId = getCurrentUser()->ID;
+            $date = getFormatDate();
+            $wpdb->query("UPDATE `ot_custom_distributor`
+                          SET
+                            `location` = '".$locationDistributor."',
+                            `tax_id` = '".$taxIdDistributor."',
+                            `edited_by` = ".$userId.",
+                            `edited_date` = '".$date."'
+                          WHERE `distributor_id` =".$distributorId.";");
+        }
+    }
+
+    function updateWarehouse($IdWarehouse, $zipCode, $latitude,$longitude, $location, $city){
+
+        global $wpdb;
+
+        if($wpdb->check_connection()){
+
+            $wpdb->query("UPDATE `ot_custom_warehouse_location`
+                          SET                        
+                            `zipcode` = '".$zipCode."',
+                            `latitude` = '".$latitude."',
+                            `longitude` = '".$longitude."',
+                            `location` = '".$location."',
+                            `city` = '".$city."',
+                            `edited_by` = ".getCurrentUser()->ID.",
+                            `edited_date` = '".getFormatDate()."'
+                          WHERE `warehouse_id` =".$IdWarehouse.";");
+
+            return true;
+        }
+        return false;
+    }
+

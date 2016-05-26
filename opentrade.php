@@ -401,7 +401,20 @@ License: GPL2
             ?>
             <div class="wrap">
                 <h4>Open Trade 2.0</h4>
-                <h3>Add New Distributor</h3>
+                <?php
+                if(isset($_POST['editDistributor']) and $_POST['editDistributor'] == true){
+                    ?>
+                    <h3>Update Distributor</h3>
+                    <?php
+                }else{
+                    ?>
+                    <h3>Add New Distributor</h3>
+                    <?php
+                }
+                ?>
+                <form action="" method="post" enctype="multipart/form-data">
+                    <input id="actionu" class="button action" value="Back Distributor List" type="submit" name="actionBackDistributorList">
+                <br>
                 <br>
                 <?php
                 if (isset($_GET['message-error'])) {
@@ -412,12 +425,22 @@ License: GPL2
                     <?php
                 }
                 ?>
-                <form action="" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="idDistributor" value="<?php _e($_POST['idDistributor']) ?>">
                     <table>
                         <thead>
                         <tr>
                             <th scope="row"><label for="nameDistributor">Name: <span class="description">(required)</span></label></th>
-                            <td><input name="nameDistributor" id="nameDistributor" value="<?php echo $_POST['nameDistributor'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                            <?php
+                            if(isset($_POST['editDistributor']) and $_POST['editDistributor'] == true){
+                                ?>
+                                <td><input readonly name="nameDistributor" id="nameDistributor" value="<?php echo $_POST['nameDistributor'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                                <?php
+                            }else{
+                                ?>
+                                <td><input name="nameDistributor" id="nameDistributor" value="<?php echo $_POST['nameDistributor'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                                <?php
+                            }
+                            ?>
                         </tr>
                         <tr>
                             <th scope="row"><label for="locationDistributor">Location: </label></th>
@@ -429,7 +452,17 @@ License: GPL2
                         </tr>
                         <tr>
                             <th scope="row"></th>
-                            <td><input id="doAction" class="button action" value="Create" type="submit" name="actionCreateDistributor"></td>
+                            <?php
+                            if(isset($_POST['editDistributor']) and $_POST['editDistributor'] == true){
+                                ?>
+                                <td><input id="doAction" class="button action" value="Update" type="submit" name="actionUpdateDistributor"></td>
+                                <?php
+                            }else{
+                                ?>
+                                <td><input id="doAction" class="button action" value="Create" type="submit" name="actionCreateDistributor"></td>
+                                <?php
+                            }
+                            ?>
                         </tr>
                 </form>
             </div>
@@ -499,7 +532,7 @@ License: GPL2
                                 <?php
                                 echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idAssignedUsers[]\" value=" . $user->distributor_user_userid . "></td>";
                                 echo "<td>" . $user->distributor_user_userid . "</td>";
-                                echo "<td>" . $user->user_login . "</td>";
+                                echo "<td>" . $user->user_login . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idUser\" value=\"$user->distributor_user_userid\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditUser\"></span></div></form></td>";
                                 echo "<td>" . $user->display_name . "</td>";
                                 echo "<td>" . $user->user_email . "</td>";
                                 echo "<td>" . $user->distributor_user_added_by . "</td>";
@@ -589,11 +622,29 @@ License: GPL2
         else if( isset($_GET['view-add-new-user']) and $_GET['view-add-new-user'] == true ){
             ?><div class="wrap">
                 <h4>Open Trade 2.0</h4>
-                <h3>Add New User</h3>
+                <?php
+                if(isset($_POST['editUser']) and $_POST['editUser'] == true){
+                    ?>
+                    <h3>Add New User</h3>
+                    <?php
+                }else{
+                    ?>
+                    <h3>Update User</h3>
+                    <?php
+                }
+                ?>
                 <form action="" method="post" enctype="multipart/form-data">
                 <input id="actionu" class="button action" value="Back User List" type="submit" name="actionBackUserList">
                 <input type="hidden" name="idDistributor" value="<?php _e($_POST['idDistributor']) ?>">
-                <p>Create a new user and add them to this distributor.</p>
+                <input type="hidden" name="idUser" value="<?php _e($_POST['idUser']) ?>">
+                <?php
+                if(!isset($_POST['editUser'])){
+                    ?>
+                    <p>Create a new user and add them to this distributor.</p>
+                    <?php
+                }
+                ?>
+
                 <?php
                 if (isset($_GET['message-error'])) {
                     ?>
@@ -607,11 +658,31 @@ License: GPL2
                 <thead>
                 <tr>
                     <th scope="row"><label for="user_login">Username <span class="description">(required)</span></label></th>
-                    <td><input name="user_login" id="user_login" value="<?php echo $_POST['user_login'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                    <?php
+                    if(isset($_POST['editUser']) and $_POST['editUser'] == true){
+                        ?>
+                        <td><input readonly name="user_login" id="user_login" value="<?php echo $_POST['user_login'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                        <?php
+                    }else{
+                        ?>
+                        <td><input name="user_login" id="user_login" value="<?php echo $_POST['user_login'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                        <?php
+                    }
+                    ?>
                 </tr>
                 <tr>
                     <th scope="row"><label for="email">Email <span class="description">(required)</span></label></th>
-                    <td><input name="email" id="email" value="<?php echo $_POST['email'];?>" type="email"></td>
+                    <?php
+                    if(isset($_POST['editUser']) and $_POST['editUser'] == true){
+                        ?>
+                        <td><input readonly name="email" id="email" value="<?php echo $_POST['email'];?>" type="email"></td>
+                        <?php
+                    }else{
+                        ?>
+                        <td><input name="email" id="email" value="<?php echo $_POST['email'];?>" type="email"></td>
+                        <?php
+                    }
+                    ?>
                 </tr>
                 <tr>
                     <th scope="row"><label for="first_name">First Name </label></th>
@@ -623,7 +694,17 @@ License: GPL2
                 </tr>
                 <tr>
                     <th scope="row"></th>
-                    <td><input name="actionCreateUser" id="createusersub" class="button button-primary" value="Add New User" type="submit"></td>
+                    <?php
+                    if(isset($_POST['editUser']) and $_POST['editUser'] == true){
+                        ?>
+                        <td><input name="actionUpdateUser" id="createusersub" class="button button-primary" value="Update User" type="submit"></td>
+                        <?php
+                    }else{
+                        ?>
+                        <td><input name="actionCreateUser" id="createusersub" class="button button-primary" value="Add New User" type="submit"></td>
+                        <?php
+                    }
+                    ?>
                 </tr>
                 </thead>
                 </table>
@@ -635,6 +716,10 @@ License: GPL2
             ?><div class="wrap">
             <h4>Open Trade 2.0</h4>
             <h3>Warehouse List</h3>
+            <form action="" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="idDistributor" value="<?php _e($_POST['idDistributor']) ?>">
+                <input id="actionu" class="button action" value="Back Distributor List" type="submit" name="actionBackDistributorList">
+            <br>
             <br>
             <?php
             if (isset($_GET['message-error'])) {
@@ -645,8 +730,6 @@ License: GPL2
                 <?php
             }
             ?>
-            <form action="" method="post" enctype="multipart/form-data">
-                <input type="hidden" name="idDistributor" value="<?php _e($_POST['idDistributor']) ?>">
                 <div class="alignleft actions bulkactions">
                     <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
                     <select name="selectActionWarehouse" id="bulk-action-selector-top">
@@ -704,7 +787,7 @@ License: GPL2
                                 <?php
                                 echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idWarehouses[]\" value=" . $warehouse->warehouse_id . "></td>";
                                 echo "<td>" . $warehouse->warehouse_id . "</td>";
-                                echo "<td>" . $warehouse->warehouse_name . "</td>";
+                                echo "<td>" . $warehouse->warehouse_name . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idWarehouse\" value=\"$warehouse->warehouse_id\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditWareHouse\"></span></div></form></td>";
                                 echo "<td>" . $warehouse->zipcode . "</td>";
                                 echo "<td>" . $warehouse->latitude . "</td>";
                                 echo "<td>" . $warehouse->longitude . "</td>";
@@ -727,11 +810,24 @@ License: GPL2
         else if( isset($_GET['view-add-new-warehouse']) and $_GET['view-add-new-warehouse'] == true ){
             ?><div class="wrap">
             <h4>Open Trade 2.0</h4>
-            <h3>Add New Warehouse</h3>
+            <?php
+            if(isset($_POST['editWarehouse']) and $_POST['editWarehouse'] == true){
+                echo "<h3>Update Warehouse</h3>";
+            }else{
+                echo "<h3>Add New Warehouse</h3>";
+            }
+            ?>
             <form action="" method="post" enctype="multipart/form-data">
                 <input id="actionu" class="button action" value="Back Warehouse List" type="submit" name="actionBackWarehouseList">
                 <input type="hidden" name="idDistributor" value="<?php _e($_POST['idDistributor']) ?>">
-                <p>Create a new warehouse and add them to this distributor.</p>
+                <input type="hidden" name="idWarehouse" value="<?php _e($_POST['idWarehouse']) ?>">
+                <?php
+                if(!isset($_POST['editWarehouse'])){
+                    ?>
+                    <p>Create a new warehouse and add them to this distributor.</p>
+                    <?php
+                }
+                ?>
                 <?php
                 if (isset($_GET['message-error'])) {
                     ?>
@@ -745,7 +841,17 @@ License: GPL2
                     <thead>
                     <tr>
                         <th scope="row"><label for="name">Name <span class="description">(required)</span></label></th>
-                        <td><input name="name" id="name" value="<?php echo $_POST['name'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                        <?php
+                        if(isset($_POST['editWarehouse']) and $_POST['editWarehouse'] == true){
+                            ?>
+                            <td><input readonly name="name" id="name" value="<?php echo $_POST['name'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                            <?php
+                        }else{
+                            ?>
+                            <td><input name="name" id="name" value="<?php echo $_POST['name'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                            <?php
+                        }
+                        ?>
                     </tr>
                     <tr>
                         <th scope="row"><label for="zipcode">Zip Code</label></th>
@@ -769,7 +875,17 @@ License: GPL2
                     </tr>
                     <tr>
                         <th scope="row"></th>
-                        <td><input name="actionCreateWarehouse" id="createusersub" class="button button-primary" value="Add New Warehouse" type="submit"></td>
+                        <?php
+                        if(isset($_POST['editWarehouse']) and $_POST['editWarehouse'] == true){
+                            ?>
+                            <td><input name="actionUpdateWarehouse" id="createusersub" class="button button-primary" value="Update Warehouse" type="submit"></td>
+                            <?php
+                        }else{
+                            ?>
+                            <td><input name="actionCreateWarehouse" id="createusersub" class="button button-primary" value="Add New Warehouse" type="submit"></td>
+                            <?php
+                        }
+                        ?>
                     </tr>
                     </thead>
                 </table>
@@ -843,7 +959,7 @@ License: GPL2
                                 <?php
                                 echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idDistributors[]\" value=" . $distributor->distributor_id . "></td>";
                                 echo "<td>" . $distributor->distributor_id . "</td>";
-                                echo "<td>" . $distributor->distributor_name . "<div class=\"row-actions\"><span class=\"edit\"><a href=\"http://localhost:8585/wordpress/wp-admin/user-edit.php?user_id=2&amp;wp_http_referer=%2Fwordpress%2Fwp-admin%2Fusers.php\">Edit</a>|</span><span class=\"delete\"><a class=\"submitdelete\" href=\"users.php?action=delete&amp;user=2&amp;_wpnonce=dac838b4d3\">Delete</a></span></div></td>";
+                                echo "<td>" . $distributor->distributor_name . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idDistributor\" value=\"$distributor->distributor_id\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditDistributor\"></span></div></form></td>";
                                 echo "<td>" . $distributor->location . "</td>";
                                 echo "<td>" . $distributor->tax_id . "</td>";
                                 echo "<td>" . $distributor->added_by . "</td>";
@@ -1029,8 +1145,7 @@ License: GPL2
                 if(isset($_POST["email"]) and $_POST["email"] !== ""){
                     $email =email_exists($_POST["email"]);
                     if(!$email){
-                        $fullName = $_POST["first_name"]." ".$_POST["last_name"];
-                        createUser($_POST["user_login"],$_POST["email"],$fullName,$_POST['idDistributor']);
+                        createUser($_POST["user_login"],$_POST["email"],$_POST["first_name"],$_POST["last_name"],$_POST['idDistributor']);
                         $_GET['idDistributor'] = $_POST['idDistributor'];
                         $_GET['view-user-distributor'] = true;
                     }else{
@@ -1109,5 +1224,88 @@ License: GPL2
             $_GET['message-error']="Please select one action!";
             $_GET['view-warehouse-list'] = true;
         }
+    }
+
+    if(isset($_POST["actionEditDistributor"])){
+        $_GET['view-new-distributor'] = true;
+        $idDistributor = $_POST['idDistributor'];
+        $distributor = getDistributorByID($idDistributor);
+        $_POST['idDistributor'] = $distributor->distributor_id;
+        $_POST['nameDistributor'] = $distributor->distributor_name;
+        $_POST['locationDistributor'] = $distributor->location;
+        $_POST['taxIdDistributor'] = $distributor->tax_id;
+        $_POST['editDistributor'] = true;
+    }
+
+    if(isset($_POST["actionUpdateDistributor"])){
+        if(isset($_POST["nameDistributor"]) and $_POST["nameDistributor"] !== ""){
+            updateDistributor($_POST['idDistributor'],$_POST['locationDistributor'],$_POST['taxIdDistributor']) ;
+            $_GET['view-new-distributor'] = false;
+        }else{
+            $_GET['message-error'] = "Please set valid name!";
+            $_GET['view-new-distributor'] = true;
+        }
+    }
+
+    if(isset($_POST["actionEditWareHouse"])){
+        $_GET['view-add-new-warehouse'] = true;
+        $idWarehouse = $_POST['idWarehouse'];
+        $warehouse = getWarehouseByID($idWarehouse);
+        $_POST['idWarehouse'] = $warehouse->warehouse_id;
+        $_POST['name']= $warehouse->warehouse_name;
+        $_POST['zipcode'] = $warehouse->zipcode;
+        $_POST['latitude'] = $warehouse->latitude;
+        $_POST['longitude'] = $warehouse->longitude;
+        $_POST['location'] = $warehouse->location;
+        $_POST['city'] = $warehouse->city;
+        $_POST['editWarehouse'] = true;
+    }
+
+    if(isset($_POST["actionUpdateWarehouse"])){
+        if(isset($_POST["name"]) and $_POST["name"] !== ""){
+            updateWarehouse($_POST["idWarehouse"], $_POST["zipcode"], $_POST["latitude"], $_POST["longitude"], $_POST["location"], $_POST["city"]);
+            $_POST['idDistributor'] = $_POST['idDistributor'];
+            $_GET['view-warehouse-list'] = true;
+
+        }else{
+            $_GET['message-error']="Name is required!";
+            $_GET['view-add-new-warehouse'] = true;
+        }
+    }
+
+    if(isset($_POST["actionBackWarehouseList"])){
+        if(isset($_POST['idDistributor'])){
+            $_GET['idDistributor'] = $_POST['idDistributor'];
+            $_GET['view-warehouse-list'] = true;
+        }
+    }
+
+    if(isset($_POST["actionEditUser"])){
+        $_GET['view-add-new-user'] = true;
+        $idUser = $_POST['idUser'];
+        $_POST['idUser'] = $idUser;
+        $user = get_user_by('ID',$idUser);
+        $_POST['user_login'] = $user->data->user_login;
+        $_POST['email'] = $user->data->user_email;
+        $_POST['first_name']= get_user_meta($idUser, 'first_name', true);
+        $_POST['last_name'] = get_user_meta($idUser, 'last_name', true);
+        $_POST['editUser'] = true;
+    }
+
+    if(isset($_POST["actionUpdateUser"])){
+
+        update_user_meta($_POST['idUser'], 'first_name', $_POST['first_name']);
+        update_user_meta($_POST['idUser'], 'last_name', $_POST['last_name']);
+        $fullName = $_POST['first_name']." ".$_POST['last_name'];
+        wp_update_user(
+            array(
+                'ID'          =>    $_POST['idUser'],
+                'nickname'    =>    $fullName,
+                'display_name' => $fullName
+            )
+        );
+
+        $_GET['idDistributor'] = $_POST['idDistributor'];
+        $_GET['view-user-distributor'] = true;
     }
 ?>
