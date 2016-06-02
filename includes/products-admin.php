@@ -26,9 +26,9 @@
 
     function getProducts($wpdb, $productFileID){
 
-        $products = $wpdb->get_results("SELECT `inventory_file_item_id`, `inventory_file_id`, `sku_id`, `sku_description`, `product_line`, `lot_number`, `issue_type`, `li_specialist`, `warehouse`, `city`, `zipcode`, `lmd`, `id_month`, `days_under_current_path`, `quantity_libs`, `sum_quantity`, `total_cost`, `added_by`, `added_date`,`edited_date`, `edited_by`,`deleted`, `status`, `category`, `distributor_id` 
-                                                     FROM `ot_custom_inventory_file_items`
-                                                     WHERE `inventory_file_id` = " . $productFileID);
+        $products = $wpdb->get_results("SELECT * 
+                                         FROM `ot_custom_inventory_file_items`
+                                         WHERE `inventory_file_id` = " . $productFileID);
 
         return $products;
     }
@@ -102,9 +102,10 @@
 
             $wp_error = '';
             $user_id = $current_user->ID;
-            $price = str_replace("$", "", $product->total_cost);
+            $price = str_replace("$", "", $product->price_unit);
 
-            $product_line  = array( 'name' => 'Product Line', 'value' => $product->product_line, 'position'=>'2', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $product_line  = array( 'name' => 'Product Line', 'value' => $product->product_line, 'position'=>'1', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            /*
             $lot  = array( 'name' => 'Lot #', 'value' => $product->lot_number, 'position'=>'1', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $issue_type  = array( 'name' => 'Issue Type', 'value' => $product->issue_type, 'position'=>'2', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $specialist = array( 'name' => 'LI Specialist', 'value' => $product->li_specialist, 'position'=>'3', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
@@ -114,20 +115,42 @@
             $lmd = array( 'name' => 'LMD', 'value' => $product->lmd, 'position'=>'6', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $id_month = array( 'name' => 'ID Month', 'value' => $product->id_month, 'position'=>'7', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $days_under_current_path = array( 'name' => 'Days Under Current Path', 'value' => $product->days_under_current_path, 'position'=>'8', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            */
+            $line_number  = array( 'name' => 'Line #', 'value' => $product->distributor_id, 'position'=>'2', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $distributor_id  = array( 'name' => 'Distributor ID', 'value' => $product->distributor_id, 'position'=>'3', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $distributor_name  = array( 'name' => 'Distributor Name', 'value' => $product->distributor_name, 'position'=>'4', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $distributor_sku_id  = array( 'name' => 'Distributor SKU ID', 'value' => $product->distributor_sku_id, 'position'=>'5', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $distributor_sku_description  = array( 'name' => 'Distributor SKU Description', 'value' => $product->distributor_sku_description, 'position'=>'6', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $lot_number  = array( 'name' => 'Lot#', 'value' => $product->lot_number, 'position'=>'7', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_type  = array( 'name' => 'PackagingType', 'value' => $product->packaging_type, 'position'=>'8', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_unit  = array( 'name' => 'Packaging Unit', 'value' => $product->packaging_unit, 'position'=>'9', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_measure  = array( 'name' => 'Packaging Measure', 'value' => $product->packaging_measure, 'position'=>'10', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_weight_lb  = array( 'name' => 'Packaging Weight (lb)', 'value' => $product->packaging_weight_lb, 'position'=>'11', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_weight_kg  = array( 'name' => 'Packaging Weight (kg)', 'value' => $product->packaging_weight_kg, 'position'=>'12', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $quantity  = array( 'name' => 'Quantity', 'value' => $product->quantity, 'position'=>'13', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $total_weight_lb  = array( 'name' => 'Total Weight (lb)', 'value' => $product->total_weight_lb, 'position'=>'14', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $total_weight_kg  = array( 'name' => 'Total Weight (Kg)', 'value' => $product->total_weight_kg, 'position'=>'15', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $price_unit  = array( 'name' => 'Price / Unit', 'value' => $product->price_unit, 'position'=>'16', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $price_lb  = array( 'name' => 'Price / lb', 'value' => $product->price_lb, 'position'=>'17', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $price_kg  = array( 'name' => 'Price / Kg', 'value' => $product->price_kg, 'position'=>'18', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $warehouse_location_id  = array( 'name' => 'Warehouse location ID', 'value' => $product->warehouse_location_id, 'position'=>'19', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $warehouse_location_address  = array( 'name' => 'Warehouse Location Address', 'value' => $product->warehouse_location_address, 'position'=>'20', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
 
-            $product_attributes = array($product_line, $lot, $issue_type, $specialist, $warehouse, $city, $zipCode, $lmd, $id_month, $days_under_current_path);
+            $product_attributes = array($product_line, $line_number, $distributor_id, $distributor_name, $distributor_sku_id, $distributor_sku_description, $lot_number, $packaging_type,
+                $packaging_unit, $packaging_measure, $packaging_weight_lb,$packaging_weight_kg, $quantity, $total_weight_lb, $total_weight_kg, $price_unit, $price_lb, $price_kg, $warehouse_location_id, $warehouse_location_address );
 
             $post = array(
                 'post_author' => $user_id,
-                'post_content' => $product->sku_description,
+                'post_content' => $product->distributor_sku_description,
                 'post_status' => "publish",
-                'post_title' => $product->sku_description,
+                'post_title' => $product->distributor_sku_description,
                 'post_parent' => '',
                 'post_type' => "product",
-                'post_name' => $product->sku_id
+                'post_name' => $product->distributor_sku_id
             );
 
-            $oTSkuID = createOTSkuID($product->sku_id, $product->distributor_id);
+            //$oTSkuID = createOTSkuID($product->sku_id, $product->distributor_id);
+            $oTSkuID = createOTSkuID($product->distributor_sku_id, $product->distributor_id);
             $post_id = wp_insert_post( $post, $wp_error );
 
             setCategory($post_id, $product);
@@ -146,7 +169,7 @@
             update_post_meta( $post_id, '_length', "" );
             update_post_meta( $post_id, '_width', "" );
             update_post_meta( $post_id, '_height', "" );
-            update_post_meta($post_id, '_sku', $oTSkuID);
+            update_post_meta($post_id,  '_sku', $oTSkuID);
             update_post_meta( $post_id, '_product_attributes', $product_attributes);
             update_post_meta( $post_id, '_sale_price_dates_from', "" );
             update_post_meta( $post_id, '_sale_price_dates_to', "" );
@@ -154,7 +177,7 @@
             update_post_meta( $post_id, '_sold_individually', "yes" );
             update_post_meta( $post_id, '_manage_stock', "yes" );
             update_post_meta( $post_id, '_backorders', "no" );
-            update_post_meta( $post_id, '_stock', $product->sum_quantity );
+            update_post_meta( $post_id, '_stock', $product->quantity );
         }
         else
         {

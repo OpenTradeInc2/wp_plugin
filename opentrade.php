@@ -141,22 +141,28 @@ License: GPL2
             <table class="widefat">
                 <thead>
                 <tr>
+                    <th>Line Number</th>
                     <th>SKU ID</th>
                     <th>SKU Description</th>
-                    <th>Product Line</th>
-                    <th>Issue Type</th>
                     <th>Quantity</th>
-                    <th>Price</th>
+                    <th>Total Weight (lb)</th>
+                    <th>Total Weight (Kg)</th>
+                    <th>Price - Unit</th>
+                    <th>Price - Lb</th>
+                    <th>Price - Kg</th>
                 </tr>
                 </thead>
                 <tfoot>
                 <tr>
+                    <th>Line Number</th>
                     <th>SKU ID</th>
                     <th>SKU Description</th>
-                    <th>Product Line</th>
-                    <th>Issue Type</th>
                     <th>Quantity</th>
-                    <th>Price</th>
+                    <th>Total Weight (lb)</th>
+                    <th>Total Weight (Kg)</th>
+                    <th>Price - Unit</th>
+                    <th>Price - Lb</th>
+                    <th>Price - Kg</th>
                 </tr>
                 </tfoot>
                 <tbody>
@@ -168,11 +174,14 @@ License: GPL2
                     <tr>
                         <?php
                         echo "<td>" . $product[1] . "</td>";
-                        echo "<td>" . $product[2] . "</td>";
-                        echo "<td>" . $product[3] . "</td>";
+                        echo "<td>" . $product[4] . "</td>";
                         echo "<td>" . $product[5] . "</td>";
+                        echo "<td>" . $product[12] . "</td>";
                         echo "<td>" . $product[13] . "</td>";
                         echo "<td>" . $product[14] . "</td>";
+                        echo "<td>" . $product[15] . "</td>";
+                        echo "<td>" . $product[16] . "</td>";
+                        echo "<td>" . $product[17] . "</td>";
                         ?>
                     </tr>
                     <?php
@@ -245,32 +254,30 @@ License: GPL2
                 <table class="widefat">
                     <thead>
                     <tr>
+                        <th>Line Number</th>
+                        <th>Distributor ID</th>
+                        <th>Distributor Name</th>
                         <th>SKU ID</th>
-                        <th>SKU Description</th>
-                        <th>Product Line</th>
-                        <th>Issue Type</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                        <th>Category</th>
-                        <th>Warehouse</th>
-                        <th>City</th>
-                        <th>Distributor</th>
-                        <th>New Product</th>
+                        <th>SKU Description</th>                        
+                        <th>PackagingType</th>
+                        <th>Packaging Unit</th>                        
+                        <th>Quantity</th>						
+						<th>Price - Unit</th>						
+						<th>Is New Product</th>			
                     </tr>
                     </thead>
                     <tfoot>
                     <tr>
+                        <th>Line Number</th>
+                        <th>Distributor ID</th>
+                        <th>Distributor Name</th>
                         <th>SKU ID</th>
-                        <th>SKU Description</th>
-                        <th>Product Line</th>
-                        <th>Issue Type</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                        <th>Category</th>
-                        <th>Warehouse</th>
-                        <th>City</th>
-                        <th>Distributor</th>
-                        <th>New Product</th>
+                        <th>SKU Description</th>                        
+                        <th>PackagingType</th>
+                        <th>Packaging Unit</th>                        
+                        <th>Quantity</th>						
+						<th>Price - Unit</th>						
+						<th>Is New Product</th>						
                     </tr>
                     </tfoot>
                     <tbody>
@@ -284,17 +291,16 @@ License: GPL2
                         ?>
                         <tr>
                             <?php
-                            echo "<td>" . $product->sku_id . "</td>";
-                            echo "<td>" . $product->sku_description . "</td>";
-                            echo "<td>" . $product->product_line . "</td>";
-                            echo "<td>" . $product->issue_type . "</td>";
-                            echo "<td>" . $product->sum_quantity . "</td>";
-                            echo "<td>$" . $product->total_cost . "</td>";
-                            echo "<td>" . $product->category . "</td>";
-                            echo "<td>" . $product->warehouse . "</td>";
-                            echo "<td>" . $product->city . "</td>";
-                            echo "<td>" . $distributor[0]->distributor_name . "</td>";
-                            echo "<td>" . $isNewProduct . "</td>";
+                            echo "<td>"  . $product->line_number . "</td>";
+                            echo "<td>"  . $product->distributor_id . "</td>";
+                            echo "<td>"  . $product->distributor_name . "</td>";
+                            echo "<td>"  . $product->distributor_sku_id . "</td>";
+                            echo "<td>"  . $product->distributor_sku_description . "</td>";                            
+                            echo "<td>"  . $product->packaging_type . "</td>";
+                            echo "<td>"  . $product->packaging_unit . "</td>";                            
+                            echo "<td>"  . $product->quantity . "</td>";
+                            echo "<td>$" . $product->price_unit . "</td>";
+							echo "<td>" . $isNewProduct . "</td>";
                             ?>
                         </tr>
                         <?php
@@ -1309,5 +1315,3 @@ License: GPL2
         $_GET['view-user-distributor'] = true;
     }
 ?>
-
-prueba phpstorm
