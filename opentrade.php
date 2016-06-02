@@ -7,7 +7,7 @@ include plugin_dir_path(__FILE__) . '/includes/process-file.php';
 include plugin_dir_path(__FILE__) . '/includes/products-admin.php';
 include plugin_dir_path(__FILE__) . '/Classes/PHPExcel/IOFactory.php';
 set_include_path(plugin_dir_path(__FILE__) . 'Classes/');
-
+include plugin_dir_path(__FILE__) . '/templates/request-information.php';
 
 
 
@@ -67,10 +67,13 @@ License: GPL2
         add_submenu_page('open-trade-menu', 'Load Inventory', 'Load Inventory', 'manage_options', 'open-trade-menu' );
         add_submenu_page('open-trade-menu', 'Pending Approval', 'Pending Approval', 'manage_options', 'open-trade-approve', 'wpdocs_pending_approval_submenu_page_callback' );
         add_submenu_page('open-trade-menu', 'Distributors', 'Distributors', 'manage_options', 'open-trade-distributors', 'wpdocs_distributors_submenu_page_callback' );
+        add_submenu_page('open-trade-menu', 'Request Information', 'Request Information', 'manage_options', 'open-trade-reques_information', 'wpdocs_reques_information_submenu_page_callback' );
+        add_submenu_page('open-trade-menu', 'Post Offer', 'Post Offer', 'manage_options', 'open-trade-post-offer', 'wpdocs_post_offer_submenu_page_callback' );
+        add_submenu_page('open-trade-menu', 'Purchase Order', 'Purchase Order', 'manage_options', 'open-trade-purchase-order', 'wpdocs_purchase_order_submenu_page_callback' );
+
     }
 
-    function open_trade_admin()
-    {       
+    function open_trade_admin(){
     ?>
     <div class="wrap">
         <h4>Open Trade 2.0</h4>
@@ -987,6 +990,277 @@ License: GPL2
             </div>
             <?php
         }
+    }
+
+    function wpdocs_reques_information_submenu_page_callback(){
+
+        ?>
+        <div class="wrap">
+            <h4>Open Trade 2.0</h4>
+            <h3>Pending Approval Files</h3>
+            <br>
+            <?php
+            if (isset($_GET['message-success'])) {
+                ?>
+                <div id="message" class="updated">
+                    <p><strong><?php _e($_GET['message-success']) ?></strong></p>
+                </div>
+                <br>
+                <?php
+            }
+            if (isset($_GET['message-error'])) {
+                ?>
+                <div id="message" class="error">
+                    <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                </div>
+                <?php
+            }
+            ?>
+            <form action="" method="post" enctype="multipart/form-data">
+                <div class="alignleft actions bulkactions">
+                    <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
+                    <select name="selectAction" id="bulk-action-selector-top">
+                        <option value="-1">Actions</option>
+                        <option value="approve" class="hide-if-no-js">Approve</option>
+                        <option value="reject">Reject</option>
+                        <input id="doaction" class="button action" value="Apply" type="submit" name="actionProducts">
+                    </select>
+                </div>
+                <br class="clear">
+                <table class="widefat" name="tablePendingFiles" id="idTablePendingFiles">
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox"></th>
+                        <th>File Name</th>
+                        <th>Quantity of Products</th>
+                        <th>Added By</th>
+                        <th>Upload Date</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th></th>
+                        <th>File Name</th>
+                        <th>Quantity of Products</th>
+                        <th>Added By</th>
+                        <th>Upload Date</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    <?php
+                    global $wpdb;
+
+                    $isConnected = $wpdb->check_connection();
+
+                    if ($isConnected) {
+                        $products_files = $wpdb->get_results("SELECT `inventory_id`, `file_md5`, `items_count`, `added_date`, users.`user_login` as added_by FROM `ot_custom_inventory_file` INNER JOIN `".$wpdb->prefix."users` as users ON `added_by` = users.`ID`  WHERE `status` = 'pending_approval' ORDER BY `added_date` DESC");
+                        foreach ($products_files as $product_file) {
+                            ?>
+                            <tr>
+                                <?php
+                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idProduct[]\" value=" . $product_file->inventory_id . "></td>";
+                                echo "<td>" . $product_file->file_md5 . "</td>";
+                                echo "<td>" . $product_file->items_count . "</td>";
+                                echo "<td>" . $product_file->added_by . "</td>";
+                                echo "<td>" . $product_file->added_date . "</td>";
+                                echo "<td>Pending Approval</td>";
+                                echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idProductFile\" value=\"$product_file->inventory_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionViewDetails\"></form></td>";
+                                ?>
+                            </tr>
+                            <?php
+                        }
+                    }
+                    ?>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+        <?php
+    }
+
+    function wpdocs_post_offer_submenu_page_callback(){
+
+        ?>
+        <div class="wrap">
+            <h4>Open Trade 2.0</h4>
+            <h3>Pending Approval Files</h3>
+            <br>
+            <?php
+            if (isset($_GET['message-success'])) {
+                ?>
+                <div id="message" class="updated">
+                    <p><strong><?php _e($_GET['message-success']) ?></strong></p>
+                </div>
+                <br>
+                <?php
+            }
+            if (isset($_GET['message-error'])) {
+                ?>
+                <div id="message" class="error">
+                    <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                </div>
+                <?php
+            }
+            ?>
+            <form action="" method="post" enctype="multipart/form-data">
+                <div class="alignleft actions bulkactions">
+                    <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
+                    <select name="selectAction" id="bulk-action-selector-top">
+                        <option value="-1">Actions</option>
+                        <option value="approve" class="hide-if-no-js">Approve</option>
+                        <option value="reject">Reject</option>
+                        <input id="doaction" class="button action" value="Apply" type="submit" name="actionProducts">
+                    </select>
+                </div>
+                <br class="clear">
+                <table class="widefat" name="tablePendingFiles" id="idTablePendingFiles">
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox"></th>
+                        <th>File Name</th>
+                        <th>Quantity of Products</th>
+                        <th>Added By</th>
+                        <th>Upload Date</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th></th>
+                        <th>File Name</th>
+                        <th>Quantity of Products</th>
+                        <th>Added By</th>
+                        <th>Upload Date</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    <?php
+                    global $wpdb;
+
+                    $isConnected = $wpdb->check_connection();
+
+                    if ($isConnected) {
+                        $products_files = $wpdb->get_results("SELECT `inventory_id`, `file_md5`, `items_count`, `added_date`, users.`user_login` as added_by FROM `ot_custom_inventory_file` INNER JOIN `".$wpdb->prefix."users` as users ON `added_by` = users.`ID`  WHERE `status` = 'pending_approval' ORDER BY `added_date` DESC");
+                        foreach ($products_files as $product_file) {
+                            ?>
+                            <tr>
+                                <?php
+                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idProduct[]\" value=" . $product_file->inventory_id . "></td>";
+                                echo "<td>" . $product_file->file_md5 . "</td>";
+                                echo "<td>" . $product_file->items_count . "</td>";
+                                echo "<td>" . $product_file->added_by . "</td>";
+                                echo "<td>" . $product_file->added_date . "</td>";
+                                echo "<td>Pending Approval</td>";
+                                echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idProductFile\" value=\"$product_file->inventory_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionViewDetails\"></form></td>";
+                                ?>
+                            </tr>
+                            <?php
+                        }
+                    }
+                    ?>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+        <?php
+
+    }
+
+    function wpdocs_purchase_order_submenu_page_callback(){
+
+        ?>
+        <div class="wrap">
+            <h4>Open Trade 2.0</h4>
+            <h3>Pending Approval Files</h3>
+            <br>
+            <?php
+            if (isset($_GET['message-success'])) {
+                ?>
+                <div id="message" class="updated">
+                    <p><strong><?php _e($_GET['message-success']) ?></strong></p>
+                </div>
+                <br>
+                <?php
+            }
+            if (isset($_GET['message-error'])) {
+                ?>
+                <div id="message" class="error">
+                    <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                </div>
+                <?php
+            }
+            ?>
+            <form action="" method="post" enctype="multipart/form-data">
+                <div class="alignleft actions bulkactions">
+                    <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
+                    <select name="selectAction" id="bulk-action-selector-top">
+                        <option value="-1">Actions</option>
+                        <option value="approve" class="hide-if-no-js">Approve</option>
+                        <option value="reject">Reject</option>
+                        <input id="doaction" class="button action" value="Apply" type="submit" name="actionProducts">
+                    </select>
+                </div>
+                <br class="clear">
+                <table class="widefat" name="tablePendingFiles" id="idTablePendingFiles">
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox"></th>
+                        <th>File Name</th>
+                        <th>Quantity of Products</th>
+                        <th>Added By</th>
+                        <th>Upload Date</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th></th>
+                        <th>File Name</th>
+                        <th>Quantity of Products</th>
+                        <th>Added By</th>
+                        <th>Upload Date</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    <?php
+                    global $wpdb;
+
+                    $isConnected = $wpdb->check_connection();
+
+                    if ($isConnected) {
+                        $products_files = $wpdb->get_results("SELECT `inventory_id`, `file_md5`, `items_count`, `added_date`, users.`user_login` as added_by FROM `ot_custom_inventory_file` INNER JOIN `".$wpdb->prefix."users` as users ON `added_by` = users.`ID`  WHERE `status` = 'pending_approval' ORDER BY `added_date` DESC");
+                        foreach ($products_files as $product_file) {
+                            ?>
+                            <tr>
+                                <?php
+                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idProduct[]\" value=" . $product_file->inventory_id . "></td>";
+                                echo "<td>" . $product_file->file_md5 . "</td>";
+                                echo "<td>" . $product_file->items_count . "</td>";
+                                echo "<td>" . $product_file->added_by . "</td>";
+                                echo "<td>" . $product_file->added_date . "</td>";
+                                echo "<td>Pending Approval</td>";
+                                echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idProductFile\" value=\"$product_file->inventory_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionViewDetails\"></form></td>";
+                                ?>
+                            </tr>
+                            <?php
+                        }
+                    }
+                    ?>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+        <?php
     }
 
     if(isset($_POST["actionUploadFile"])) {
