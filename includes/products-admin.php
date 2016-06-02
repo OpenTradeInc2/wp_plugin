@@ -103,9 +103,8 @@
             $wp_error = '';
             $user_id = $current_user->ID;
             $price = str_replace("$", "", $product->price_unit);
-
-            $product_line  = array( 'name' => 'Product Line', 'value' => $product->product_line, 'position'=>'1', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             /*
+            $product_line  = array( 'name' => 'Product Line', 'value' => $product->product_line, 'position'=>'1', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $lot  = array( 'name' => 'Lot #', 'value' => $product->lot_number, 'position'=>'1', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $issue_type  = array( 'name' => 'Issue Type', 'value' => $product->issue_type, 'position'=>'2', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $specialist = array( 'name' => 'LI Specialist', 'value' => $product->li_specialist, 'position'=>'3', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
@@ -116,7 +115,7 @@
             $id_month = array( 'name' => 'ID Month', 'value' => $product->id_month, 'position'=>'7', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $days_under_current_path = array( 'name' => 'Days Under Current Path', 'value' => $product->days_under_current_path, 'position'=>'8', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             */
-            $line_number  = array( 'name' => 'Line #', 'value' => $product->distributor_id, 'position'=>'2', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $line_number  = array( 'name' => 'Line #', 'value' => $product->line_number, 'position'=>'2', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $distributor_id  = array( 'name' => 'Distributor ID', 'value' => $product->distributor_id, 'position'=>'3', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $distributor_name  = array( 'name' => 'Distributor Name', 'value' => $product->distributor_name, 'position'=>'4', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $distributor_sku_id  = array( 'name' => 'Distributor SKU ID', 'value' => $product->distributor_sku_id, 'position'=>'5', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
@@ -136,7 +135,7 @@
             $warehouse_location_id  = array( 'name' => 'Warehouse location ID', 'value' => $product->warehouse_location_id, 'position'=>'19', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $warehouse_location_address  = array( 'name' => 'Warehouse Location Address', 'value' => $product->warehouse_location_address, 'position'=>'20', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
 
-            $product_attributes = array($product_line, $line_number, $distributor_id, $distributor_name, $distributor_sku_id, $distributor_sku_description, $lot_number, $packaging_type,
+            $product_attributes = array($line_number, $distributor_id, $distributor_name, $distributor_sku_id, $distributor_sku_description, $lot_number, $packaging_type,
                 $packaging_unit, $packaging_measure, $packaging_weight_lb,$packaging_weight_kg, $quantity, $total_weight_lb, $total_weight_kg, $price_unit, $price_lb, $price_kg, $warehouse_location_id, $warehouse_location_address );
 
             $post = array(
@@ -150,7 +149,7 @@
             );
 
             //$oTSkuID = createOTSkuID($product->sku_id, $product->distributor_id);
-            $oTSkuID = createOTSkuID($product->distributor_sku_id, $product->distributor_id);
+            $oTSkuID = createOTSkuID($product->line_number, $product->distributor_id);
             $post_id = wp_insert_post( $post, $wp_error );
 
             setCategory($post_id, $product);
