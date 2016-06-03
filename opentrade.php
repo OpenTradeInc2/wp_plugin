@@ -7,7 +7,6 @@ include plugin_dir_path(__FILE__) . '/includes/process-file.php';
 include plugin_dir_path(__FILE__) . '/includes/products-admin.php';
 include plugin_dir_path(__FILE__) . '/Classes/PHPExcel/IOFactory.php';
 set_include_path(plugin_dir_path(__FILE__) . 'Classes/');
-include plugin_dir_path(__FILE__) . '/templates/request-information.php';
 
 
 
@@ -1180,7 +1179,7 @@ License: GPL2
                 <h4>Open Trade 2.0</h4>
                 <h3>Products Detail</h3>
                 <form action="" method="post" enctype="multipart/form-data">
-                    <input id="actionDetails" class="button action" value="Back File List" type="submit" name="actionBackPurchaseList">
+                    <input id="actionDetails" class="button action" value="Back Purchase Order List" type="submit" name="actionBackPurchaseList">
                 </form>
                 <table class="widefat">
                     <thead>
