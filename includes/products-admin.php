@@ -480,3 +480,18 @@
         return false;
     }
 
+    function updateProductQuantity($productId,$quantity){
+        global $wpdb;
+
+        if($wpdb->check_connection()){
+            $userId = getCurrentUser()->ID;
+            $date = getFormatDate();
+            $wpdb->query("UPDATE `ot_custom_inventory_file_items`
+                            SET
+                            `quantity` = ".$quantity.",
+                            `edited_date` = '".$date."',
+                            `edited_by` = ".$userId."
+                            WHERE `inventory_file_item_id` =".$productId.";");            
+        }
+    }
+

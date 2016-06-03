@@ -304,7 +304,7 @@ License: GPL2
                             echo "<td>"  . $product->distributor_sku_description . "</td>";                            
                             echo "<td>"  . $product->packaging_type . "</td>";
                             echo "<td>"  . $product->packaging_unit . "</td>";                            
-                            echo "<td>"  . $product->quantity . "</td>";
+                            echo "<td><form action=\"\" method=\"post\" enctype=\"multipart/form-data\"><input type=\"hidden\" name=\"idProductFile\" value=\"$idProductFile\"><input type=\"hidden\" name=\"idProduct\" value=\"$product->inventory_file_item_id\"><input type='number' name='quantity' value='"  . $product->quantity . "'><input name='actionUpdateTotalItem' id=\"actionUpdateTotalItem\" class=\"button action\" value=\"Update\" type=\"submit\"></form></td>";
                             echo "<td>$" . $product->price_unit . "</td>";
 							echo "<td>" . $isNewProduct . "</td>";
                             ?>
@@ -1174,93 +1174,153 @@ License: GPL2
     }
 
     function wpdocs_purchase_order_submenu_page_callback(){
-
-        ?>
-        <div class="wrap">
-            <h4>Open Trade 2.0</h4>
-            <h3>Pending Approval Files</h3>
-            <br>
-            <?php
-            if (isset($_GET['message-success'])) {
-                ?>
-                <div id="message" class="updated">
-                    <p><strong><?php _e($_GET['message-success']) ?></strong></p>
-                </div>
-                <br>
-                <?php
-            }
-            if (isset($_GET['message-error'])) {
-                ?>
-                <div id="message" class="error">
-                    <p><strong><?php _e($_GET['message-error']) ?></strong></p>
-                </div>
-                <?php
-            }
+        if( isset($_GET['view-products-purchase-order']) and $_GET['view-products-purchase-order'] == true ) {
             ?>
-            <form action="" method="post" enctype="multipart/form-data">
-                <div class="alignleft actions bulkactions">
-                    <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
-                    <select name="selectAction" id="bulk-action-selector-top">
-                        <option value="-1">Actions</option>
-                        <option value="approve" class="hide-if-no-js">Approve</option>
-                        <option value="reject">Reject</option>
-                        <input id="doaction" class="button action" value="Apply" type="submit" name="actionProducts">
-                    </select>
-                </div>
-                <br class="clear">
-                <table class="widefat" name="tablePendingFiles" id="idTablePendingFiles">
+            <div class="wrap">
+                <h4>Open Trade 2.0</h4>
+                <h3>Products Detail</h3>
+                <form action="" method="post" enctype="multipart/form-data">
+                    <input id="actionDetails" class="button action" value="Back File List" type="submit" name="actionBackPurchaseList">
+                </form>
+                <table class="widefat">
                     <thead>
                     <tr>
-                        <th><input type="checkbox"></th>
-                        <th>File Name</th>
-                        <th>Quantity of Products</th>
-                        <th>Added By</th>
-                        <th>Upload Date</th>
-                        <th>Status</th>
-                        <th>Details</th>
+                        <th>Product ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Stock</th>
                     </tr>
                     </thead>
                     <tfoot>
                     <tr>
-                        <th></th>
-                        <th>File Name</th>
-                        <th>Quantity of Products</th>
-                        <th>Added By</th>
-                        <th>Upload Date</th>
-                        <th>Status</th>
-                        <th>Details</th>
+                        <th>Product ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Stock</th>
                     </tr>
                     </tfoot>
                     <tbody>
                     <?php
+
                     global $wpdb;
+                    $idPurchaseOrder = $_GET['idPurchaseOrder'];
+                    $products = $wpdb->get_results("SELECT * FROM `ot_custom_product_purchase_order`  WHERE `purchase_order_id` = ".$idPurchaseOrder.";");
 
-                    $isConnected = $wpdb->check_connection();
-
-                    if ($isConnected) {
-                        $products_files = $wpdb->get_results("SELECT `inventory_id`, `file_md5`, `items_count`, `added_date`, users.`user_login` as added_by FROM `ot_custom_inventory_file` INNER JOIN `".$wpdb->prefix."users` as users ON `added_by` = users.`ID`  WHERE `status` = 'pending_approval' ORDER BY `added_date` DESC");
-                        foreach ($products_files as $product_file) {
-                            ?>
-                            <tr>
-                                <?php
-                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idProduct[]\" value=" . $product_file->inventory_id . "></td>";
-                                echo "<td>" . $product_file->file_md5 . "</td>";
-                                echo "<td>" . $product_file->items_count . "</td>";
-                                echo "<td>" . $product_file->added_by . "</td>";
-                                echo "<td>" . $product_file->added_date . "</td>";
-                                echo "<td>Pending Approval</td>";
-                                echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idProductFile\" value=\"$product_file->inventory_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionViewDetails\"></form></td>";
-                                ?>
-                            </tr>
+                    foreach ($products as $product) {
+                        $price = get_post_meta( $product->product_id, '_price', true );
+                        $post = get_post($product->product_id);
+                        $stock = get_post_meta( $product->product_id, '_stock' );
+                        ?>
+                        <tr>
                             <?php
-                        }
+                            echo "<td>"  . $product->product_id . "</td>";
+                            echo "<td>"  . $post->post_title . "</td>";
+                            echo "<td>"  . $post->post_content . "</td>";
+                            echo "<td>$"  . $price . "</td>";
+                            echo "<td>"  . $stock[0] . "</td>";
+                            ?>
+                        </tr>
+                        <?php
                     }
                     ?>
                     </tbody>
                 </table>
-            </form>
-        </div>
-        <?php
+            </div>
+            <?php
+
+        }
+        else {
+            ?>
+            <div class="wrap">
+                <h4>Open Trade 2.0</h4>
+                <h3>Pending Approval Purchase Orders</h3>
+                <br>
+                <?php
+                if (isset($_GET['message-success'])) {
+                    ?>
+                    <div id="message" class="updated">
+                        <p><strong><?php _e($_GET['message-success']) ?></strong></p>
+                    </div>
+                    <br>
+                    <?php
+                }
+                if (isset($_GET['message-error'])) {
+                    ?>
+                    <div id="message" class="error">
+                        <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                    </div>
+                    <?php
+                }
+                ?>
+                <form action="" method="post" enctype="multipart/form-data">
+                    <div class="alignleft actions bulkactions">
+                        <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
+                        <select name="selectActionPurchaseOrder" id="bulk-action-selector-top">
+                            <option value="-1">Actions</option>
+                            <option value="approve" class="hide-if-no-js">Approve</option>
+                            <option value="reject">Reject</option>
+                            <input id="doaction" class="button action" value="Apply" type="submit" name="actionPurchaseOrders">
+                        </select>
+                    </div>
+                    <br class="clear">
+                    <table class="widefat" name="tablePendingFiles" id="idTablePendingFiles">
+                        <thead>
+                        <tr>
+                            <th><input type="checkbox"></th>
+                            <th>User Name</th>
+                            <th>User Email</th>
+                            <th>Quantity of Products</th>
+                            <th>Total Amount</th>
+                            <th>File Name</th>
+                            <th>View Products</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <th></th>
+                            <th>User Name</th>
+                            <th>User Email</th>
+                            <th>Quantity of Products</th>
+                            <th>Total Amount</th>
+                            <th>File Name</th>
+                            <th>View Products</th>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                        <?php
+                        global $wpdb;
+
+                        $isConnected = $wpdb->check_connection();
+
+                        if ($isConnected) {
+                            $purchaseOrders = $wpdb->get_results("SELECT * FROM `ot_custom_purchase_order`  WHERE `status` = 'created' ORDER BY `added_date` DESC");
+                            foreach ($purchaseOrders as $purchaseOrder) {
+                                $user = get_user_by('ID', $purchaseOrder->user_id);
+                                $products = $wpdb->get_results("SELECT * FROM `ot_custom_product_purchase_order`  WHERE `purchase_order_id` = " . $purchaseOrder->purchase_order_id . ";");
+                                ?>
+                                <tr>
+                                    <?php
+                                    echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idPurchaseOrders[]\" value=" . $purchaseOrder->purchase_order_id . "></td>";
+                                    echo "<td>" . $user->nickname . "</td>";
+                                    echo "<td>" . $user->user_email . "</td>";
+                                    echo "<td>" . sizeof($products) . "</td>";
+                                    echo "<td>" . $purchaseOrder->total_amount . "</td>";
+                                    echo "<td><a href='" . $purchaseOrder->file_patch . "'>" . $purchaseOrder->file_name . "</a></td>";
+                                    echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idPurchaseOrder\" value=\"$purchaseOrder->purchase_order_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionPurchaseOrderViewProducts\"></form></td>";
+                                    ?>
+                                </tr>
+                                <?php
+                            }
+                        }
+                        ?>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+            <?php
+        }
     }
 
     if(isset($_POST["actionUploadFile"])) {
@@ -1590,5 +1650,56 @@ License: GPL2
 
         $_GET['idDistributor'] = $_POST['idDistributor'];
         $_GET['view-user-distributor'] = true;
+    }
+
+    if(isset($_POST["actionUpdateTotalItem"])){
+        updateProductQuantity($_POST['idProduct'],$_POST['quantity']);
+        $_GET['view-details'] = true;
+        $_GET['view-details-idProductFile'] = $_POST['idProductFile'];
+    }
+
+    if(isset($_POST["actionPurchaseOrderViewProducts"])){
+        $_GET['idPurchaseOrder'] = $_POST['idPurchaseOrder'];
+        $_GET['view-products-purchase-order'] = true;
+    }
+
+    if(isset($_POST["actionBackPurchaseList"])){
+        $_GET['view-products-purchase-order'] = false;
+    }
+
+    if(isset($_POST["actionPurchaseOrders"])){
+        if(isset($_POST['selectActionPurchaseOrder']) and $_POST['selectActionPurchaseOrder'] !== "-1"){
+            if (isset($_POST['idPurchaseOrders'])) {
+                $idPurchaseOrders = $_POST["idPurchaseOrders"];
+                $action = $_POST['selectActionPurchaseOrder'];
+                foreach ($idPurchaseOrders as $idPurchaseOrder){
+                    if($action == 'approve'){
+                        global $wpdb;
+
+                        if($wpdb->check_connection()){
+                            $wpdb->query("UPDATE `ot_custom_purchase_order` SET `status` = 'approve' WHERE `purchase_order_id` = ".$idPurchaseOrder.";");
+
+                            $products = $wpdb->get_results("SELECT * FROM `ot_custom_product_purchase_order`  WHERE `purchase_order_id` = ".$idPurchaseOrder.";");
+
+                            foreach ($products as $product){
+                                $stock = get_post_meta( $product->product_id, '_stock' );
+                                $newTotal = $stock[0] - $product->quantity;
+                                update_post_meta( $product->product_id, '_stock', $newTotal );
+                            }
+                            $_GET['message-success'] = "Order Approved!";
+                        }
+                    }
+                    if($action == 'reject'){
+                        $wpdb->query("UPDATE `ot_custom_purchase_order` SET `status` = 'reject' WHERE `purchase_order_id` = ".$idPurchaseOrder.";");
+                    }
+                }
+            }
+            else{
+                $_GET['message-error']="Please select a purchase order!";
+            }
+        }
+        else{
+            $_GET['message-error']="Please select one action!";
+        }
     }
 ?>
