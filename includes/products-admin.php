@@ -480,3 +480,32 @@
         return false;
     }
 
+    function updateProductOfferList($idProductOffer, $status)
+    {
+        global $wpdb;
+        global $current_user;
+        $current_user =  wp_get_current_user();
+        $formatDate = date("Ymdhis");
+
+        if ($wpdb->check_connection()) {
+            $wpdb->query("UPDATE `ot_custom_offer_information`
+                                           SET
+                                           `status` = '$status',
+                                           `edited_date` = '$formatDate',
+                                           `edited_by` = $current_user->ID
+                                           WHERE `offer_information_id`=" . $idProductOffer);
+
+            $requestInformation = $wpdb->get_results("SELECT * 
+                                         FROM `ot_custom_offer_information`
+                                         WHERE `offer_information_id` = " . $idProductOffer);
+
+            $productId = $requestInformation[0]->product_id;
+            $quantity = $requestInformation[0]->quantity;
+            if($status == "approve"){
+                $stock = get_post_meta( $productId , '_stock' );
+                $newTotal = $stock[0] - $quantity;
+                update_post_meta( $productId, '_stock', $newTotal );
+
+            }           
+        }
+    }

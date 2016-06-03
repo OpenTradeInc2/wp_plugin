@@ -1087,7 +1087,7 @@ License: GPL2
         ?>
         <div class="wrap">
             <h4>Open Trade 2.0</h4>
-            <h3>Pending Approval Files</h3>
+            <h3>Post Offer</h3>
             <br>
             <?php
             if (isset($_GET['message-success'])) {
@@ -1109,11 +1109,11 @@ License: GPL2
             <form action="" method="post" enctype="multipart/form-data">
                 <div class="alignleft actions bulkactions">
                     <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
-                    <select name="selectAction" id="bulk-action-selector-top">
+                    <select name="selectActionOfferInformation" id="bulk-action-selector-top">
                         <option value="-1">Actions</option>
                         <option value="approve" class="hide-if-no-js">Approve</option>
                         <option value="reject">Reject</option>
-                        <input id="doaction" class="button action" value="Apply" type="submit" name="actionProducts">
+                        <input id="doaction" class="button action" value="Apply" type="submit" name="actionOfferInformation">
                     </select>
                 </div>
                 <br class="clear">
@@ -1121,23 +1121,27 @@ License: GPL2
                     <thead>
                     <tr>
                         <th><input type="checkbox"></th>
-                        <th>File Name</th>
-                        <th>Quantity of Products</th>
-                        <th>Added By</th>
-                        <th>Upload Date</th>
-                        <th>Status</th>
-                        <th>Details</th>
+                        <th>Product Id</th>
+                        <th>Product Description</th>
+                        <th>User Id</th>
+                        <th>User Name</th>
+                        <th>User Email</th>
+                        <th>Price</th>
+                        <th>Bid Price</th>
+                        <th>Quatity</th>
                     </tr>
                     </thead>
                     <tfoot>
                     <tr>
                         <th></th>
-                        <th>File Name</th>
-                        <th>Quantity of Products</th>
-                        <th>Added By</th>
-                        <th>Upload Date</th>
-                        <th>Status</th>
-                        <th>Details</th>
+                        <th>Product Id</th>
+                        <th>Product Description</th>
+                        <th>User Id</th>
+                        <th>User Name</th>
+                        <th>User Email</th>
+                        <th>Price</th>
+                        <th>Bid Price</th>
+                        <th>Quatity</th>
                     </tr>
                     </tfoot>
                     <tbody>
@@ -1147,18 +1151,23 @@ License: GPL2
                     $isConnected = $wpdb->check_connection();
 
                     if ($isConnected) {
-                        $products_files = $wpdb->get_results("SELECT `inventory_id`, `file_md5`, `items_count`, `added_date`, users.`user_login` as added_by FROM `ot_custom_inventory_file` INNER JOIN `".$wpdb->prefix."users` as users ON `added_by` = users.`ID`  WHERE `status` = 'pending_approval' ORDER BY `added_date` DESC");
-                        foreach ($products_files as $product_file) {
+                        $products_items = $wpdb->get_results("SELECT *  FROM `ot_custom_offer_information` WHERE status = 'created'");
+                        foreach ($products_items as $product_item) {
+                            $user = get_user_by('ID',$product_item->user_id );
+                            $price= get_post_meta( $product_item->product_id , '_price', true );
+                            $post   = get_post($product_item->product_id);
                             ?>
                             <tr>
                                 <?php
-                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idProduct[]\" value=" . $product_file->inventory_id . "></td>";
-                                echo "<td>" . $product_file->file_md5 . "</td>";
-                                echo "<td>" . $product_file->items_count . "</td>";
-                                echo "<td>" . $product_file->added_by . "</td>";
-                                echo "<td>" . $product_file->added_date . "</td>";
-                                echo "<td>Pending Approval</td>";
-                                echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idProductFile\" value=\"$product_file->inventory_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionViewDetails\"></form></td>";
+                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idProductOfferList[]\" value=" . $product_item->offer_information_id . "></td>";
+                                echo "<td>"  . $product_item->product_id . "</td>";
+                                echo "<td>"  . $post->post_title . "</td>";
+                                echo "<td>"  . $user->ID . "</td>";
+                                echo "<td>"  . $user->user_login . "</td>";
+                                echo "<td>"  . $user->user_email . "</td>";
+                                echo "<td>$" . $price . "</td>";
+                                echo "<td>$" . $product_item->bid_price . "</td>";
+                                echo "<td>"  . $product_item->quantity . "</td>";
                                 ?>
                             </tr>
                             <?php
@@ -1590,5 +1599,31 @@ License: GPL2
 
         $_GET['idDistributor'] = $_POST['idDistributor'];
         $_GET['view-user-distributor'] = true;
+    }
+
+    if(isset($_POST["actionOfferInformation"])){
+        if(isset($_POST['selectActionOfferInformation']) and $_POST['selectActionOfferInformation'] !== "-1"){
+            if (isset($_POST['idProductOfferList'])) {
+                $idProductOfferList = $_POST["idProductOfferList"];
+               if( $_POST['selectActionOfferInformation'] == "approve") {
+                   $status = "approve";
+                   foreach ($idProductOfferList as $idProductOffer) {
+                       updateProductOfferList($idProductOffer, $status);
+                   }
+               }
+                else if( $_POST['selectActionOfferInformation'] == "reject") {
+                    $status = "reject";
+                    foreach ($idProductOfferList as $idProductOffer) {
+                        updateProductOfferList($idProductOffer, $status);
+                    }
+                }
+            }
+            else{
+                $_GET['message-error']="Please select a post offer!";
+            }
+        }
+        else{
+            $_GET['message-error']="Please select one action!";
+        }
     }
 ?>
