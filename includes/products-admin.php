@@ -524,3 +524,13 @@
                                 WHERE `inventory_file_item_id` =".$productId.";");
         }
     }
+
+    function updateRequestInformation($requestInformationId, $state){
+        global $wpdb;
+    
+        if($wpdb->check_connection()){
+            $userId = getCurrentUser()->ID;
+            $date = getFormatDate();
+            $wpdb->query("update `ot_custom_request_information` set `status` = '".$state."' where request_information_id = ".$requestInformationId.";");
+        }
+    }
