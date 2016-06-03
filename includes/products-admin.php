@@ -51,42 +51,11 @@
         global $wpdb;
         $result = false;
 
-        $totalProducts = $wpdb->get_results("SELECT count(post.`ID`) as total
-             FROM `".$wpdb->prefix."posts` as post             
-             WHERE post.`post_content`='".$product->sku_description."';");
-        // 1 ,2 Description and package size
-        if($totalProducts[0]->total == 0){
+        $totalDistributor = $wpdb->get_results("SELECT count(`id_sku_distributor`) as total
+                                                FROM `ot_custom_distributor_sku`            
+                                                WHERE `id_distributor` = ".$product->distributor_id." and `id_sku_product` = '".$product->distributor_sku_id."';");
+        if($totalDistributor[0]->total == 0){
             $result = true;
-        }else{
-            //3 location
-            $productPost = $wpdb->get_results("SELECT *
-             FROM `".$wpdb->prefix."posts` as post             
-             WHERE post.`post_content`='".$product->sku_description."';");
-
-            $productAttributes = get_post_meta( $productPost[0]->ID, '_product_attributes', true);
-            $warehouse = '';
-            $city = '';
-
-            foreach ($productAttributes as $productAttribute){
-                if($productAttribute['name'] == 'Warehouse'){
-                    $warehouse = $productAttribute['value'];
-                }
-                if($productAttribute['name'] == 'City'){
-                    $city = $productAttribute['value'];
-                }
-            }
-            if($warehouse !== $product->warehouse or $city !== $product->city){
-                $result = true;
-
-            }else{
-                // 4 distributor
-                $totalDistributor = $wpdb->get_results("SELECT count(`id_sku_distributor`) as total
-                                                        FROM `ot_custom_distributor_sku`            
-                                                        WHERE `id_sku_product`=".$product->sku_id." and `id_distributor` = ".$product->distributor_id.";");
-                if($totalDistributor[0]->total == 0){
-                    $result = true;
-                }
-            }
         }
 
         return $result;
@@ -121,7 +90,7 @@
             $distributor_sku_id  = array( 'name' => 'Distributor SKU ID', 'value' => $product->distributor_sku_id, 'position'=>'5', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $distributor_sku_description  = array( 'name' => 'Distributor SKU Description', 'value' => $product->distributor_sku_description, 'position'=>'6', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $lot_number  = array( 'name' => 'Lot#', 'value' => $product->lot_number, 'position'=>'7', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $packaging_type  = array( 'name' => 'PackagingType', 'value' => $product->packaging_type, 'position'=>'8', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_type  = array( 'name' => 'Packaging Type', 'value' => $product->packaging_type, 'position'=>'8', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $packaging_unit  = array( 'name' => 'Packaging Unit', 'value' => $product->packaging_unit, 'position'=>'9', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $packaging_measure  = array( 'name' => 'Packaging Measure', 'value' => $product->packaging_measure, 'position'=>'10', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $packaging_weight_lb  = array( 'name' => 'Packaging Weight (lb)', 'value' => $product->packaging_weight_lb, 'position'=>'11', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
@@ -138,9 +107,14 @@
             $product_attributes = array($line_number, $distributor_id, $distributor_name, $distributor_sku_id, $distributor_sku_description, $lot_number, $packaging_type,
                 $packaging_unit, $packaging_measure, $packaging_weight_lb,$packaging_weight_kg, $quantity, $total_weight_lb, $total_weight_kg, $price_unit, $price_lb, $price_kg, $warehouse_location_id, $warehouse_location_address );
 
+            if(strtolower($product->packaging_measure) =='kg'){
+                $weight = $product->packaging_weight_kg;
+            }else{
+                $weight = $product->packaging_weight_lb;
+            }
             $post = array(
                 'post_author' => $user_id,
-                'post_content' => $product->distributor_sku_description,
+                'post_content' => $product->distributor_sku_description.' '.$product->packaging_type.' '.$product->packaging_unit.' '.$weight.' '.$product->packaging_measure,
                 'post_status' => "publish",
                 'post_title' => $product->distributor_sku_description,
                 'post_parent' => '',
@@ -148,9 +122,9 @@
                 'post_name' => $product->distributor_sku_id
             );
 
-            //$oTSkuID = createOTSkuID($product->sku_id, $product->distributor_id);
-            $oTSkuID = createOTSkuID($product->line_number, $product->distributor_id);
             $post_id = wp_insert_post( $post, $wp_error );
+
+            $oTSkuID = createOTSkuID($product->distributor_sku_id, $product->distributor_id, $post_id);
 
             setCategory($post_id, $product);
 
@@ -213,7 +187,7 @@
 
         $productID = getProductID($product);
         $postMeta = get_post_meta($productID, '_stock', true);
-        $totalStock =$postMeta + $product->sum_quantity;
+        $totalStock =$postMeta + $product->quantity;
 
         $result =$wpdb->query("UPDATE `".$wpdb->prefix."postmeta`
                                         SET
@@ -230,16 +204,11 @@
     function getProductID($product){
         global $wpdb;
 
-        $distributorInfo = $wpdb->get_results("SELECT *
-                                                FROM `ot_custom_distributor_sku`            
-                                                WHERE `id_sku_product`=".$product->sku_id." and `id_distributor` = ".$product->distributor_id.";");
+        $result = $wpdb->get_results("SELECT `post_id`
+                                      FROM `ot_custom_distributor_sku`            
+                                      WHERE `id_distributor` = ".$product->distributor_id." and `id_sku_product` = '".$product->distributor_sku_id."';");
 
-        $result = $wpdb->get_results("SELECT post.`ID` as ID
-                 FROM `".$wpdb->prefix."posts` as post
-                 INNER JOIN `".$wpdb->prefix."postmeta` as post_meta on post.`ID`= post_meta.`post_id`
-                 WHERE post.`post_content`='".$product->sku_description."' and post_meta.`meta_value` in('".$distributorInfo[0]->id_sku_distributor."');");
-
-        return $result[0]->ID;
+        return $result[0]->post_id;
     }
 
     function insertTermRelationships($wpdb,$post_id,$term_id){
@@ -330,7 +299,7 @@
         }
     }
 
-    function createOTSkuID($productSku, $distributorID ){
+    function createOTSkuID($productSku, $distributorID, $postID ){
         global $wpdb;
 
         if($wpdb->check_connection()){
@@ -339,11 +308,13 @@
             $wpdb->query("INSERT INTO `ot_custom_distributor_sku`
                         (`id_sku_product`,
                         `id_distributor`,
+                        `post_id`,
                         `added_by`,
                         `added_date`)
                         VALUES
-                        (".$productSku.", 
-                         ".$distributorID.", 
+                        ('".$productSku."', 
+                         ".$distributorID.",
+                          ".$postID.",
                          ".$userId.", 
                          '".$date."');");
         }
