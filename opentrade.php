@@ -994,10 +994,68 @@ License: GPL2
 
     function wpdocs_reques_information_submenu_page_callback(){
 
+        if( isset($_GET['view-products-request']) and $_GET['view-products-request'] == true ) {
+            ?>
+            <div class="wrap">
+                <h4>Open Trade 2.0</h4>
+                <h3>Products Detail</h3>
+                <form action="" method="post" enctype="multipart/form-data">
+                    <input id="actionDetails" class="button action" value="Back Request List" type="submit" name="actionBackRequestInfoList">
+                </form>
+                <table class="widefat">
+                    <thead>
+                    <tr>
+                        <th>Product ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th>Product ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    <?php
+
+                    global $wpdb;
+                    $idRequestInfo = $_GET['view-details-idRequestInfo'];
+                    $products = $wpdb->get_results("SELECT * FROM `ot_custom_product_request_information`  WHERE `request_information_id` = ".$idRequestInfo.";");
+
+                    foreach ($products as $product) {
+                        $price = get_post_meta( $product->product_id, '_price', true );
+                        $post = get_post($product->product_id);
+                        $stock = get_post_meta( $product->product_id, '_stock' );
+                        ?>
+                        <tr>
+                            <?php
+                            echo "<td>"  . $product->product_id . "</td>";
+                            echo "<td>"  . $post->post_title . "</td>";
+                            echo "<td>"  . $post->post_content . "</td>";
+                            echo "<td>$"  . $price . "</td>";
+                            echo "<td>"  . $stock[0] . "</td>";
+                            ?>
+                        </tr>
+                        <?php
+                    }
+                    ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php
+
+        }
+        else {
         ?>
         <div class="wrap">
             <h4>Open Trade 2.0</h4>
-            <h3>Pending Approval Files</h3>
+            <h3>Pending Request Information</h3>
             <br>
             <?php
             if (isset($_GET['message-success'])) {
@@ -1018,36 +1076,38 @@ License: GPL2
             ?>
             <form action="" method="post" enctype="multipart/form-data">
                 <div class="alignleft actions bulkactions">
+
                     <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
-                    <select name="selectAction" id="bulk-action-selector-top">
+                    <select name="selectActionRequestInformation" id="bulk-action-selector-top">
                         <option value="-1">Actions</option>
-                        <option value="approve" class="hide-if-no-js">Approve</option>
-                        <option value="reject">Reject</option>
-                        <input id="doaction" class="button action" value="Apply" type="submit" name="actionProducts">
+                        <option value="processed" class="hide-if-no-js">Processed</option>
+                        <!--<option value="reject">Reject</option>-->
+                        <input id="doaction" class="button action" value="Apply" type="submit" name="actionRequestInformation">
                     </select>
+
                 </div>
                 <br class="clear">
-                <table class="widefat" name="tablePendingFiles" id="idTablePendingFiles">
+                <table class="widefat" name="tableRequestsinformation" id="idTableRequestInformation">
                     <thead>
                     <tr>
                         <th><input type="checkbox"></th>
-                        <th>File Name</th>
-                        <th>Quantity of Products</th>
-                        <th>Added By</th>
-                        <th>Upload Date</th>
-                        <th>Status</th>
-                        <th>Details</th>
+                        <th>Id</th>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Quantity</th>
+                        <th>Date</th>
+                        <th>Products</th>
                     </tr>
                     </thead>
                     <tfoot>
                     <tr>
                         <th></th>
-                        <th>File Name</th>
-                        <th>Quantity of Products</th>
-                        <th>Added By</th>
-                        <th>Upload Date</th>
-                        <th>Status</th>
-                        <th>Details</th>
+                        <th>Id</th>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Quantity</th>
+                        <th>Date</th>
+                        <th>Products</th>
                     </tr>
                     </tfoot>
                     <tbody>
@@ -1057,18 +1117,28 @@ License: GPL2
                     $isConnected = $wpdb->check_connection();
 
                     if ($isConnected) {
-                        $products_files = $wpdb->get_results("SELECT `inventory_id`, `file_md5`, `items_count`, `added_date`, users.`user_login` as added_by FROM `ot_custom_inventory_file` INNER JOIN `".$wpdb->prefix."users` as users ON `added_by` = users.`ID`  WHERE `status` = 'pending_approval' ORDER BY `added_date` DESC");
-                        foreach ($products_files as $product_file) {
+                        $requests_information = $wpdb->get_results("select ".
+        "cri.request_information_id as requestId,
+        (select user_login from wp_users where ID = (select user_id from ot_custom_request_information where request_information_id = cri.request_information_id)) as user_name,
+        (select user_email from wp_users where ID = (select user_id from ot_custom_request_information where request_information_id = cri.request_information_id)) as email,
+        cri.added_date as date,
+        (select count(*) from ot_custom_product_request_information where request_information_id = cri.request_information_id) as quantity
+    from ot_custom_request_information cri where status = 'created'");
+                        foreach ($requests_information as $request_information) {
+                            //$price= get_post_meta( $request_information->product_id, '_price', true );
                             ?>
                             <tr>
                                 <?php
-                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idProduct[]\" value=" . $product_file->inventory_id . "></td>";
-                                echo "<td>" . $product_file->file_md5 . "</td>";
-                                echo "<td>" . $product_file->items_count . "</td>";
-                                echo "<td>" . $product_file->added_by . "</td>";
-                                echo "<td>" . $product_file->added_date . "</td>";
-                                echo "<td>Pending Approval</td>";
-                                echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idProductFile\" value=\"$product_file->inventory_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionViewDetails\"></form></td>";
+                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idRequestInformation[]\" value=" . $request_information->requestId . "></td>";
+                                echo "<td>" . $request_information->requestId . "</td>";
+                                //echo "<td>" . $request_information->product_description . "</td>";
+                                echo "<td>" . $request_information->user_name . "</td>";
+                                echo "<td>" . $request_information->email . "</td>";
+                                //echo "<td>" . $price . "</td>";
+                                echo "<td>" . $request_information->quantity . "</td>";
+                                echo "<td>" . $request_information->date . "</td>";
+                                //echo "<td>Pending Approval</td>";
+                                echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idRequestInfo\" value=\"$request_information->requestId\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionViewRequestInfo\"></form></td>";
                                 ?>
                             </tr>
                             <?php
@@ -1080,6 +1150,7 @@ License: GPL2
             </form>
         </div>
         <?php
+            }
     }
 
     function wpdocs_post_offer_submenu_page_callback(){
@@ -1591,4 +1662,37 @@ License: GPL2
         $_GET['idDistributor'] = $_POST['idDistributor'];
         $_GET['view-user-distributor'] = true;
     }
+
+    if(isset($_POST["actionRequestInformation"])){
+        if(isset($_POST['selectActionRequestInformation']) and $_POST['selectActionRequestInformation'] !== "-1"){
+            if (isset($_POST['idRequestInformation'])) {
+                $idRequestInformation = $_POST["idRequestInformation"];
+                foreach ($idRequestInformation as $idRequestInformation){
+                    updateRequestInformation($idRequestInformation, "processed");
+                    $_GET['message-success']="Request processed!";
+                }
+            }
+            else{
+                $_GET['message-error']="Please select a request!";
+            }
+        }
+        else{
+            $_GET['message-error']="Please select one action!";
+        }
+    }
+
+    if(isset($_POST["actionViewRequestInfo"])){
+        if(isset($_POST["idRequestInfo"])){
+            $_GET['view-products-request'] = true;
+            $_GET['view-details-idRequestInfo'] = $_POST['idRequestInfo'];
+        }
+    }
+
+    if(isset($_POST["actionBackRequestInfoList"])){
+        if(isset($_POST["idRequestInfo"])){
+            $_GET['view-products-request'] = false;
+            $_GET['view-details-idRequestInfo'] = $_POST['idRequestInfo'];
+        }
+    }
+
 ?>
