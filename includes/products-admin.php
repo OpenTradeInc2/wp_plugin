@@ -51,10 +51,11 @@
         global $wpdb;
         $result = false;
 
-        $totalDistributor = $wpdb->get_results("SELECT count(`id_sku_distributor`) as total
-                                                FROM `ot_custom_distributor_sku`            
-                                                WHERE `id_distributor` = ".$product->distributor_id." and `id_sku_product` = '".$product->distributor_sku_id."';");
-        if($totalDistributor[0]->total == 0){
+        $total = $wpdb->get_results("SELECT count(`product_post_id`) as total
+                                     FROM `ot_custom_product_post`
+                                     WHERE `sku_distributor` = '".$product->distributor_sku_id."' and `sku_description` = '".$product->distributor_sku_description."' and `distributor_id` = ".$product->distributor_id." and `package_size` = '".$product->packaging_type."' and `warehouse` = '".$product->warehouse_location_id."';");
+
+        if($total[0]->total == 0){
             $result = true;
         }
 
@@ -124,7 +125,7 @@
 
             $post_id = wp_insert_post( $post, $wp_error );
 
-            $oTSkuID = createOTSkuID($product->distributor_sku_id, $product->distributor_id, $post_id);
+            $oTSkuID = createOTSkuID($product, $post_id);
 
             setCategory($post_id, $product);
 
@@ -299,7 +300,7 @@
         }
     }
 
-    function createOTSkuID($productSku, $distributorID, $postID ){
+    function createOTSkuID($product, $postID ){
         global $wpdb;
 
         if($wpdb->check_connection()){
@@ -312,13 +313,34 @@
                         `added_by`,
                         `added_date`)
                         VALUES
-                        ('".$productSku."', 
-                         ".$distributorID.",
+                        ('".$product->distributor_sku_id."', 
+                         ".$product->distributor_id.",
                           ".$postID.",
                          ".$userId.", 
                          '".$date."');");
+
+            $result = zerofill($wpdb->insert_id,7);
+
+            $wpdb->query("INSERT INTO `ot_custom_product_post`
+                            (`post_id`,
+                            `sku_distributor`,
+                            `sku_description`,
+                            `distributor_id`,
+                            `package_size`,
+                            `warehouse`,
+                            `added_by`,
+                            `added_date`)
+                          VALUES
+                            (".$postID.",
+                            '".$product->distributor_sku_id."',
+                            '".$product->distributor_sku_description."',
+                            ".$product->distributor_id.",
+                            '".$product->packaging_type."',
+                            '".$product->warehouse_location_id."',
+                            ".$userId.",
+                            '".$date."');");
         }
-        $result = zerofill($wpdb->insert_id,7);
+
         return $result;
     }
 
@@ -533,4 +555,23 @@
             $date = getFormatDate();
             $wpdb->query("update `ot_custom_request_information` set `status` = '".$state."' where request_information_id = ".$requestInformationId.";");
         }
+    }
+
+    function rejectProductsFiles($idProductsFile){
+
+        global $wpdb;
+
+        $isConnected = $wpdb->check_connection();
+        $overallProcess = true;
+
+        if($isConnected){
+
+            foreach ($idProductsFile as $productFileID) {
+                if($wpdb->check_connection()){
+                    $wpdb->query("UPDATE `ot_custom_inventory_file` SET `status` = 'reject' WHERE `inventory_id` = ".$productFileID." ;");
+                }
+            }
+        }
+
+        return $overallProcess;
     }

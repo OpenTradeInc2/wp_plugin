@@ -1451,16 +1451,20 @@ License: GPL2
             if ($selectOption == -1) {
                 errorMessage('Please select one action!');
             } else if ($selectOption == 'approve') {
-
                 if (isset($_POST['idProduct'])) {
                     $idProductsFile = $_POST["idProduct"];
-                    $result = approveProductsFiles($idProductsFile);
+                    approveProductsFiles($idProductsFile);
                 } else {
                     errorMessage('Please select a file to approve!');
                 }
 
             } else if ($selectOption == 'reject') {
-                errorMessage('Pending implementation.');
+                if (isset($_POST['idProduct'])) {
+                    $idProductsFile = $_POST["idProduct"];
+                    rejectProductsFiles($idProductsFile);
+                } else {
+                    errorMessage('Please select a file to approve!');
+                }
             }
         }
     }
