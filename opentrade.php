@@ -1685,55 +1685,56 @@ License: GPL2
             $_GET['message-error']="Please select one action!";
         }
     }
-if(isset($_POST["actionUpdateTotalItem"])){
-    updateProductQuantity($_POST['idProduct'],$_POST['quantity']);
-    $_GET['view-details'] = true;
-    $_GET['view-details-idProductFile'] = $_POST['idProductFile'];
-}
 
-if(isset($_POST["actionPurchaseOrderViewProducts"])){
-    $_GET['idPurchaseOrder'] = $_POST['idPurchaseOrder'];
-    $_GET['view-products-purchase-order'] = true;
-}
+    if(isset($_POST["actionUpdateTotalItem"])){
+        updateProductQuantity($_POST['idProduct'],$_POST['quantity']);
+        $_GET['view-details'] = true;
+        $_GET['view-details-idProductFile'] = $_POST['idProductFile'];
+    }
 
-if(isset($_POST["actionBackPurchaseList"])){
-    $_GET['view-products-purchase-order'] = false;
-}
+    if(isset($_POST["actionPurchaseOrderViewProducts"])){
+        $_GET['idPurchaseOrder'] = $_POST['idPurchaseOrder'];
+        $_GET['view-products-purchase-order'] = true;
+    }
 
-if(isset($_POST["actionPurchaseOrders"])){
-    if(isset($_POST['selectActionPurchaseOrder']) and $_POST['selectActionPurchaseOrder'] !== "-1"){
-        if (isset($_POST['idPurchaseOrders'])) {
-            $idPurchaseOrders = $_POST["idPurchaseOrders"];
-            $action = $_POST['selectActionPurchaseOrder'];
-            foreach ($idPurchaseOrders as $idPurchaseOrder){
-                if($action == 'approve'){
-                    global $wpdb;
+    if(isset($_POST["actionBackPurchaseList"])){
+        $_GET['view-products-purchase-order'] = false;
+    }
 
-                    if($wpdb->check_connection()){
-                        $wpdb->query("UPDATE `ot_custom_purchase_order` SET `status` = 'approve' WHERE `purchase_order_id` = ".$idPurchaseOrder.";");
+    if(isset($_POST["actionPurchaseOrders"])){
+        if(isset($_POST['selectActionPurchaseOrder']) and $_POST['selectActionPurchaseOrder'] !== "-1"){
+            if (isset($_POST['idPurchaseOrders'])) {
+                $idPurchaseOrders = $_POST["idPurchaseOrders"];
+                $action = $_POST['selectActionPurchaseOrder'];
+                foreach ($idPurchaseOrders as $idPurchaseOrder){
+                    if($action == 'approve'){
+                        global $wpdb;
 
-                        $products = $wpdb->get_results("SELECT * FROM `ot_custom_product_purchase_order`  WHERE `purchase_order_id` = ".$idPurchaseOrder.";");
+                        if($wpdb->check_connection()){
+                            $wpdb->query("UPDATE `ot_custom_purchase_order` SET `status` = 'approve' WHERE `purchase_order_id` = ".$idPurchaseOrder.";");
 
-                        foreach ($products as $product){
-                            $stock = get_post_meta( $product->product_id, '_stock' );
-                            $newTotal = $stock[0] - $product->quantity;
-                            update_post_meta( $product->product_id, '_stock', $newTotal );
+                            $products = $wpdb->get_results("SELECT * FROM `ot_custom_product_purchase_order`  WHERE `purchase_order_id` = ".$idPurchaseOrder.";");
+
+                            foreach ($products as $product){
+                                $stock = get_post_meta( $product->product_id, '_stock' );
+                                $newTotal = $stock[0] - $product->quantity;
+                                update_post_meta( $product->product_id, '_stock', $newTotal );
+                            }
+                            $_GET['message-success'] = "Order Approved!";
                         }
-                        $_GET['message-success'] = "Order Approved!";
+                    }
+                    if($action == 'reject'){
+                        $wpdb->query("UPDATE `ot_custom_purchase_order` SET `status` = 'reject' WHERE `purchase_order_id` = ".$idPurchaseOrder.";");
                     }
                 }
-                if($action == 'reject'){
-                    $wpdb->query("UPDATE `ot_custom_purchase_order` SET `status` = 'reject' WHERE `purchase_order_id` = ".$idPurchaseOrder.";");
-                }
+            }
+            else{
+                $_GET['message-error']="Please select a purchase order!";
             }
         }
         else{
-            $_GET['message-error']="Please select a purchase order!";
+            $_GET['message-error']="Please select one action!";
         }
     }
-    else{
-        $_GET['message-error']="Please select one action!";
-    }
-}
 
 ?>
