@@ -53,7 +53,7 @@
 
         $totalDistributor = $wpdb->get_results("SELECT count(`id_sku_distributor`) as total
                                                 FROM `ot_custom_distributor_sku`            
-                                                WHERE `id_distributor` = ".distributor_sku_id.";");
+                                                WHERE `id_distributor` = ".$product->distributor_id." and `id_sku_product` = '".$product->distributor_sku_id."';");
         if($totalDistributor[0]->total == 0){
             $result = true;
         }
@@ -187,7 +187,7 @@
 
         $productID = getProductID($product);
         $postMeta = get_post_meta($productID, '_stock', true);
-        $totalStock =$postMeta + $product->sum_quantity;
+        $totalStock =$postMeta + $product->quantity;
 
         $result =$wpdb->query("UPDATE `".$wpdb->prefix."postmeta`
                                         SET
@@ -204,16 +204,11 @@
     function getProductID($product){
         global $wpdb;
 
-        $distributorInfo = $wpdb->get_results("SELECT *
-                                                FROM `ot_custom_distributor_sku`            
-                                                WHERE `id_sku_product`=".$product->sku_id." and `id_distributor` = ".$product->distributor_id.";");
+        $result = $wpdb->get_results("SELECT `post_id`
+                                      FROM `ot_custom_distributor_sku`            
+                                      WHERE `id_distributor` = ".$product->distributor_id." and `id_sku_product` = '".$product->distributor_sku_id."';");
 
-        $result = $wpdb->get_results("SELECT post.`ID` as ID
-                 FROM `".$wpdb->prefix."posts` as post
-                 INNER JOIN `".$wpdb->prefix."postmeta` as post_meta on post.`ID`= post_meta.`post_id`
-                 WHERE post.`post_content`='".$product->sku_description."' and post_meta.`meta_value` in('".$distributorInfo[0]->id_sku_distributor."');");
-
-        return $result[0]->ID;
+        return $result[0]->post_id;
     }
 
     function insertTermRelationships($wpdb,$post_id,$term_id){
@@ -313,11 +308,11 @@
             $wpdb->query("INSERT INTO `ot_custom_distributor_sku`
                         (`id_sku_product`,
                         `id_distributor`,
-                        `post_id`
+                        `post_id`,
                         `added_by`,
                         `added_date`)
                         VALUES
-                        (".$productSku.", 
+                        ('".$productSku."', 
                          ".$distributorID.",
                           ".$postID.",
                          ".$userId.", 

@@ -377,15 +377,12 @@
 													  
 				*/	
 
-				$totalWeightLb = str_replace(".", "", $product[13]);
-				$totalWeightKg = str_replace(".", "", $product[14]);	
-				
-				$priceUnitWOP = str_replace(".", "", $product[15]);
-                $priceLbWOP = str_replace(".", "", $product[16]);
-				$priceKgWOP = str_replace(".", "", $product[17]);
-				$priceUnit = str_replace("$", "", $priceUnitWOP);
-                $priceLb = str_replace("$", "", $priceLbWOP);
-				$priceKg = str_replace("$", "", $priceKgWOP);
+				$totalWeightLb = $product[13];
+				$totalWeightKg = $product[14];
+
+				$priceUnit = str_replace("$", "", $product[15]);
+                $priceLb = str_replace("$", "", $product[16]);
+				$priceKg = str_replace("$", "", $product[17]);
 				
 				$wpdb->query("INSERT INTO ot_custom_inventory_file_items 
                                                       (`inventory_file_id`, 
