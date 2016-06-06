@@ -69,6 +69,7 @@ License: GPL2
         add_submenu_page('open-trade-menu', 'Request Information', 'Request Information', 'manage_options', 'open-trade-reques_information', 'wpdocs_reques_information_submenu_page_callback' );
         add_submenu_page('open-trade-menu', 'Post Offer', 'Post Offer', 'manage_options', 'open-trade-post-offer', 'wpdocs_post_offer_submenu_page_callback' );
         add_submenu_page('open-trade-menu', 'Purchase Order', 'Purchase Order', 'manage_options', 'open-trade-purchase-order', 'wpdocs_purchase_order_submenu_page_callback' );
+        add_submenu_page('open-trade-menu', 'Download Inventory', 'Download Inventory', 'manage_options', 'open-trade-download-inventory', 'wpdocs_download_inventory_submenu_page_callback' );
 
     }
 
@@ -1400,6 +1401,15 @@ License: GPL2
             </div>
             <?php
         }
+    }
+
+    function wpdocs_download_inventory_submenu_page_callback(){
+    ?>
+        <div class="wrap">
+            <h4>Open Trade 2.0</h4>
+            <h3>Download All Inventory</h3>
+        </div>
+    <?php
     }
 
     if(isset($_POST["actionUploadFile"])) {
