@@ -440,7 +440,8 @@
         }
     }
 
-    function tofloat($num) {
+    function tofloat($num)
+    {
         $dotPos = strrpos($num, '.');
         $commaPos = strrpos($num, ',');
         $sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos :
@@ -452,6 +453,271 @@
 
         return floatval(
             preg_replace("/[^0-9]/", "", substr($num, 0, $sep)) . '.' .
-            preg_replace("/[^0-9]/", "", substr($num, $sep+1, strlen($num)))
+            preg_replace("/[^0-9]/", "", substr($num, $sep + 1, strlen($num)))
         );
+    }
+
+    function validateQuantityHeadersToUpdate($allDataInSheet){
+
+        $headersQuantity = count($allDataInSheet[1]);
+
+        //if($headersQuantity == 15 ){
+        if($headersQuantity == 20){
+            $result = true;
+        }else{
+            $result= false;
+        }
+        return $result;
+    }
+
+    function validateNameHeadersToUpdate($allDataInSheet){
+
+    $headers = $allDataInSheet[1];
+    $result = true;
+
+    if (!in_array('Post ID', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Line#', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Distributor ID', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Distributor Name', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Distributor SKU ID', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Distributor SKU Description', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Lot#', $headers)) {
+        $result = false;
+    }
+    if (!in_array('PackagingType', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Packaging Unit', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Packaging Measure', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Packaging Weight (lb)', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Packaging Weight (kg)', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Quantity', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Total Weight (lb)', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Total Weight (Kg)', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Price / Unit', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Price / lb', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Price / Kg', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Warehouse location ID', $headers)) {
+        $result = false;
+    }
+    if (!in_array('Warehouse Location Address', $headers)) {
+        $result = false;
+    }
+    return $result;
+}
+
+    function validatePositionOFHeadersToUpdate($allDataInSheet){
+
+    $headers = $allDataInSheet[1];
+    $result = true;
+
+    if ($headers['A'] !== 'Post ID') {
+        $result = false;
+    }
+    if ($headers['B'] !== 'Line#') {
+        $result = false;
+    }
+    if ($headers['C'] !== 'Distributor ID') {
+        $result = false;
+    }
+    if ($headers['D'] !== 'Distributor Name') {
+        $result = false;
+    }
+    if ($headers['E'] !== 'Distributor SKU ID') {
+        $result = false;
+    }
+    if ($headers['F'] !== 'Distributor SKU Description') {
+        $result = false;
+    }
+    if ($headers['G'] !== 'Lot#') {
+        $result = false;
+    }
+    if ($headers['H'] !== 'PackagingType') {
+        $result = false;
+    }
+    if ($headers['I'] !== 'Packaging Unit') {
+        $result = false;
+    }
+    if ($headers['J'] !== 'Packaging Measure') {
+        $result = false;
+    }
+    if ($headers['K'] !== 'Packaging Weight (lb)') {
+        $result = false;
+    }
+    if ($headers['L'] !== 'Packaging Weight (kg)') {
+        $result = false;
+    }
+    if ($headers['M'] !== 'Quantity') {
+        $result = false;
+    }
+    if ($headers['N'] !== 'Total Weight (lb)') {
+        $result = false;
+    }
+    if ($headers['O'] !== 'Total Weight (Kg)') {
+        $result = false;
+    }
+    if ($headers['P'] !== 'Price / Unit') {
+        $result = false;
+    }
+    if ($headers['Q'] !== 'Price / lb') {
+        $result = false;
+    }
+    if ($headers['R'] !== 'Price / Kg') {
+        $result = false;
+    }
+    if ($headers['S'] !== 'Warehouse location ID') {
+        $result = false;
+    }
+    if ($headers['T'] !== 'Warehouse Location Address') {
+        $result = false;
+    }
+
+    return $result;
+}
+
+    function readAndProcessFileToUpdate($fullPatch, $filename, $current_user, $formatDate){
+
+        $allDataInSheet = readContentFile($fullPatch);
+        $arrayCount = count($allDataInSheet)-1;
+
+        if(validateQuantityHeadersToUpdate($allDataInSheet) and validateNameHeadersToUpdate($allDataInSheet)){
+
+            if(validatePositionOFHeadersToUpdate($allDataInSheet)){
+
+                $products = getProductsListToUpdate($allDataInSheet, $arrayCount);
+                saveProductsUpdate($products);
+                //saveProducts($products, $filename, $arrayCount, $current_user, $formatDate);
+
+                $_GET['message-success']='Upload success!';
+                $_GET['message-file-name'] = $filename;
+                $_GET['message-total-products'] = $arrayCount;
+            }else{
+                $_GET['message-error']= 'The Format File not contain the headers required.';
+            }
+        }else{
+            $_GET['message-error']= 'The Format File not contain the headers required.';
+        }
+        return $products;
+    }
+
+    function getProductsListToUpdate($allDataInSheet, $arrayCount){
+
+    $products = array();
+    for ($i = 2; $i <= $arrayCount+1; $i++) {
+        $product = array();
+
+        $postID= trim($allDataInSheet[$i]["A"]);
+        $product[1] = $postID;
+        $lineNumber = trim($allDataInSheet[$i]["B"]);
+        $product[2] = $lineNumber;
+        $distributorID = trim($allDataInSheet[$i]["C"]);
+        $product[3] = $distributorID;
+        $distributorName = trim($allDataInSheet[$i]["D"]);
+        $product[4] = $distributorName;
+        $distributorSkuId = trim($allDataInSheet[$i]["E"]);
+        $product[5] = $distributorSkuId;
+        $distributorSkuDescription = trim($allDataInSheet[$i]["F"]);
+        $product[6] = $distributorSkuDescription;
+        $lotNumber = trim($allDataInSheet[$i]["G"]);
+        $product[7] = $lotNumber;
+        $packagingType = trim($allDataInSheet[$i]["H"]);
+        $product[8] = $packagingType;
+        $packagingUnit = trim($allDataInSheet[$i]["I"]);
+        $product[9] = $packagingUnit;
+        $packagingMeasure = trim($allDataInSheet[$i]["J"]);
+        $product[10] = $packagingMeasure;
+        $packagingWeightLb = trim($allDataInSheet[$i]["K"]);
+        $product[11] = $packagingWeightLb;
+        $packagingWeightKg = trim($allDataInSheet[$i]["L"]);
+        $product[12] = $packagingWeightKg;
+        $quantity = trim($allDataInSheet[$i]["M"]);
+        $product[13] = $quantity;
+        $totalWeightLb = trim($allDataInSheet[$i]["N"]);
+        $product[14] = $totalWeightLb;
+        $totalWeightKg = trim($allDataInSheet[$i]["O"]);
+        $product[15]=$totalWeightKg;
+        $priceUnit = trim($allDataInSheet[$i]["P"]);
+        $product[16]=$priceUnit;
+        $priceLb = trim($allDataInSheet[$i]["Q"]);
+        $product[17]=$priceLb;
+        $priceKg = trim($allDataInSheet[$i]["R"]);
+        $product[18]=$priceKg;
+        $warehouseLocationId = trim($allDataInSheet[$i]["S"]);
+        $product[19]=$warehouseLocationId;
+        $warehouseLocationAddress = trim($allDataInSheet[$i]["T"]);
+        $product[20]=$warehouseLocationAddress;
+        $products[$i-1]=$product;
+    }
+    return $products;
+}
+
+    function saveProductsUpdate($products){
+
+        foreach ($products as $product){
+
+            $line_number  = array( 'name' => 'Line #', 'value' => $product[2], 'position'=>'2', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $distributor_id  = array( 'name' => 'Distributor ID', 'value' => $product[3], 'position'=>'3', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $distributor_name  = array( 'name' => 'Distributor Name', 'value' => $product[4], 'position'=>'4', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $distributor_sku_id  = array( 'name' => 'Distributor SKU ID', 'value' => $product[5], 'position'=>'5', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $distributor_sku_description  = array( 'name' => 'Distributor SKU Description', 'value' => $product[6], 'position'=>'6', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $lot_number  = array( 'name' => 'Lot#', 'value' => $product[7], 'position'=>'7', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_type  = array( 'name' => 'Packaging Type', 'value' => $product[8], 'position'=>'8', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_unit  = array( 'name' => 'Packaging Unit', 'value' => $product[9], 'position'=>'9', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_measure  = array( 'name' => 'Packaging Measure', 'value' => $product[10], 'position'=>'10', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_weight_lb  = array( 'name' => 'Packaging Weight (lb)', 'value' => $product[11], 'position'=>'11', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_weight_kg  = array( 'name' => 'Packaging Weight (kg)', 'value' => $product[12], 'position'=>'12', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $quantity  = array( 'name' => 'Quantity', 'value' => $product[13], 'position'=>'13', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $total_weight_lb  = array( 'name' => 'Total Weight (lb)', 'value' => $product[14], 'position'=>'14', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $total_weight_kg  = array( 'name' => 'Total Weight (Kg)', 'value' => $product[15], 'position'=>'15', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $price_unit  = array( 'name' => 'Price / Unit', 'value' => $product[16], 'position'=>'16', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $price_lb  = array( 'name' => 'Price / lb', 'value' => $product[17], 'position'=>'17', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $price_kg  = array( 'name' => 'Price / Kg', 'value' => $product[18], 'position'=>'18', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $warehouse_location_id  = array( 'name' => 'Warehouse location ID', 'value' => $product[19], 'position'=>'19', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $warehouse_location_address  = array( 'name' => 'Warehouse Location Address', 'value' => $product[20], 'position'=>'20', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+
+            $product_attributes = array($line_number, $distributor_id, $distributor_name, $distributor_sku_id, $distributor_sku_description, $lot_number, $packaging_type,
+            $packaging_unit, $packaging_measure, $packaging_weight_lb,$packaging_weight_kg, $quantity, $total_weight_lb, $total_weight_kg, $price_unit, $price_lb, $price_kg, $warehouse_location_id, $warehouse_location_address );
+
+            $price = str_replace("$", "", $product[16]);
+
+            update_post_meta( $product[1], '_regular_price', $price );
+            update_post_meta( $product[1], '_sale_price', $price );
+            update_post_meta( $product[1], '_price', $price );
+
+            update_post_meta($product[1],'_product_attributes',$product_attributes);
+
+        }
+
     }
