@@ -9,7 +9,7 @@
 
             if(validatePositionOFHeaders($allDataInSheet)){
     
-                $products = getProductsList($allDataInSheet, $arrayCount);
+                $products = getProductsList($allDataInSheet, $arrayCount, $fullPatch);
                 saveProducts($products, $filename, $arrayCount, $current_user, $formatDate, $distributorID);
 
                 $_GET['message-success']='Upload success, please approve the file to update de inventory.';
@@ -34,6 +34,17 @@
         $allDataInSheet = $objPHPExcel->getActiveSheet()->toArray(null, true, true, true);
 
         return $allDataInSheet;
+    }
+
+    function getValue($fullPatch,$cell, $row){
+
+        try {
+            $objPHPExcel = PHPExcel_IOFactory::load($fullPatch);
+        } catch (Exception $e) {
+            $_GET['message-error']='Error loading file "' . pathinfo($fullPatch, PATHINFO_BASENAME) . '": ' . $e->getMessage();
+        }
+
+        return $objPHPExcel->getActiveSheet()->getCell($cell.$row)->getOldCalculatedValue();
     }
 
     function validateQuantityHeaders($allDataInSheet){
@@ -273,43 +284,12 @@
         return $result;
     }
 
-    function getProductsList($allDataInSheet, $arrayCount){
+    function getProductsList($allDataInSheet, $arrayCount, $fullPatch){
 
         $products = array();
         for ($i = 2; $i <= $arrayCount+1; $i++) {
             $product = array();
-            
-			/*$skuID = trim($allDataInSheet[$i]["A"]);
-            $product[1] = $skuID;
-            $skuDescription = trim($allDataInSheet[$i]["B"]);
-            $product[2] = $skuDescription;
-            $productLine = trim($allDataInSheet[$i]["C"]);
-            $product[3] = $productLine;
-            $lot = trim($allDataInSheet[$i]["D"]);
-            $product[4] = $lot;
-            $issueType = trim($allDataInSheet[$i]["E"]);
-            $product[5] = $issueType;
-            $liSpecialist = trim($allDataInSheet[$i]["F"]);
-            $product[6] = $liSpecialist;
-            $warehouse = trim($allDataInSheet[$i]["G"]);
-            $product[7] = $warehouse;
-            $city = trim($allDataInSheet[$i]["H"]);
-            $product[8] = $city;
-            $zipCode = trim($allDataInSheet[$i]["I"]);
-            $product[9] = $zipCode;
-            $lmd = trim($allDataInSheet[$i]["J"]);
-            $product[10] = $lmd;
-            $idMonth = trim($allDataInSheet[$i]["K"]);
-            $product[11] = $idMonth;
-            $daysUnderCurrentPath = trim($allDataInSheet[$i]["L"]);
-            $product[12] = $daysUnderCurrentPath;
-            $qty = trim($allDataInSheet[$i]["M"]);
-            $product[13] = $qty;
-            $tc = trim($allDataInSheet[$i]["N"]);
-            $product[14]=$tc;
-            $category = trim($allDataInSheet[$i]["O"]);
-            $product[15]=$category;*/
-	
+
 			$lineNumber = trim($allDataInSheet[$i]["A"]);
             $product[1] = $lineNumber;
             $distributorID = trim($allDataInSheet[$i]["B"]);
@@ -329,16 +309,31 @@
             $packagingMeasure = trim($allDataInSheet[$i]["I"]);
             $product[9] = $packagingMeasure;
             $packagingWeightLb = trim($allDataInSheet[$i]["J"]);
+            if($packagingWeightLb=='na'){
+                $packagingWeightLb = getValue($fullPatch,"J",$i).".0";
+            }
             $product[10] = $packagingWeightLb;
             $packagingWeightKg = trim($allDataInSheet[$i]["K"]);
+            if($packagingWeightKg=='na'){
+                $packagingWeightKg = getValue($fullPatch,"K",$i).".0";
+            }
             $product[11] = $packagingWeightKg;
             $quantity = trim($allDataInSheet[$i]["L"]);
             $product[12] = $quantity;
             $totalWeightLb = trim($allDataInSheet[$i]["M"]);
+            if($totalWeightLb=='#VALUE!'){
+                $totalWeightLb = getValue($fullPatch,"M",$i).".0";
+            }
             $product[13] = $totalWeightLb;
             $totalWeightKg = trim($allDataInSheet[$i]["N"]);
+            if($totalWeightKg=='#VALUE!'){
+                $totalWeightKg = getValue($fullPatch,"N",$i).".0";
+            }
             $product[14]=$totalWeightKg;
             $priceUnit = trim($allDataInSheet[$i]["O"]);
+            if($priceUnit=='$0'){
+                $priceUnit = "$".getValue($fullPatch,"O",$i);
+            }
             $product[15]=$priceUnit;
 			$priceLb = trim($allDataInSheet[$i]["P"]);
             $product[16]=$priceLb;
@@ -377,12 +372,16 @@
 													  
 				*/	
 
-				$totalWeightLb = $product[13];
-				$totalWeightKg = $product[14];
+				$totalWeightLb = tofloat($product[13]);
+				$totalWeightKg = tofloat($product[14]);
 
-				$priceUnit = str_replace("$", "", $product[15]);
-                $priceLb = str_replace("$", "", $product[16]);
-				$priceKg = str_replace("$", "", $product[17]);
+                $product[15] = str_replace("$", "", $product[15]);
+                $product[16] = str_replace("$", "", $product[16]);
+                $product[17] = str_replace("$", "", $product[17]);
+
+                $priceUnit = tofloat($product[15]);
+                $priceLb = tofloat($product[16]);
+                $priceKg = tofloat($product[17]);
 				
 				$wpdb->query("INSERT INTO ot_custom_inventory_file_items 
                                                       (`inventory_file_id`, 
@@ -408,7 +407,8 @@
 													  `price_lb`,
 													  `price_kg`,
 													  `warehouse_location_id`,
-													  `warehouse_location_address`) 
+													  `warehouse_location_address`,
+													  `distributor_file_id`) 
                                            VALUES 
                                                       ('$idProductFile',
 													  $distributorID,
@@ -427,14 +427,31 @@
 													  '$product[10]',
 													  '$product[11]',
 													  '$product[12]',													 
-													  '$totalWeightLb',
-													  '$totalWeightKg',													  
+													  $totalWeightLb,
+													  $totalWeightKg,													  
 													  '$priceUnit',
 													  '$priceLb',
 													  '$priceKg',
 													  '$product[18]',
-													  '$product[19]')");
+													  '$product[19]',
+													  '$product[2]')");
 				
             }
         }
+    }
+
+    function tofloat($num) {
+        $dotPos = strrpos($num, '.');
+        $commaPos = strrpos($num, ',');
+        $sep = (($dotPos > $commaPos) && $dotPos) ? $dotPos :
+            ((($commaPos > $dotPos) && $commaPos) ? $commaPos : false);
+
+        if (!$sep) {
+            return floatval(preg_replace("/[^0-9]/", "", $num));
+        }
+
+        return floatval(
+            preg_replace("/[^0-9]/", "", substr($num, 0, $sep)) . '.' .
+            preg_replace("/[^0-9]/", "", substr($num, $sep+1, strlen($num)))
+        );
     }
