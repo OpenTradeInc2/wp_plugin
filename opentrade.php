@@ -1500,10 +1500,23 @@ License: GPL2
 
     function wpdocs_download_inventory_submenu_page_callback(){
     ?>
-        <div class="wrap">
-            <h4>Open Trade 2.0</h4>
-            <h3>Download All Inventory</h3>
-        </div>
+    <div class="wrap">
+        <h4>Open Trade 2.0</h4>
+        <h3>Download All Inventory</h3>
+            <?php
+            if (isset($_GET['message-error'])) {
+                ?>
+                <div id="message" class="error">
+                    <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                </div>
+                <?php
+            }
+        ?>
+        <form action="" method="post" enctype="multipart/form-data">
+            <p>Press download button to generated inventory file.</p>
+            <input id="actionDownloadInventory" class="button action" value="Download" type="submit" name="actionDownloadInventory">
+        </form>
+    </div>
     <?php
     }
 
@@ -2043,154 +2056,6 @@ License: GPL2
     }
 
     if(isset($_POST["actionDownloadInventory"])) {
-        global $wpdb;
-    
-        $isConnected = $wpdb->check_connection();
-    
-        if ($isConnected) {
-    
-            $rows = $wpdb->get_results("SELECT * FROM ot_custom_product_post");
-    
-            if($wpdb->num_rows > 0){
-                $phpExcel = new PHPExcel();
-                $date = getdate();
-                $phpExcel->getProperties()->setTitle("Inventory");
-                $phpExcel->getActiveSheet()->setTitle('Sheet1');
-    
-                $columnsTitles = array('Post ID','Line#', 'Distributor ID', 'Distributor Name', 'Distriutor SKU ID', 'Distributor SKU Description', 'Lot#',
-                    'PackagingType', 'Packaging Unit', 'Packaging Measure', 'Packaging Weight (lb)', 'Packaging Weight (kg)', 'Quantity',
-                    'Total Weight (lb)', 'Total Weight (Kg)', 'Price / Unit', 'Price / lb', 'Price / Kg', 'Warehouse location ID', 'Warehouse Location Address');
-    
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("A1",$columnsTitles[0]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('A')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("B1",$columnsTitles[1]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('B')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("C1",$columnsTitles[2]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('C')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("D1",$columnsTitles[3]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('D')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("E1",$columnsTitles[4]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('E')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("F1",$columnsTitles[5]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('F')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("G1",$columnsTitles[6]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('G')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("H1",$columnsTitles[7]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('H')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("I1",$columnsTitles[8]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('I')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("J1",$columnsTitles[9]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('J')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("K1",$columnsTitles[10]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('K')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("L1",$columnsTitles[11]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('L')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("M1",$columnsTitles[12]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('M')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("N1",$columnsTitles[13]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('N')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("O1",$columnsTitles[14]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('O')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("P1",$columnsTitles[15]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('P')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("Q1",$columnsTitles[16]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('Q')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("R1",$columnsTitles[17]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('R')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("S1",$columnsTitles[18]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('S')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("T1",$columnsTitles[18]);
-                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('T')->setAutoSize(true);
-    
-                $rowStart = 2;
-                foreach ($rows as $row) {
-    
-                    $post = get_post($row->post_id);
-                    $post_meta_regular_price = get_post_meta($row->post_id, '_regular_price', true);
-                    $post_meta_price = get_post_meta($row->post_id, '_price', true);
-                    $post_meta_product_attributes = get_post_meta($row->post_id, '_product_attributes', true);
-    
-    
-                    foreach ($post_meta_product_attributes as $product_atributte) {
-    
-                        if ($product_atributte["name"] == "Line #") {
-                            $line = $product_atributte["value"];
-                        } else if ($product_atributte["name"] == "Distributor ID") {
-                            $distributorID = $product_atributte["value"];
-                        } else if($product_atributte["name"] == "Distributor Name"){
-                            $distributorName = $product_atributte["value"];
-                        } else if($product_atributte["name"] == "Distributor SKU ID"){
-                            $distributorSKUId = $product_atributte["value"];
-                        } else if($product_atributte["name"] == "Distributor SKU Description"){
-                            $distributorSKUName = $product_atributte["value"];
-                        } else if($product_atributte["name"] == "Lot#"){
-                            $lotNum = $product_atributte["value"];
-                        } else if($product_atributte["name"] == "Packaging Type"){
-                            $packingType = $product_atributte["value"];
-                        } else if($product_atributte["name"] == "Packaging Unit"){
-                            $packingUnit = $product_atributte["value"];
-                        } else if($product_atributte["name"] == "Packaging Measure"){
-                            $packingMeasure = $product_atributte["value"];
-                        } else if($product_atributte["name"] == "Packaging Weight (lb)"){
-                            $packingWeightLB = $product_atributte["value"];
-                        } else if($product_atributte["name"] == "Packaging Weight (kg)"){
-                            $packingWeightKG = $product_atributte["value"];
-                        } else if($product_atributte["name"] == "Quantity"){
-                            $quantity = $product_atributte["value"];
-                        } else if($product_atributte["name"] == "Total Weight (lb)"){
-                            $totalWeightLB = $product_atributte["value"];
-                        } else if($product_atributte["name"] == "Total Weight (Kg)"){
-                            $totalWeightKG = $product_atributte["value"];
-                        } else if($product_atributte["name"] == "Price / Unit"){
-                            $priceUnit = $product_atributte["value"];
-                        } else if($product_atributte["name"] == "Price / lb"){
-                            $priceLB = $product_atributte["value"];
-                        } else if($product_atributte["name"] == "Price / Kg"){
-                            $priceKg = $product_atributte["value"];
-                        } else if($product_atributte["name"] == "Warehouse location ID"){
-                            $warehouseID = $product_atributte["value"];
-                        }else{
-                            $warehouseName = $product_atributte["value"];
-                        }
-                    }
-    
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('A'.$rowStart, $row->post_id);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('B'.$rowStart, $line);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('C'.$rowStart, $distributorID);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('D'.$rowStart, $distributorName);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('E'.$rowStart, $distributorSKUId);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('F'.$rowStart, $distributorSKUName);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('G'.$rowStart, $lotNum);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('H'.$rowStart, $packingType);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('I'.$rowStart, $packingUnit);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('J'.$rowStart, $packingMeasure);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('K'.$rowStart, $packingWeightLB);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('L'.$rowStart, $packingWeightKG);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('M'.$rowStart, $quantity);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('N'.$rowStart, $totalWeightLB);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('O'.$rowStart, $totalWeightKG);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('P'.$rowStart, '$'.$priceUnit);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('Q'.$rowStart, '$'.$priceLB);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('R'.$rowStart, '$'.$priceKg);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('S'.$rowStart, $warehouseID);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('T'.$rowStart, $warehouseName);
-    
-                    $rowStart++;
-    
-                }
-    
-                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                header('Content-Disposition: attachment;filename="Inventory '.$date["year"].'_'.$date["mon"].'_'.$date["mday"].'_'.$date["hours"].'_'.$date["minutes"].'_'.$date["seconds"].'.xlsx"');
-                header('Cache-Control: max-age=0');
-    
-                $objWriter = PHPExcel_IOFactory::createWriter($phpExcel, 'Excel2007');
-                $objWriter->save('php://output');
-                exit;
-    
-            }
-        }else{
-            $_GET['message-error'] = "No data!";
-        }
-    
+        downloadInventory();
     }
 ?>
