@@ -70,7 +70,7 @@ License: GPL2
         add_submenu_page('open-trade-menu', 'Post Offer', 'Post Offer', 'manage_options', 'open-trade-post-offer', 'wpdocs_post_offer_submenu_page_callback' );
         add_submenu_page('open-trade-menu', 'Purchase Order', 'Purchase Order', 'manage_options', 'open-trade-purchase-order', 'wpdocs_purchase_order_submenu_page_callback' );
         add_submenu_page('open-trade-menu', 'Download Inventory', 'Download Inventory', 'manage_options', 'open-trade-download-inventory', 'wpdocs_download_inventory_submenu_page_callback' );
-
+        add_submenu_page('open-trade-menu', 'Upload Inventory', 'Upload Inventory', 'manage_options', 'open-trade-upload-inventory', 'wpdocs_upload_inventory_submenu_page_callback' );
     }
 
     function open_trade_admin(){
@@ -1424,6 +1424,79 @@ License: GPL2
     <?php
     }
 
+    function wpdocs_upload_inventory_submenu_page_callback(){
+    ?>
+    <div class="wrap">
+        <h4>Open Trade 2.0</h4>
+        <h3>Upload All Inventory</h3>
+        <?php
+        if( isset($_GET['message-success']) ) {
+            ?>
+            <div id="message" class="updated">
+                <p><strong><?php _e($_GET['message-success']) ?></strong></p>
+            </div>
+            <?php
+        }
+        if( isset($_GET['message-error']) ) {
+            ?>
+            <div id="message" class="error">
+                <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+            </div>
+            <?php
+        }
+        if( isset($_GET['message-file-name']) ) {
+            ?>
+            <div id="message" class="updated">
+                <p><strong>File name: <?php _e($_GET['message-file-name']) ?></strong></p>
+            </div>
+            <?php
+        }
+        if( isset($_GET['message-total-products']) ) {
+            ?>
+            <div id="message" class="updated">
+                <p><strong>Total Products: <?php _e($_GET['message-total-products']) ?></strong></p>
+            </div>
+            <?php
+        }
+        ?>
+        <br>
+        <form action="" method="post" enctype="multipart/form-data">
+            <table>
+                <thead>
+                <!--<tr>
+                    <th scope="row"><label for="selectDistributor">Please select distributor: <span class="description">(required)</span></label></th>
+                    <td><select name="selectDistributor" id="selectDistributor">
+                            <option value="-1">Distributors</option>
+                            <?php
+        /*
+                            global $wpdb;
+
+                            if($wpdb->check_connection()){
+                                $distributors =  $wpdb->get_results("SELECT `distributor_id`, `distributor_name` FROM `ot_custom_distributor`");
+                                foreach ($distributors as $distributor) {
+                                    echo "<option value=\"$distributor->distributor_id\">$distributor->distributor_name</option>";
+                                }
+                            }
+        */
+                            ?>
+                        </select>
+                    </td>
+                </tr>-->
+                <tr>
+                    <th scope="row"><label for="fileToUpload">Please select file to upload: <span class="description">(required)</span></label></th>
+                    <td><input type="file" name="fileToUpload" id="fileToUpload" accept=".xlsx, .xls" /></td>
+                </tr>
+                <tr>
+                    <th scope="row"></th>
+                    <td><input type="submit" value="Upload File" name="actionUpdateUploadFile"></td>
+                </tr>
+                </thead>
+            </table>
+        </form>
+    </div>
+    <?php
+}
+
     if(isset($_POST["actionUploadFile"])) {
 
         $distributorID = $_POST['selectDistributor'];
@@ -1881,7 +1954,7 @@ License: GPL2
             $phpExcel->getProperties()->setTitle("Inventory");
             $phpExcel->getActiveSheet()->setTitle('Sheet1');
 
-            $columnsTitles = array('Post ID','Line#', 'Distributor ID', 'Distributor Name', 'Distriutor SKU ID', 'Distributor SKU Description', 'Lot#',
+            $columnsTitles = array('Post ID','Line#', 'Distributor ID', 'Distributor Name', 'Distributor SKU ID', 'Distributor SKU Description', 'Lot#',
                 'PackagingType', 'Packaging Unit', 'Packaging Measure', 'Packaging Weight (lb)', 'Packaging Weight (kg)', 'Quantity',
                 'Total Weight (lb)', 'Total Weight (Kg)', 'Price / Unit', 'Price / lb', 'Price / Kg', 'Warehouse location ID', 'Warehouse Location Address');
 
@@ -1923,7 +1996,7 @@ License: GPL2
             $phpExcel->setActiveSheetIndex(0)->getColumnDimension('R')->setAutoSize(true);
             $phpExcel->setActiveSheetIndex(0)->setCellValue("S1",$columnsTitles[18]);
             $phpExcel->setActiveSheetIndex(0)->getColumnDimension('S')->setAutoSize(true);
-            $phpExcel->setActiveSheetIndex(0)->setCellValue("T1",$columnsTitles[18]);
+            $phpExcel->setActiveSheetIndex(0)->setCellValue("T1",$columnsTitles[19]);
             $phpExcel->setActiveSheetIndex(0)->getColumnDimension('T')->setAutoSize(true);
 
             $rowStart = 2;
@@ -1973,7 +2046,7 @@ License: GPL2
                         $priceKg = $product_atributte["value"];
                     } else if($product_atributte["name"] == "Warehouse location ID"){
                         $warehouseID = $product_atributte["value"];
-                    }else{
+                    }else if($product_atributte["name"] == "Warehouse Location Address"){
                         $warehouseName = $product_atributte["value"];
                     }
                 }
@@ -1993,9 +2066,9 @@ License: GPL2
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('M'.$rowStart, $quantity);
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('N'.$rowStart, $totalWeightLB);
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('O'.$rowStart, $totalWeightKG);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('P'.$rowStart, '$'.$priceUnit);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('Q'.$rowStart, '$'.$priceLB);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('R'.$rowStart, '$'.$priceKg);
+                    $phpExcel->setActiveSheetIndex(0)->setCellValue('P'.$rowStart, $priceUnit);
+                    $phpExcel->setActiveSheetIndex(0)->setCellValue('Q'.$rowStart, $priceLB);
+                    $phpExcel->setActiveSheetIndex(0)->setCellValue('R'.$rowStart, $priceKg);
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('S'.$rowStart, $warehouseID);
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('T'.$rowStart, $warehouseName);
 
@@ -2017,4 +2090,29 @@ License: GPL2
         }
 
 }
+
+    if(isset($_POST["actionUpdateUploadFile"])){
+        $errors = validateFile($_FILES['fileToUpload']);
+
+        if (count($errors) === 0) {
+
+            $formatDate = getFormatDate();
+            $current_user = getCurrentUser();
+            $target_dir = plugin_dir_path(__FILE__) . "uploads/";
+            $fullPatch = getFullPatch($target_dir, $_FILES["fileToUpload"], $formatDate, $current_user);
+            $filename = ($_FILES["fileToUpload"]['name']);
+            $userID = $current_user->ID;
+            if(uploadFile($_FILES["fileToUpload"], $fullPatch)){
+
+                //$products = readAndProcessFile($fullPatch,$filename , $userID, $formatDate, $distributorID);
+                readAndProcessFileToUpdate($fullPatch,$filename , $userID, $formatDate);
+                //$_GET['message-error'] = "EXITO!";
+
+            }else{
+                $_GET['message-error'] = 'File was not uploaded';
+            }
+        } else {
+            $_GET['message-error'] = $errors[0];
+        }
+    }
 
