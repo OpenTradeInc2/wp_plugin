@@ -269,7 +269,8 @@ License: GPL2
                         <th>Packaging Unit</th>                        
                         <th>Quantity</th>						
 						<th>Price - Unit</th>						
-						<th>Is New Product</th>			
+						<th>Is New Product</th>
+                        <th>Edit</th>
                     </tr>
                     </thead>
                     <tfoot>
@@ -283,7 +284,8 @@ License: GPL2
                         <th>Packaging Unit</th>                        
                         <th>Quantity</th>						
 						<th>Price - Unit</th>						
-						<th>Is New Product</th>						
+						<th>Is New Product</th>
+                        <th>Edit</th>
                     </tr>
                     </tfoot>
                     <tbody>
@@ -298,15 +300,16 @@ License: GPL2
                         <tr>
                             <?php
                             echo "<td>"  . $product->line_number . "</td>";
-                            echo "<td>"  . $product->distributor_id . "</td>";
+                            echo "<td>"  . $product->distributor_file_id . "</td>";
                             echo "<td>"  . $product->distributor_name . "</td>";
                             echo "<td>"  . $product->distributor_sku_id . "</td>";
                             echo "<td>"  . $product->distributor_sku_description . "</td>";                            
                             echo "<td>"  . $product->packaging_type . "</td>";
                             echo "<td>"  . $product->packaging_unit . "</td>";                            
-                            echo "<td><form action=\"\" method=\"post\" enctype=\"multipart/form-data\"><input type=\"hidden\" name=\"idProductFile\" value=\"$idProductFile\"><input type=\"hidden\" name=\"idProduct\" value=\"$product->inventory_file_item_id\"><input type='number' name='quantity' value='"  . $product->quantity . "'><input name='actionUpdateTotalItem' id=\"actionUpdateTotalItem\" class=\"button action\" value=\"Update\" type=\"submit\"></form></td>";
+                            echo "<td>"  . $product->quantity . "</td>";
                             echo "<td>$" . $product->price_unit . "</td>";
 							echo "<td>" . $isNewProduct . "</td>";
+                            echo "<td><form action=\"\" method=\"post\" enctype=\"multipart/form-data\"><input type=\"hidden\" name=\"idProductFile\" value=\"$idProductFile\"><input type=\"hidden\" name=\"idProduct\" value=\"$product->inventory_file_item_id\"><input name='actionUpdateItem' id=\"actionUpdateItem\" class=\"button action\" value=\"Edit\" type=\"submit\"></form></td>";
                             ?>
                         </tr>
                         <?php
@@ -315,8 +318,100 @@ License: GPL2
                     </tbody>
                 </table>
             </div>
-             <?php
-
+            <?php
+        }
+        else if( isset($_GET['view-item-details']) and $_GET['view-item-details'] == true ) {
+            ?><div class="wrap">
+            <h4>Open Trade 2.0</h4>
+            <h3>Update Product</h3>
+            <form action="" method="post" enctype="multipart/form-data">
+                <input id="actionu" class="button action" value="Back File Detail" type="submit" name="actionBackFileDetail">
+                <input type="hidden" name="idProductFile" value="<?php _e($_GET['idProductFile']) ?>">
+                <input type="hidden" name="idProduct" value="<?php _e($_GET['idProduct']) ?>">
+                <p>Edit Product Information.</p>
+                <?php
+                if (isset($_GET['message-error'])) {
+                    ?>
+                    <div id="message" class="error">
+                        <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                    </div>
+                    <?php
+                }
+                if( isset($_GET['message-success']) ) {
+                    ?>
+                    <div id="message" class="updated">
+                        <p><strong><?php _e($_GET['message-success']) ?></strong></p>
+                    </div>
+                    <?php
+                }
+                ?>
+                <table>
+                    <thead>
+                    <tr>
+                        <th scope="row"><label for="distributor_id">Distributor ID <span class="description">(required)</span></label></th>
+                        <td><input name="distributor_id" id="distributor_id" value="<?php echo $_POST['distributor_id'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                        <th scope="row"><label for="distributor_name">Distributor Name <span class="description">(required)</span></label></th>
+                        <td><input name="distributor_name" id="distributor_name" value="<?php echo $_POST['distributor_name'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="distributor_sku_id">Distributor SKU ID <span class="description">(required)</span></label></th>
+                        <td><input name="distributor_sku_id" id="distributor_sku_id" value="<?php echo $_POST['distributor_sku_id'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text"></td>
+                        <th scope="row"><label for="distributor_sku_description">Distributor SKU Description <span class="description">(required)</span></label></th>
+                        <td><input name="distributor_sku_description" id="distributor_sku_description" value="<?php echo $_POST['distributor_sku_description'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="lot">Lot#</label></th>
+                        <td><input name="lot" id="distributor_id" value="<?php echo $_POST['lot'];?>" type="text" ></td>
+                        <th scope="row"><label for="packaging_type">Packaging Type <span class="description">(required)</span></label></th>
+                        <td><input name="packaging_type" id="packaging_type" value="<?php echo $_POST['packaging_type'];?>" type="text"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="packaging_unit">Packaging Unit <span class="description">(required)</span></label></th>
+                        <td><input name="packaging_unit" id="packaging_unit" value="<?php echo $_POST['packaging_unit'];?>" type="text" ></td>
+                        <th scope="row"><label for="packaging_measure">Packaging Measure<span class="description">(required)</span></label></th>
+                        <td><input name="packaging_measure" id="packaging_measure" value="<?php echo $_POST['packaging_measure'];?>" type="text"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="packaging_weight_lb">Packaging Weight (lb)</label></th>
+                        <td><input name="packaging_weight_lb" id="packaging_weight_lb" value="<?php echo $_POST['packaging_weight_lb'];?>" type="text" ></td>
+                        <th scope="row"><label for="packaging_weight_kg">Packaging Weight (kg)</label></th>
+                        <td><input name="packaging_weight_kg" id="packaging_weight_kg" value="<?php echo $_POST['packaging_weight_kg'];?>" type="text"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="quantity">Quantity <span class="description">(required)</span></label></th>
+                        <td><input name="quantity" id="quantity" value="<?php echo $_POST['quantity'];?>" type="text" ></td>
+                        <th scope="row"><label for="price_unit">Price / Unit<span class="description">(required)</span></label></th>
+                        <td><input name="price_unit" id="price_unit" value="<?php echo $_POST['price_unit'];?>" type="text"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="total_weight_lb">Total Weight (lb)</label></th>
+                        <td><input name="total_weight_lb" id="total_weight_lb" value="<?php echo $_POST['total_weight_lb'];?>" type="text" ></td>
+                        <th scope="row"><label for="total_weight_kg">Total Weight (Kg)</label></th>
+                        <td><input name="total_weight_kg" id="total_weight_kg" value="<?php echo $_POST['total_weight_kg'];?>" type="text"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="price_lb">Price / lb</label></th>
+                        <td><input name="price_lb" id="price_lb" value="<?php echo $_POST['price_lb'];?>" type="text" ></td>
+                        <th scope="row"><label for="price_kg">Price / Kg</label></th>
+                        <td><input name="price_kg" id="price_kg" value="<?php echo $_POST['price_kg'];?>" type="text"></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="warehouse_location_id">Warehouse location ID</label></th>
+                        <td><input name="warehouse_location_id" id="warehouse_location_id" value="<?php echo $_POST['warehouse_location_id'];?>" type="text" ></td>
+                        <th scope="row"><label for="warehouse_location_address">Warehouse Location Address</label></th>
+                        <td><input name="warehouse_location_address" id="warehouse_location_address" value="<?php echo $_POST['warehouse_location_address'];?>" type="text"></td>
+                    </tr>
+                    </thead>
+                    <tr>
+                        <th scope="row"></th>
+                        <th scope="row"></th>
+                        <td><input name="actionUpdateProduct" id="createusersub" class="button button-primary" value="Update Product" type="submit"></td>
+                        <th></th>
+                    </tr>
+                </table>
+            </form>
+            </div>
+            <?php
         }
         else {
             ?>
@@ -1771,10 +1866,35 @@ License: GPL2
         }
     }
 
-    if(isset($_POST["actionUpdateTotalItem"])){
-        updateProductQuantity($_POST['idProduct'],$_POST['quantity']);
-        $_GET['view-details'] = true;
-        $_GET['view-details-idProductFile'] = $_POST['idProductFile'];
+    if(isset($_POST["actionUpdateItem"])){
+        $_GET['view-item-details'] = true;
+        $_GET['idProductFile'] = $_POST['idProductFile'];
+        $_GET['idProduct'] = $_POST['idProduct'];
+
+        global $wpdb;
+        $idProduct = $_GET['idProduct'];
+        if($wpdb->check_connection()) {
+            $product = $wpdb->get_results("SELECT * FROM `ot_custom_inventory_file_items` WHERE `inventory_file_item_id` = ".$_POST['idProduct'].";")[0];
+
+            $_POST['distributor_id'] = $product->distributor_file_id;
+            $_POST['distributor_name'] = $product->distributor_name;
+            $_POST['distributor_sku_id'] = $product->distributor_sku_id;
+            $_POST['distributor_sku_description'] = $product->distributor_sku_description;
+            $_POST['lot'] = $product->lot_number;
+            $_POST['packaging_type'] = $product->packaging_type;
+            $_POST['packaging_unit'] = $product->packaging_unit;
+            $_POST['packaging_measure'] = $product->packaging_measure;
+            $_POST['packaging_weight_lb'] = $product->packaging_weight_lb;
+            $_POST['packaging_weight_kg'] = $product->packaging_weight_kg;
+            $_POST['quantity'] = $product->quantity;
+            $_POST['price_unit'] = $product->price_unit;
+            $_POST['total_weight_lb'] = $product->total_weight_lb;
+            $_POST['total_weight_kg'] = $product->total_weight_kg;
+            $_POST['price_lb'] = $product->price_lb;
+            $_POST['price_kg'] = $product->price_kg;
+            $_POST['warehouse_location_id'] = $product->warehouse_location_id;
+            $_POST['warehouse_location_address'] = $product->warehouse_location_address;
+        }
     }
 
     if(isset($_POST["actionPurchaseOrderViewProducts"])){
@@ -1854,4 +1974,71 @@ License: GPL2
         }
     }
 
+    if(isset($_POST["actionUpdateProduct"])){
+        if(isValidRequiredFields($_POST)){
+            updateProductFileItem($_POST);
+            $_GET['message-success'] = 'Product updated success!';
+            $_GET['view-item-details'] = true;
+            $_GET['idProductFile'] = $_POST['idProductFile'];
+            $_GET['idProduct'] = $_POST['idProduct'];
+        }else{
+            $_GET['view-item-details'] = true;
+        }
+    }
+
+    function isValidRequiredFields($post){
+        $result = true;
+        if(!isset($post['distributor_id']) or $post['distributor_id'] == ""){
+            $result = false;
+            $_GET['message-error'] = 'Please set a valid distributor id.';
+            return $result;
+        }
+        if(!isset($post['distributor_name']) or $post['distributor_name'] == ""){
+            $result = false;
+            $_GET['message-error'] = 'Please set a valid distributor name.';
+            return $result;
+        }
+        if(!isset($post['distributor_sku_id']) or $post['distributor_sku_id'] == ""){
+            $result = false;
+            $_GET['message-error'] = 'Please set a valid sku id.';
+            return $result;
+        }
+        if(!isset($post['distributor_sku_description']) or $post['distributor_sku_description'] == ""){
+            $result = false;
+            $_GET['message-error'] = 'Please set a valid sku description.';
+            return $result;
+        }
+        if(!isset($post['packaging_measure'] ) or $post['packaging_measure'] == ""){
+            $result = false;
+            $_GET['message-error'] = 'Please set a valid packaging measure.';
+            return $result;
+        }
+
+        if(!isset($post['quantity']) or $post['quantity']      == ""){
+            $result = false;
+            $_GET['message-error'] = 'Please set a valid quantity.';
+            return $result;
+        }
+        if(!isset($post['price_unit']) or $post['price_unit']    == ""){
+            $result = false;
+            $_GET['message-error'] = 'Please set a valid price unit.';
+            return $result;
+        }
+        if(!isset($post['warehouse_location_id']) or $post['warehouse_location_id'] == ""){
+            $result = false;
+            $_GET['message-error'] = 'Please set a valid warehouse.';
+            return $result;
+        }
+        if(!isset($post['warehouse_location_address']) or $post['warehouse_location_address'] == ""){
+            $result = false;
+            $_GET['message-error'] = 'Please set a valid warehouse location.';
+            return $result;
+        }
+        return $result;
+    }
+
+    if(isset($_POST["actionBackFileDetail"])){
+        $_GET['view-details'] = true;
+        $_GET['view-details-idProductFile'] = $_POST['idProductFile'];
+    }
 ?>

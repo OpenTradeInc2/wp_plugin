@@ -86,7 +86,7 @@
             $days_under_current_path = array( 'name' => 'Days Under Current Path', 'value' => $product->days_under_current_path, 'position'=>'8', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             */
             $line_number  = array( 'name' => 'Line #', 'value' => $product->line_number, 'position'=>'2', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $distributor_id  = array( 'name' => 'Distributor ID', 'value' => $product->distributor_id, 'position'=>'3', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $distributor_id  = array( 'name' => 'Distributor ID', 'value' => $product->distributor_file_id, 'position'=>'3', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $distributor_name  = array( 'name' => 'Distributor Name', 'value' => $product->distributor_name, 'position'=>'4', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $distributor_sku_id  = array( 'name' => 'Distributor SKU ID', 'value' => $product->distributor_sku_id, 'position'=>'5', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $distributor_sku_description  = array( 'name' => 'Distributor SKU Description', 'value' => $product->distributor_sku_description, 'position'=>'6', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
@@ -574,4 +574,37 @@
         }
 
         return $overallProcess;
+    }
+
+    function updateProductFileItem($post){
+        global $wpdb;
+
+        if($wpdb->check_connection()){
+
+            if($wpdb->check_connection()){
+                $wpdb->query("UPDATE `ot_custom_inventory_file_items`
+                              SET                             
+                                `lot_number` = '".$post['lot']."',                                
+                                `quantity` = ".$post['quantity'].",                               
+                                `edited_date` = ".getCurrentUser()->ID.",
+                                `edited_by` = '".getFormatDate()."', 
+                                `distributor_file_id` = '".$post['distributor_id']."',
+                                `distributor_name` = '".$post['distributor_name']."',
+                                `distributor_sku_id` = '".$post['distributor_sku_id']."',
+                                `distributor_sku_description` = '".$post['distributor_sku_description']."',
+                                `packaging_type` = '".$post['packaging_type']."',
+                                `packaging_unit` = '".$post['packaging_unit']."',
+                                `packaging_measure` = '".$post['packaging_measure']."',
+                                `packaging_weight_lb` = ".$post['packaging_weight_lb'].",
+                                `packaging_weight_kg` = ".$post['packaging_weight_kg'].",
+                                `total_weight_lb` = ".$post['total_weight_lb'].",
+                                `total_weight_kg` = ".$post['total_weight_kg'].",
+                                `price_unit` = ".$post['price_unit'].",
+                                `price_lb` = ".$post['price_lb'].",
+                                `price_kg` = ".$post['price_kg'].",
+                                `warehouse_location_id` = '".$post['warehouse_location_id']."',
+                                `warehouse_location_address` = '".$post['warehouse_location_address']."'                                
+                                WHERE `inventory_file_item_id` ='".$post['idProduct']."';");
+            }
+        }
     }
