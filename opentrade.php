@@ -1996,6 +1996,8 @@ License: GPL2
             $_GET['idProduct'] = $_POST['idProduct'];
         }else{
             $_GET['view-item-details'] = true;
+            $_GET['idProductFile'] = $_POST['idProductFile'];
+            $_GET['idProduct'] = $_POST['idProduct'];
         }
     }
 
