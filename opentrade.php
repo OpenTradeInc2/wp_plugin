@@ -1287,6 +1287,7 @@ License: GPL2
                     <thead>
                     <tr>
                         <th><input type="checkbox"></th>
+                        <th>Id</th>
                         <th>Product Id</th>
                         <th>Product Description</th>
                         <th>User Id</th>
@@ -1300,6 +1301,7 @@ License: GPL2
                     <tfoot>
                     <tr>
                         <th></th>
+                        <th>Id</th>
                         <th>Product Id</th>
                         <th>Product Description</th>
                         <th>User Id</th>
@@ -1326,6 +1328,7 @@ License: GPL2
                             <tr>
                                 <?php
                                 echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idProductOfferList[]\" value=" . $product_item->offer_information_id . "></td>";
+                                echo "<td>"  . $product_item->offer_information_id . "</td>";
                                 echo "<td>"  . $product_item->product_id . "</td>";
                                 echo "<td>"  . $post->post_title . "</td>";
                                 echo "<td>"  . $user->ID . "</td>";
@@ -1360,6 +1363,7 @@ License: GPL2
                 <table class="widefat">
                     <thead>
                     <tr>
+                        <th>Id</th>
                         <th>Product ID</th>
                         <th>Name</th>
                         <th>Description</th>
@@ -1369,6 +1373,7 @@ License: GPL2
                     </thead>
                     <tfoot>
                     <tr>
+                        <th>Id</th>
                         <th>Product ID</th>
                         <th>Name</th>
                         <th>Description</th>
@@ -1390,6 +1395,7 @@ License: GPL2
                         ?>
                         <tr>
                             <?php
+                            echo "<td>"  . $product->product_purchase_order_id . "</td>";
                             echo "<td>"  . $product->product_id . "</td>";
                             echo "<td>"  . $post->post_title . "</td>";
                             echo "<td>"  . $post->post_content . "</td>";
@@ -1444,6 +1450,7 @@ License: GPL2
                         <thead>
                         <tr>
                             <th><input type="checkbox"></th>
+                            <th>Id</th>
                             <th>User Name</th>
                             <th>User Email</th>
                             <th>Quantity of Products</th>
@@ -1455,6 +1462,7 @@ License: GPL2
                         <tfoot>
                         <tr>
                             <th></th>
+                            <th>Id</th>
                             <th>User Name</th>
                             <th>User Email</th>
                             <th>Quantity of Products</th>
@@ -1478,6 +1486,7 @@ License: GPL2
                                 <tr>
                                     <?php
                                     echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idPurchaseOrders[]\" value=" . $purchaseOrder->purchase_order_id . "></td>";
+                                    echo "<td>" . $purchaseOrder->purchase_order_id . "</td>";
                                     echo "<td>" . $user->nickname . "</td>";
                                     echo "<td>" . $user->user_email . "</td>";
                                     echo "<td>" . sizeof($products) . "</td>";
