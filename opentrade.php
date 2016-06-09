@@ -1214,8 +1214,8 @@ License: GPL2
                     if ($isConnected) {
                         $requests_information = $wpdb->get_results("select ".
         "cri.request_information_id as requestId,
-        (select user_login from wp_users where ID = (select user_id from ot_custom_request_information where request_information_id = cri.request_information_id)) as user_name,
-        (select user_email from wp_users where ID = (select user_id from ot_custom_request_information where request_information_id = cri.request_information_id)) as email,
+        (select user_login from ".$wpdb->prefix."users where ID = (select user_id from ot_custom_request_information where request_information_id = cri.request_information_id)) as user_name,
+        (select user_email from ".$wpdb->prefix."users where ID = (select user_id from ot_custom_request_information where request_information_id = cri.request_information_id)) as email,
         cri.added_date as date,
         (select count(*) from ot_custom_product_request_information where request_information_id = cri.request_information_id) as quantity
     from ot_custom_request_information cri where status = 'created'");
@@ -1249,7 +1249,67 @@ License: GPL2
     }
 
     function wpdocs_post_offer_submenu_page_callback(){
+        if( isset($_GET['view-products-offer']) and $_GET['view-products-offer'] == true ) {
+        ?>
+        <div class="wrap">
+            <h4>Open Trade 2.0</h4>
+            <h3>Products Detail</h3>
+            <form action="" method="post" enctype="multipart/form-data">
+                <input id="actionDetails" class="button action" value="Back Offer List" type="submit" name="actionBackOfferInfoList">
+            </form>
+            <br>
+            <table class="widefat">
+                <thead>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Offer</th>
+                    <th>Stock</th>
+                </tr>
+                </thead>
+                <tfoot>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Offer</th>
+                    <th>Stock</th>
+                </tr>
+                </tfoot>
+                <tbody>
+                <?php
 
+                global $wpdb;
+                $idOfferInfo = $_GET['idOfferInfo'];
+                $products = $wpdb->get_results("SELECT * FROM `ot_custom_product_offer_information`  WHERE `offer_information_id` = ".$idOfferInfo.";");
+
+                foreach ($products as $product) {
+                    $price = get_post_meta( $product->product_id, '_price', true );
+                    $post = get_post($product->product_id);
+                    $stock = get_post_meta( $product->product_id, '_stock' );
+                    ?>
+                    <tr>
+                        <?php
+                        echo "<td>"  . $product->product_id . "</td>";
+                        echo "<td>"  . $post->post_title . "</td>";
+                        echo "<td>"  . $post->post_content . "</td>";
+                        echo "<td>$"  . number_format($price, 2) . "</td>";
+                        echo "<td>$"  . number_format($product->offer, 2)  . "</td>";
+                        echo "<td>"  . $stock[0] . "</td>";
+                        ?>
+                    </tr>
+                    <?php
+                }
+                ?>
+                </tbody>
+            </table>
+        </div>
+        <?php
+        }
+        else {
         ?>
         <div class="wrap">
             <h4>Open Trade 2.0</h4>
@@ -1288,28 +1348,26 @@ License: GPL2
                     <tr>
                         <th><input type="checkbox"></th>
                         <th>Id</th>
-                        <th>Product Id</th>
-                        <th>Product Description</th>
                         <th>User Id</th>
                         <th>User Name</th>
                         <th>User Email</th>
-                        <th>Price</th>
-                        <th>Bid Price</th>
-                        <th>Quatity</th>
+                        <th>Added Date</th>
+                        <th>Total Amount</th>
+                        <th>Total Offer</th>
+                        <th>Products</th>
                     </tr>
                     </thead>
                     <tfoot>
                     <tr>
                         <th></th>
                         <th>Id</th>
-                        <th>Product Id</th>
-                        <th>Product Description</th>
                         <th>User Id</th>
                         <th>User Name</th>
                         <th>User Email</th>
-                        <th>Price</th>
-                        <th>Bid Price</th>
-                        <th>Quatity</th>
+                        <th>Added Date</th>
+                        <th>Total Amount</th>
+                        <th>Total Offer</th>
+                        <th>Products</th>
                     </tr>
                     </tfoot>
                     <tbody>
@@ -1319,24 +1377,21 @@ License: GPL2
                     $isConnected = $wpdb->check_connection();
 
                     if ($isConnected) {
-                        $products_items = $wpdb->get_results("SELECT *  FROM `ot_custom_offer_information` WHERE status = 'created'");
+                        $products_items = $wpdb->get_results("SELECT *  FROM `ot_custom_offer_information` WHERE status = 'created' ORDER BY `added_date` DESC");
                         foreach ($products_items as $product_item) {
                             $user = get_user_by('ID',$product_item->user_id );
-                            $price= get_post_meta( $product_item->product_id , '_price', true );
-                            $post   = get_post($product_item->product_id);
                             ?>
                             <tr>
                                 <?php
                                 echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idProductOfferList[]\" value=" . $product_item->offer_information_id . "></td>";
                                 echo "<td>"  . $product_item->offer_information_id . "</td>";
-                                echo "<td>"  . $product_item->product_id . "</td>";
-                                echo "<td>"  . $post->post_title . "</td>";
                                 echo "<td>"  . $user->ID . "</td>";
                                 echo "<td>"  . $user->user_login . "</td>";
                                 echo "<td>"  . $user->user_email . "</td>";
-                                echo "<td>$" . $price . "</td>";
-                                echo "<td>$" . $product_item->bid_price . "</td>";
-                                echo "<td>"  . $product_item->quantity . "</td>";
+                                echo "<td>"  . $product_item->added_date . "</td>";
+                                echo "<td> $" . number_format($product_item->total_amount, 2) . "</td>";
+                                echo "<td>$" . number_format($product_item->total_offer, 2) . "</td>";
+                                echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idOfferInfo\" value=\"$product_item->offer_information_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionViewOfferInfo\"></form></td>";
                                 ?>
                             </tr>
                             <?php
@@ -1348,7 +1403,7 @@ License: GPL2
             </form>
         </div>
         <?php
-
+        }
     }
 
     function wpdocs_purchase_order_submenu_page_callback(){
@@ -1490,7 +1545,7 @@ License: GPL2
                                     echo "<td>" . $user->nickname . "</td>";
                                     echo "<td>" . $user->user_email . "</td>";
                                     echo "<td>" . sizeof($products) . "</td>";
-                                    echo "<td>" . $purchaseOrder->total_amount . "</td>";
+                                    echo "<td>$" . $purchaseOrder->total_amount . "</td>";
                                     echo "<td><a href='" . $purchaseOrder->file_patch . "'>" . $purchaseOrder->file_name . "</a></td>";
                                     echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idPurchaseOrder\" value=\"$purchaseOrder->purchase_order_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionPurchaseOrderViewProducts\"></form></td>";
                                     ?>
@@ -2155,10 +2210,8 @@ License: GPL2
             $filename = ($_FILES["fileToUpload"]['name']);
             $userID = $current_user->ID;
             if(uploadFile($_FILES["fileToUpload"], $fullPatch)){
-
-                //$products = readAndProcessFile($fullPatch,$filename , $userID, $formatDate, $distributorID);
                 readAndProcessFileToUpdate($fullPatch,$filename , $userID, $formatDate);
-                //$_GET['message-error'] = "EXITO!";
+                $_GET['message-error'] = "The inventory has been updated!";
 
             }else{
                 $_GET['message-error'] = 'File was not uploaded';
@@ -2167,3 +2220,18 @@ License: GPL2
             $_GET['message-error'] = $errors[0];
         }
     }
+
+    if(isset($_POST["actionViewOfferInfo"])){
+        if(isset($_POST["idOfferInfo"])){
+            $_GET['view-products-offer'] = true;
+            $_GET['idOfferInfo'] = $_POST['idOfferInfo'];
+        }
+    }
+
+    if(isset($_POST["actionBackOfferInfoList"])){
+        if(isset($_POST["idOfferInfo"])){
+            $_GET['view-products-offer'] = false;
+            $_GET['idOfferInfo'] = $_POST['idOfferInfo'];
+        }
+    }
+    ?>
