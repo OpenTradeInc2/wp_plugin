@@ -371,6 +371,14 @@
         }
     }
 
+    function approveDistributor($distributorID){
+        global $wpdb;
+
+        if($wpdb->check_connection()){
+            $wpdb->query(" UPDATE `ot_custom_distributor` SET `status` = 'approved' WHERE `distributor_id` = ".$distributorID.";");
+        }
+    }
+
     function addUserDistributor($userId, $distributorID){
         global $wpdb;
 
@@ -400,6 +408,20 @@
         if($wpdb->check_connection()){            
             $wpdb->query("DELETE FROM `ot_custom_distributor_user`
                           WHERE `distributor_user_userid` = ".$userId." and `distributor_user_distributor_id` =".$distributorID.";");
+        }
+    }
+
+    function approvedUserDistributor($userId){
+        global $wpdb;
+
+        if($wpdb->check_connection()) {
+            $wpdb->query("UPDATE `ot_custom_distributor_user`
+                          SET
+                        `distributor_user_edited_by` = " . getCurrentUser()->ID . ",
+                        `distributor_user_edited_date` = '" . getFormatDate() . "',
+                        `status` = 'approved'
+                        WHERE `distributor_user_userid` = " . $userId . ";");
+
         }
     }
 
