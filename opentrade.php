@@ -2155,11 +2155,7 @@ License: GPL2
             $filename = ($_FILES["fileToUpload"]['name']);
             $userID = $current_user->ID;
             if(uploadFile($_FILES["fileToUpload"], $fullPatch)){
-
-                //$products = readAndProcessFile($fullPatch,$filename , $userID, $formatDate, $distributorID);
                 readAndProcessFileToUpdate($fullPatch,$filename , $userID, $formatDate);
-                //$_GET['message-error'] = "EXITO!";
-
             }else{
                 $_GET['message-error'] = 'File was not uploaded';
             }

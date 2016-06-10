@@ -620,11 +620,10 @@
 
             if($wpdb->num_rows > 0){
                 $phpExcel = new PHPExcel();
-                $date = getdate();
                 $phpExcel->getProperties()->setTitle("Inventory");
                 $phpExcel->getActiveSheet()->setTitle('Sheet1');
 
-                $columnsTitles = array('Post ID','Line#', 'Distributor ID', 'Distributor Name', 'Distriutor SKU ID', 'Distributor SKU Description', 'Lot#',
+                $columnsTitles = array('Post ID','Line#', 'Distributor ID', 'Distributor Name', 'Distributor SKU ID', 'Distributor SKU Description', 'Lot#',
                     'PackagingType', 'Packaging Unit', 'Packaging Measure', 'Packaging Weight (lb)', 'Packaging Weight (kg)', 'Quantity',
                     'Total Weight (lb)', 'Total Weight (Kg)', 'Price / Unit', 'Price / lb', 'Price / Kg', 'Warehouse location ID', 'Warehouse Location Address');
 
@@ -666,7 +665,7 @@
                 $phpExcel->setActiveSheetIndex(0)->getColumnDimension('R')->setAutoSize(true);
                 $phpExcel->setActiveSheetIndex(0)->setCellValue("S1",$columnsTitles[18]);
                 $phpExcel->setActiveSheetIndex(0)->getColumnDimension('S')->setAutoSize(true);
-                $phpExcel->setActiveSheetIndex(0)->setCellValue("T1",$columnsTitles[18]);
+                $phpExcel->setActiveSheetIndex(0)->setCellValue("T1",$columnsTitles[19]);
                 $phpExcel->setActiveSheetIndex(0)->getColumnDimension('T')->setAutoSize(true);
 
                 $rowStart = 2;
@@ -709,14 +708,14 @@
                         } else if($product_atributte["name"] == "Total Weight (Kg)"){
                             $totalWeightKG = $product_atributte["value"];
                         } else if($product_atributte["name"] == "Price / Unit"){
-                            $priceUnit = $product_atributte["value"];
+                                $priceUnit = $product_atributte["value"];
                         } else if($product_atributte["name"] == "Price / lb"){
                             $priceLB = $product_atributte["value"];
                         } else if($product_atributte["name"] == "Price / Kg"){
                             $priceKg = $product_atributte["value"];
                         } else if($product_atributte["name"] == "Warehouse location ID"){
                             $warehouseID = $product_atributte["value"];
-                        }else{
+                        }else if($product_atributte["name"] == "Warehouse Location Address"){
                             $warehouseName = $product_atributte["value"];
                         }
                     }
@@ -736,9 +735,9 @@
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('M'.$rowStart, $quantity);
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('N'.$rowStart, $totalWeightLB);
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('O'.$rowStart, $totalWeightKG);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('P'.$rowStart, '$'.$priceUnit);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('Q'.$rowStart, '$'.$priceLB);
-                    $phpExcel->setActiveSheetIndex(0)->setCellValue('R'.$rowStart, '$'.$priceKg);
+                    $phpExcel->setActiveSheetIndex(0)->setCellValue('P'.$rowStart, "$".$priceUnit);
+                    $phpExcel->setActiveSheetIndex(0)->setCellValue('Q'.$rowStart, "$".$priceLB);
+                    $phpExcel->setActiveSheetIndex(0)->setCellValue('R'.$rowStart, "$".$priceKg);
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('S'.$rowStart, $warehouseID);
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('T'.$rowStart, $warehouseName);
 
