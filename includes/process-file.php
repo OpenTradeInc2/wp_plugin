@@ -618,7 +618,6 @@
 
                 $products = getProductsListToUpdate($allDataInSheet, $arrayCount);
                 saveProductsUpdate($products);
-                //saveProducts($products, $filename, $arrayCount, $current_user, $formatDate);
 
                 $_GET['message-success']='Upload success!';
                 $_GET['message-file-name'] = $filename;
@@ -687,6 +686,10 @@
 
         foreach ($products as $product){
 
+            $product[16] = str_replace("$", "", $product[16]);
+            $product[17] = str_replace("$", "", $product[17]);
+            $product[18] = str_replace("$", "", $product[18]);
+
             $line_number  = array( 'name' => 'Line #', 'value' => $product[2], 'position'=>'2', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $distributor_id  = array( 'name' => 'Distributor ID', 'value' => $product[3], 'position'=>'3', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $distributor_name  = array( 'name' => 'Distributor Name', 'value' => $product[4], 'position'=>'4', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
@@ -704,13 +707,14 @@
             $price_unit  = array( 'name' => 'Price / Unit', 'value' => $product[16], 'position'=>'16', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $price_lb  = array( 'name' => 'Price / lb', 'value' => $product[17], 'position'=>'17', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $price_kg  = array( 'name' => 'Price / Kg', 'value' => $product[18], 'position'=>'18', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $warehouse_location_id  = array( 'name' => 'Warehouse location ID', 'value' => $product[19], 'position'=>'19', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $warehouse_location_id  = array( 'name' => 'Warehouse Location ID', 'value' => $product[19], 'position'=>'19', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $warehouse_location_address  = array( 'name' => 'Warehouse Location Address', 'value' => $product[20], 'position'=>'20', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
 
             $product_attributes = array($line_number, $distributor_id, $distributor_name, $distributor_sku_id, $distributor_sku_description, $lot_number, $packaging_type,
             $packaging_unit, $packaging_measure, $packaging_weight_lb,$packaging_weight_kg, $quantity, $total_weight_lb, $total_weight_kg, $price_unit, $price_lb, $price_kg, $warehouse_location_id, $warehouse_location_address );
 
             $price = str_replace("$", "", $product[16]);
+
 
             update_post_meta( $product[1], '_regular_price', $price );
             update_post_meta( $product[1], '_sale_price', $price );
