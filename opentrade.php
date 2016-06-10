@@ -60,8 +60,8 @@ License: GPL2
     }
 
     add_action( 'admin_menu', 'admin_menu' );
-
     function admin_menu(){
+
         add_menu_page(__( 'Open Trade 2.0', 'textdomain' ), 'Open Trade 2.0', 'manage_options', 'open-trade-menu', 'open_trade_admin' , 'dashicons-migrate', 6 );
         add_submenu_page('open-trade-menu', 'Load Inventory', 'Load Inventory', 'manage_options', 'open-trade-menu' );
         add_submenu_page('open-trade-menu', 'Pending Approval', 'Pending Approval', 'manage_options', 'open-trade-approve', 'wpdocs_pending_approval_submenu_page_callback' );
@@ -200,7 +200,7 @@ License: GPL2
         ?>
     </div>
     <?php
-}
+    }
 
     function wpdocs_pending_approval_submenu_page_callback() {
         if( isset($_GET['view-details']) and $_GET['view-details'] == true ) {
@@ -571,6 +571,8 @@ License: GPL2
                             }
                             ?>
                         </tr>
+                        </thead>
+                    </table>
                 </form>
             </div>
             <?php
@@ -588,7 +590,7 @@ License: GPL2
                         <select name="selectActionAssignedUsers" id="bulk-action-selector-top">
                             <option value="-1">Actions</option>
                             <option value="delete" class="hide-if-no-js">Delete</option>
-                            <!--<option value="deactivate">Deactivate</option>-->
+                            <option value="approve">Approve</option>
                             <input id="doAction" class="button action" value="Apply" type="submit" name="actionBulkAssignedUsers">
                             <input class="button action" value="Add New User" type="submit" name="actionNewUser">
                         </select>
@@ -604,6 +606,7 @@ License: GPL2
                         <th>Email</th>
                         <th>Added By</th>
                         <th>Added Date</th>
+                        <th>Status</th>
                     </tr>
                     </thead>
                     <tfoot>
@@ -615,6 +618,7 @@ License: GPL2
                         <th>Email</th>
                         <th>Added By</th>
                         <th>Added Date</th>
+                        <th>Status</th>
                     </tr>
                     </tfoot>
                     <tbody>
@@ -629,7 +633,8 @@ License: GPL2
                                                             users.`display_name`,
                                                             users.`user_email`,                                                           
                                                             (SELECT `user_login` FROM `".$wpdb->prefix."users` WHERE `ID` = cdu.`distributor_user_added_by`) as distributor_user_added_by,
-                                                            cdu.`distributor_user_added_date`
+                                                            cdu.`distributor_user_added_date`,
+                                                            cdu.`status`
                                                        FROM `ot_custom_distributor_user` as cdu
                                                        INNER JOIN `".$wpdb->prefix."users` as users ON users.`ID` = cdu.`distributor_user_userid`
                                                        WHERE cdu.`distributor_user_distributor_id` = ".$distributorID.";");
@@ -644,6 +649,7 @@ License: GPL2
                                 echo "<td>" . $user->user_email . "</td>";
                                 echo "<td>" . $user->distributor_user_added_by . "</td>";
                                 echo "<td>" . $user->distributor_user_added_date . "</td>";
+                                echo "<td>" .str_replace("-", " ", ucfirst($user->status)). "</td>";
                                 ?>
                             </tr>
                             <?php
@@ -1022,7 +1028,7 @@ License: GPL2
                         <select name="selectActionDistributors" id="bulk-action-selector-top">
                             <option value="-1">Actions</option>
                             <option value="delete" class="hide-if-no-js">Delete</option>
-                            <!--<option value="deactivate">Deactivate</option>-->
+                            <option value="approve">Approve</option>
                             <input id="doAction" class="button action" value="Apply" type="submit" name="actionBulkDistributors">
                             <input id="doAction" class="button action" value="New Distributor" type="submit" name="actionNewDistributor">
                         </select>
@@ -1037,6 +1043,7 @@ License: GPL2
                         <th>Tax ID</th>
                         <th>Added By</th>
                         <th>Added Date</th>
+                        <th>Status</th>
                         <th>Users</th>
                         <th>Warehouses</th>
                     </tr>
@@ -1050,6 +1057,7 @@ License: GPL2
                         <th>Tax ID</th>
                         <th>Added By</th>
                         <th>Added Date</th>
+                        <th>Status</th>
                         <th>Users</th>
                         <th>Warehouses</th>
                     </tr>
@@ -1059,7 +1067,7 @@ License: GPL2
                     global $wpdb;
 
                     if($wpdb->check_connection()){
-                        $distributors =  $wpdb->get_results("SELECT dist.`distributor_id`, dist.`distributor_name`, dist.`location`,dist.`tax_id`, user.`user_nicename` as `added_by`, dist.`added_date` FROM `ot_custom_distributor` as dist INNER JOIN `".$wpdb->prefix."users` as user ON dist.`added_by` = user.`ID` ;");
+                        $distributors =  $wpdb->get_results("SELECT dist.`distributor_id`, dist.`distributor_name`, dist.`location`,dist.`tax_id`, user.`user_nicename` as `added_by`, dist.`added_date`, dist.`status` FROM `ot_custom_distributor` as dist INNER JOIN `".$wpdb->prefix."users` as user ON dist.`added_by` = user.`ID` ;");
                         foreach ($distributors as $distributor) {
                             ?>
                             <tr>
@@ -1071,6 +1079,7 @@ License: GPL2
                                 echo "<td>" . $distributor->tax_id . "</td>";
                                 echo "<td>" . $distributor->added_by . "</td>";
                                 echo "<td>" . $distributor->added_date . "</td>";
+                                echo "<td>" . str_replace("-", " ", ucfirst($distributor->status)) . "</td>";
                                 echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idDistributor\" value=\"$distributor->distributor_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionViewUsers\"></form></td>";
                                 echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idDistributor\" value=\"$distributor->distributor_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionViewWarehouse\"></form></td>";
                                 ?>
@@ -1744,14 +1753,81 @@ License: GPL2
 
     if(isset($_POST["actionBulkDistributors"])){
         if(isset($_POST['selectActionDistributors']) and $_POST['selectActionDistributors'] !== "-1"){
-            if (isset($_POST['idDistributors'])) {
-                $idDistributors = $_POST["idDistributors"];
-                foreach ($idDistributors as $idDistributor){
-                    deleteDistributor($idDistributor);
+            
+            if($_POST['selectActionDistributors'] =='delete') {                
+                if (isset($_POST['idDistributors'])) {
+                    $idDistributors = $_POST["idDistributors"];
+                    foreach ($idDistributors as $idDistributor) {
+                        deleteDistributor($idDistributor);
+                    }
+                } else {
+                    $_GET['message-error'] = "Please select a distributor!";
                 }
-            }
-            else{
-                $_GET['message-error']="Please select a distributor!";
+            }else if($_POST['selectActionDistributors'] =='approve'){
+                if (isset($_POST['idDistributors'])) {
+                    $idDistributors = $_POST["idDistributors"];
+                    foreach ($idDistributors as $idDistributor) {
+                        approveDistributor($idDistributor);
+
+                        global $wpdb;
+                        if($wpdb->check_connection()){
+                            $distributor = $wpdb->get_results(" SELECT * FROM `ot_custom_distributor` WHERE `distributor_id` = ".$idDistributor.";")[0];
+                            $to = array($distributor->email_administrator);
+                            $subject='Your Company Is approved';
+                            $headers = 'Reply-to: '.'Michael'.' '.'Lin'.' <'.'michael.lin@opentradeinc.com'.'>' . "\r\n";
+                            $userData = $current_user->data;
+                            $formatDate = date("Y-m-d h:i:s");
+                            $message ='
+                                        <html>
+                                            <head>
+                                            <font FACE="impact" SIZE=6 COLOR="red">O</font><font FACE="impact" SIZE=6 COLOR="black">PENTRADE</font>
+                                            <br/>
+                                                <h1>Your company has been approved to add inventory at the site of openTrade.</h1>
+                                            </head>
+                                            <body>
+                                                <table>                    
+                                                    <tr>
+                                                        <th>Company Name:</th>
+                                                        <td>'.$distributor->distributor_name.'</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Location:</th>
+                                                        <td>'.$distributor->location.'</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Tax Id:</th>
+                                                        <td>'.$distributor->tax_id.'</td>
+                                                    </tr>                                                                                  
+                                                </table>                    
+                                                <br/>
+                                                <table>
+                                                    <tr>
+                                                        <th>Date:</th>
+                                                        <td><label>'.$formatDate.'</label></td>
+                                                    </tr>
+                                                </table>
+                                            </body>
+                                        </html>';
+
+
+
+                            add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
+                            add_filter('wp_mail_from','mqw_email_from');
+
+                            function mqw_email_from($content_type) {
+                                return 'info@opentradeinc.com';
+                            }
+
+                            add_filter( 'wp_mail_from_name', function( $name ) {
+                                return 'Opentradeinc';
+                            });
+
+                            wp_mail( $to, $subject, $message, $headers);
+                        }
+                    }
+                } else {
+                    $_GET['message-error'] = "Please select a distributor!";
+                }                
             }
         }
         else{
@@ -1791,18 +1867,40 @@ License: GPL2
 
     if(isset($_POST["actionBulkAssignedUsers"])){
         if(isset($_POST['selectActionAssignedUsers']) and $_POST['selectActionAssignedUsers'] !== "-1"){
-            if (isset($_POST['idAssignedUsers'])) {
-                $idUsers = $_POST["idAssignedUsers"];
-                $idDistributor = $_POST['idDistributor'];
-                foreach ($idUsers as $idUser){
-                    deleteUserDistributor($idUser,$idDistributor);
+            if($_POST['selectActionAssignedUsers'] =='delete'){
+                if (isset($_POST['idAssignedUsers'])){
+                    $idUsers = $_POST["idAssignedUsers"];
+                    $idDistributor = $_POST['idDistributor'];
+                    foreach ($idUsers as $idUser){
+                        deleteUserDistributor($idUser,$idDistributor);
+                    }
+                    $_GET['view-user-distributor'] = true;
+                    $_GET['idDistributor'] = $idDistributor;
                 }
-                $_GET['view-user-distributor'] = true;
-                $_GET['idDistributor'] = $idDistributor;
-            }
-            else{
-                $_GET['message-error']="Please select a user!";
-                $_GET['view-user-distributor'] = true;
+                else{
+                    $_GET['message-error']="Please select a user!";
+                    $_GET['view-user-distributor'] = true;
+                }
+            }else if($_POST['selectActionAssignedUsers'] =='approve'){
+                if (isset($_POST['idAssignedUsers'])){
+                    $idUsers = $_POST["idAssignedUsers"];
+                    $idDistributor = $_POST['idDistributor'];
+                    foreach ($idUsers as $idUser){
+                        approvedUserDistributor($idUser);
+                        $code = sha1( $idUser . time() );
+                        $url = get_page_by_title( 'User Activated' )->guid;
+                        $activation_link = add_query_arg( array( 'key' => $code, 'user' => $idUser ),$url);
+                        add_user_meta( $idUser, 'has_to_be_activated', $code, true );
+                        $user = get_user_by('ID',$idUser);
+                        wp_mail( $user->user_email, 'OpenTrade User Activation', 'Congrats your user of open Trade is create .Here is your activation link: ' . $activation_link );
+                    }
+                    $_GET['view-user-distributor'] = true;
+                    $_GET['idDistributor'] = $idDistributor;
+                }
+                else{
+                    $_GET['message-error']="Please select a user!";
+                    $_GET['view-user-distributor'] = true;
+                }
             }
         }
         else{
