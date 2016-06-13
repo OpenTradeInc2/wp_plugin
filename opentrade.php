@@ -2211,7 +2211,7 @@ License: GPL2
             $userID = $current_user->ID;
             if(uploadFile($_FILES["fileToUpload"], $fullPatch)){
                 readAndProcessFileToUpdate($fullPatch,$filename , $userID, $formatDate);
-                $_GET['message-error'] = "The inventory has been updated!";
+                $_GET['message-success'] = "The inventory has been updated!";
 
             }else{
                 $_GET['message-error'] = 'File was not uploaded';

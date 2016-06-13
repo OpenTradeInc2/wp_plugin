@@ -617,6 +617,7 @@
             if(validatePositionOFHeadersToUpdate($allDataInSheet)){
 
                 $products = getProductsListToUpdate($allDataInSheet, $arrayCount);
+
                 saveProductsUpdate($products);
 
                 $_GET['message-success']='Upload success!';
@@ -721,6 +722,28 @@
             update_post_meta( $product[1], '_price', $price );
 
             update_post_meta($product[1],'_product_attributes',$product_attributes);
+
+            $current_user =  wp_get_current_user();
+            $user_id = $current_user->ID;
+
+            if(strtolower($product[10]) =='kg'){
+                $weight = $product[12];
+            }else{
+                $weight = $product[11];
+            }
+
+            $post = array(
+                'ID'=> $product[1],
+                'post_author' => $user_id,
+                'post_content' => $product[6].' '.$product[8].' '.$product[9].' '.$weight.' '.$product[10],
+                'post_status' => "publish",
+                'post_title' => $product[6],
+                'post_parent' => '',
+                'post_type' => "product",
+                'post_name' => $product[5]
+            );
+
+            wp_update_post($post);
 
         }
 
