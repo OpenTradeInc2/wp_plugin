@@ -83,7 +83,7 @@ License: GPL2
             <table>
                 <thead>
                 <tr>
-                    <th scope="row"><label for="selectDistributor">Please select distributor: <span class="description">(required)</span></label></th>
+                    <th align="left" scope="row"><label for="selectDistributor">Please select distributor: <span class="description">(required)</span></label></th>
                     <td><select name="selectDistributor" id="selectDistributor">
                             <option value="-1">Distributors</option>
                             <?php
@@ -100,7 +100,7 @@ License: GPL2
                     </td>
                 </tr>
                 <tr>
-                    <th scope="row"><label for="fileToUpload">Please select file to upload: <span class="description">(required)</span></label></th>
+                    <th  align="left" scope="row"><label for="fileToUpload">Please select file to upload: <span class="description">(required)</span></label></th>
                     <td><input type="file" name="fileToUpload" id="fileToUpload" accept=".xlsx, .xls" /></td>
                 </tr>
                 <tr>
@@ -348,62 +348,61 @@ License: GPL2
                 <table>
                     <thead>
                     <tr>
-                        <th scope="row"><label for="distributor_id">Distributor ID <span class="description">(required)</span></label></th>
+                        <th align="left" scope="row"><label for="distributor_id">Distributor ID <span class="description">(required)</span></label></th>
                         <td><input name="distributor_id" id="distributor_id" value="<?php echo $_POST['distributor_id'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
-                        <th scope="row"><label for="distributor_name">Distributor Name <span class="description">(required)</span></label></th>
+                        <th align="left" scope="row"><label for="distributor_name">Distributor Name <span class="description">(required)</span></label></th>
                         <td><input name="distributor_name" id="distributor_name" value="<?php echo $_POST['distributor_name'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text"></td>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="distributor_sku_id">Distributor SKU ID <span class="description">(required)</span></label></th>
+                        <th align="left" scope="row"><label for="distributor_sku_id">Distributor SKU ID <span class="description">(required)</span></label></th>
                         <td><input name="distributor_sku_id" id="distributor_sku_id" value="<?php echo $_POST['distributor_sku_id'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text"></td>
-                        <th scope="row"><label for="distributor_sku_description">Distributor SKU Description <span class="description">(required)</span></label></th>
+                        <th align="left" scope="row"><label for="distributor_sku_description">Distributor SKU Description <span class="description">(required)</span></label></th>
                         <td><input name="distributor_sku_description" id="distributor_sku_description" value="<?php echo $_POST['distributor_sku_description'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text"></td>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="lot">Lot#</label></th>
+                        <th align="left" scope="row"><label for="lot">Lot#</label></th>
                         <td><input name="lot" id="distributor_id" value="<?php echo $_POST['lot'];?>" type="text" ></td>
-                        <th scope="row"><label for="packaging_type">Packaging Type <span class="description">(required)</span></label></th>
+                        <th align="left" scope="row"><label for="packaging_type">Packaging Type <span class="description">(required)</span></label></th>
                         <td><input name="packaging_type" id="packaging_type" value="<?php echo $_POST['packaging_type'];?>" type="text"></td>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="packaging_unit">Packaging Unit <span class="description">(required)</span></label></th>
+                        <th align="left" scope="row"><label for="packaging_unit">Packaging Unit <span class="description">(required)</span></label></th>
                         <td><input name="packaging_unit" id="packaging_unit" value="<?php echo $_POST['packaging_unit'];?>" type="text" ></td>
-                        <th scope="row"><label for="packaging_measure">Packaging Measure<span class="description">(required)</span></label></th>
+                        <th align="left" scope="row"><label for="packaging_measure">Packaging Measure<span class="description">(required)</span></label></th>
                         <td><input name="packaging_measure" id="packaging_measure" value="<?php echo $_POST['packaging_measure'];?>" type="text"></td>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="packaging_weight_lb">Packaging Weight (lb)</label></th>
+                        <th align="left" scope="row"><label for="packaging_weight_lb">Packaging Weight (lb)</label></th>
                         <td><input name="packaging_weight_lb" id="packaging_weight_lb" value="<?php echo $_POST['packaging_weight_lb'];?>" type="text" ></td>
-                        <th scope="row"><label for="packaging_weight_kg">Packaging Weight (kg)</label></th>
+                        <th align="left" scope="row"><label for="packaging_weight_kg">Packaging Weight (kg)</label></th>
                         <td><input name="packaging_weight_kg" id="packaging_weight_kg" value="<?php echo $_POST['packaging_weight_kg'];?>" type="text"></td>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="quantity">Quantity <span class="description">(required)</span></label></th>
+                        <th align="left" scope="row"><label for="quantity">Quantity <span class="description">(required)</span></label></th>
                         <td><input name="quantity" id="quantity" value="<?php echo $_POST['quantity'];?>" type="text" ></td>
-                        <th scope="row"><label for="price_unit">Price / Unit<span class="description">(required)</span></label></th>
+                        <th align="left" scope="row"><label for="price_unit">Price / Unit<span class="description">(required)</span></label></th>
                         <td><input name="price_unit" id="price_unit" value="<?php echo $_POST['price_unit'];?>" type="text"></td>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="total_weight_lb">Total Weight (lb)</label></th>
+                        <th align="left" scope="row"><label for="total_weight_lb">Total Weight (lb)</label></th>
                         <td><input name="total_weight_lb" id="total_weight_lb" value="<?php echo $_POST['total_weight_lb'];?>" type="text" ></td>
-                        <th scope="row"><label for="total_weight_kg">Total Weight (Kg)</label></th>
+                        <th align="left" scope="row"><label for="total_weight_kg">Total Weight (Kg)</label></th>
                         <td><input name="total_weight_kg" id="total_weight_kg" value="<?php echo $_POST['total_weight_kg'];?>" type="text"></td>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="price_lb">Price / lb</label></th>
+                        <th align="left" scope="row"><label for="price_lb">Price / lb</label></th>
                         <td><input name="price_lb" id="price_lb" value="<?php echo $_POST['price_lb'];?>" type="text" ></td>
-                        <th scope="row"><label for="price_kg">Price / Kg</label></th>
+                        <th align="left" scope="row"><label for="price_kg">Price / Kg</label></th>
                         <td><input name="price_kg" id="price_kg" value="<?php echo $_POST['price_kg'];?>" type="text"></td>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="warehouse_location_id">Warehouse location ID</label></th>
+                        <th align="left" scope="row"><label for="warehouse_location_id">Warehouse location ID</label></th>
                         <td><input name="warehouse_location_id" id="warehouse_location_id" value="<?php echo $_POST['warehouse_location_id'];?>" type="text" ></td>
-                        <th scope="row"><label for="warehouse_location_address">Warehouse Location Address</label></th>
+                        <th align="left" scope="row"><label for="warehouse_location_address">Warehouse Location Address</label></th>
                         <td><input name="warehouse_location_address" id="warehouse_location_address" value="<?php echo $_POST['warehouse_location_address'];?>" type="text"></td>
                     </tr>
                     </thead>
                     <tr>
-                        <th scope="row"></th>
                         <th scope="row"></th>
                         <td><input name="actionUpdateProduct" id="createusersub" class="button button-primary" value="Update Product" type="submit"></td>
                         <th></th>
@@ -446,11 +445,18 @@ License: GPL2
                             <input id="doaction" class="button action" value="Apply" type="submit" name="actionProducts">
                         </select>
                     </div>
+                    <script>
+                        jQuery(function ($) {
+                            $('#selectAllValues').on('click', function () {
+                                $(':checkbox').prop("checked", $(this).is(':checked'));
+                            });
+                        })
+                    </script>
                     <br class="clear">
                     <table class="widefat" name="tablePendingFiles" id="idTablePendingFiles">
                         <thead>
                         <tr>
-                            <th><input type="checkbox"></th>
+                            <th><input type="checkbox" id="selectAllValues" name ="selectAllValues"></th>
                             <th>File Name</th>
                             <th>Quantity of Products</th>
                             <th>Added By</th>
@@ -471,6 +477,8 @@ License: GPL2
                         </tr>
                         </tfoot>
                         <tbody>
+
+
                         <?php
                         global $wpdb;
 
@@ -532,11 +540,11 @@ License: GPL2
                     <?php
                 }
                 ?>
-                    <input type="hidden" name="idDistributor" value="<?php _e($_POST['idDistributor']) ?>">
+                    <input align="left" type="hidden" name="idDistributor" value="<?php _e($_POST['idDistributor']) ?>">
                     <table>
                         <thead>
                         <tr>
-                            <th scope="row"><label for="nameDistributor">Name: <span class="description">(required)</span></label></th>
+                            <th align="left"  scope="row"><label for="nameDistributor">Name: <span class="description">(required)</span></label></th>
                             <?php
                             if(isset($_POST['editDistributor']) and $_POST['editDistributor'] == true){
                                 ?>
@@ -550,11 +558,11 @@ License: GPL2
                             ?>
                         </tr>
                         <tr>
-                            <th scope="row"><label for="locationDistributor">Location: </label></th>
+                            <th align="left"  scope="row"><label for="locationDistributor">Location: </label></th>
                             <td><textarea rows="4" cols="50" name="locationDistributor"><?php echo $_POST['locationDistributor'];?></textarea></td>
                         </tr>
                         <tr>
-                            <th scope="row"><label for="locationDistributor">Tax Id: </label></th>
+                            <th align="left"  scope="row"><label for="locationDistributor">Tax Id: </label></th>
                             <td><input type="text" name="taxIdDistributor" value="<?php echo $_POST['taxIdDistributor'];?>"></td>
                         </tr>
                         <tr>
@@ -562,11 +570,11 @@ License: GPL2
                             <?php
                             if(isset($_POST['editDistributor']) and $_POST['editDistributor'] == true){
                                 ?>
-                                <td><input id="doAction" class="button action" value="Update" type="submit" name="actionUpdateDistributor"></td>
+                                <td><input class="button button-primary" id="doAction" class="button action" value="Update" type="submit" name="actionUpdateDistributor"></td>
                                 <?php
                             }else{
                                 ?>
-                                <td><input id="doAction" class="button action" value="Create" type="submit" name="actionCreateDistributor"></td>
+                                <td><input class="button button-primary" id="doAction" class="button action" value="Create" type="submit" name="actionCreateDistributor"></td>
                                 <?php
                             }
                             ?>
@@ -764,7 +772,7 @@ License: GPL2
                 <table>
                 <thead>
                 <tr>
-                    <th scope="row"><label for="user_login">Username <span class="description">(required)</span></label></th>
+                    <th align="left" scope="row" ><label for="user_login">Username <span class="description">(required)</span></label></th>
                     <?php
                     if(isset($_POST['editUser']) and $_POST['editUser'] == true){
                         ?>
@@ -778,7 +786,7 @@ License: GPL2
                     ?>
                 </tr>
                 <tr>
-                    <th scope="row"><label for="email">Email <span class="description">(required)</span></label></th>
+                    <th align="left" scope="row"><label for="email">Email <span class="description">(required)</span></label></th>
                     <?php
                     if(isset($_POST['editUser']) and $_POST['editUser'] == true){
                         ?>
@@ -792,11 +800,11 @@ License: GPL2
                     ?>
                 </tr>
                 <tr>
-                    <th scope="row"><label for="first_name">First Name </label></th>
+                    <th align="left" scope="row"><label for="first_name">First Name </label></th>
                     <td><input name="first_name" id="first_name" value="<?php echo $_POST['first_name'];?>" type="text"></td>
                 </tr>
                 <tr>
-                    <th scope="row"><label for="last_name">Last Name </label></th>
+                    <th align="left" scope="row"><label for="last_name">Last Name </label></th>
                     <td><input name="last_name" id="last_name" value="<?php echo $_POST['last_name'];?>" type="text"></td>
                 </tr>
                 <tr>
@@ -947,37 +955,37 @@ License: GPL2
                 <table>
                     <thead>
                     <tr>
-                        <th scope="row"><label for="name">Name <span class="description">(required)</span></label></th>
+                        <th align="left" scope="row"><label for="name">Name <span class="description">(required)</span></label></th>
                         <?php
                         if(isset($_POST['editWarehouse']) and $_POST['editWarehouse'] == true){
                             ?>
-                            <td><input readonly name="name" id="name" value="<?php echo $_POST['name'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                            <td align="left"><input readonly name="name" id="name" value="<?php echo $_POST['name'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
                             <?php
                         }else{
                             ?>
-                            <td><input name="name" id="name" value="<?php echo $_POST['name'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                            <td align="left"><input name="name" id="name" value="<?php echo $_POST['name'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
                             <?php
                         }
                         ?>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="zipcode">Zip Code</label></th>
+                        <th align="left" scope="row"><label for="zipcode">Zip Code</label></th>
                         <td><input name="zipcode" id="zipcode" value="<?php echo $_POST['zipcode'];?>" type="text"></td>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="latitude">Latitude </label></th>
+                        <th align="left" scope="row"><label for="latitude">Latitude </label></th>
                         <td><input name="latitude" id="latitude" value="<?php echo $_POST['latitude'];?>" type="text"></td>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="longitude">longitude </label></th>
+                        <th align="left" scope="row"><label for="longitude">Longitude </label></th>
                         <td><input name="longitude" id="longitude" value="<?php echo $_POST['longitude'];?>" type="text"></td>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="location">location </label></th>
+                        <th align="left" scope="row"><label for="location">Location </label></th>
                         <td><textarea rows="4" cols="50" name="location"><?php echo $_POST['location'];?></textarea></td>
                     </tr>
                     <tr>
-                        <th scope="row"><label for="city">City </label></th>
+                        <th align="left" scope="row"><label for="city">City </label></th>
                         <td><input name="city" id="city" value="<?php echo $_POST['city'];?>" type="text"></td>
                     </tr>
                     <tr>
