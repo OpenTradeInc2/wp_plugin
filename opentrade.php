@@ -601,11 +601,37 @@ License: GPL2
                             <input class="button action" value="Add New User" type="submit" name="actionNewUser">
                         </select>
                     </div>
+                    <script language="JavaScript">
+                        function checkAssigned(ele) {
+                            var checkboxes = document.getElementsByTagName('input');
+                            if (ele.checked) {
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'IdAssignedUsers') {
+                                            checkboxes[i].checked = true;
+                                        }
+                                    }
+                                }
+                            } else {
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    console.log(i)
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'IdAssignedUsers') {
+                                            checkboxes[i].checked = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    </script>
+
                 <input type="hidden" name="idDistributor" value="<?php _e($_GET['idDistributor']) ?>">
                 <table class="widefat">
                     <thead>
                     <tr>
-                        <th><input type="checkbox"></th>
+                        <th><input type="checkbox" onchange="checkAssigned(this)" name="chk[]" id="IdAssignedUsers" /> </th>
                         <th>ID</th>
                         <th>Username</th>
                         <th>Full Name</th>
@@ -616,7 +642,7 @@ License: GPL2
                     </thead>
                     <tfoot>
                     <tr>
-                        <th><input type="checkbox"></th>
+                        <th></th>
                         <th>ID</th>
                         <th>Username</th>
                         <th>Full Name</th>
@@ -645,7 +671,7 @@ License: GPL2
                             ?>
                             <tr>
                                 <?php
-                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idAssignedUsers[]\" value=" . $user->distributor_user_userid . "></td>";
+                                echo "<td><input  id=\"IdAssignedUsers\" style='margin-left:8px;' type=\"checkbox\" name=\"idAssignedUsers[]\" value=" . $user->distributor_user_userid . "></td>";
                                 echo "<td>" . $user->distributor_user_userid . "</td>";
                                 echo "<td>" . $user->user_login . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idUser\" value=\"$user->distributor_user_userid\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditUser\"></span></div></form></td>";
                                 echo "<td>" . $user->display_name . "</td>";
@@ -672,7 +698,7 @@ License: GPL2
                     <?php
                 }
                 ?>
-                <form action="" method="post" enctype="multipart/form-data">
+                <form action="" method="post" enctype="multipart/form-data" name="Unassigned " id="Unassigned ">
                     <div class="alignleft actions bulkactions">
                         <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
                         <select name="selectActionUsers" id="bulk-action-selector-top">
@@ -682,11 +708,38 @@ License: GPL2
                             <input id="doAction" class="button action" value="Apply" type="submit" name="actionBulkUsers">
                         </select>
                     </div>
+
+                    <script language="JavaScript">
+                        function checkAll(ele) {
+                            var checkboxes = document.getElementsByTagName('input');
+                            if (ele.checked) {
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                         if(currentValue.toString() == 'IdUnassignedUsers') {
+                                            checkboxes[i].checked = true;
+                                        }
+                                    }
+                                }
+                            } else {
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    console.log(i)
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'IdUnassignedUsers') {
+                                            checkboxes[i].checked = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    </script>
+
                     <input type="hidden" name="idDistributor" value="<?php _e($_GET['idDistributor']) ?>">
                 <table class="widefat">
                     <thead>
                     <tr>
-                        <th><input type="checkbox"></th>
+                        <th><input type="checkbox" onchange="checkAll(this)" name="chk[]" id="IdUnassignedUsers" /> </th>
                         <th>ID</th>
                         <th>Username</th>
                         <th>Full Name</th>
@@ -696,7 +749,7 @@ License: GPL2
                     </thead>
                     <tfoot>
                     <tr>
-                        <th><input type="checkbox"></th>
+                        <th></th>
                         <th>ID</th>
                         <th>Username</th>
                         <th>Full Name</th>
@@ -716,7 +769,7 @@ License: GPL2
                             ?>
                             <tr>
                                 <?php
-                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idUsers[]\" value=" . $user->ID . "></td>";
+                                echo "<td><input id=\"IdUnassignedUsers\" style='margin-left:8px;' type=\"checkbox\" name=\"idUsers[]\" value=" . $user->ID . "></td>";
                                 echo "<td>" . $user->ID . "</td>";
                                 echo "<td>" . $user->user_login . "</td>";
                                 echo "<td>" . $user->display_name . "</td>";
@@ -834,6 +887,13 @@ License: GPL2
             <form action="" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="idDistributor" value="<?php _e($_POST['idDistributor']) ?>">
                 <input id="actionu" class="button action" value="Back Distributor List" type="submit" name="actionBackDistributorList">
+                <script>
+                    jQuery(function ($) {
+                        $('#selectAllValues').on('click', function () {
+                            $(':checkbox').prop("checked", $(this).is(':checked'));
+                        });
+                    })
+                </script>
             <br>
             <br>
             <?php
@@ -858,7 +918,7 @@ License: GPL2
                 <table class="widefat">
                     <thead>
                     <tr>
-                        <th><input type="checkbox"></th>
+                        <th><input type="checkbox" id="selectAllValues" name ="selectAllValues"></th>
                         <th>ID</th>
                         <th>Name</th>
                         <th>ZipCode</th>
@@ -872,7 +932,7 @@ License: GPL2
                     </thead>
                     <tfoot>
                     <tr>
-                        <th><input type="checkbox"></th>
+                        <th></th>
                         <th>ID</th>
                         <th>Name</th>
                         <th>ZipCode</th>
@@ -1035,10 +1095,17 @@ License: GPL2
                             <input id="doAction" class="button action" value="New Distributor" type="submit" name="actionNewDistributor">
                         </select>
                 </div>
+                <script>
+                    jQuery(function ($) {
+                        $('#selectAllValues').on('click', function () {
+                            $(':checkbox').prop("checked", $(this).is(':checked'));
+                        });
+                    })
+                </script>
                 <table class="widefat">
                     <thead>
                     <tr>
-                        <th><input type="checkbox"></th>
+                        <th><input type="checkbox" id="selectAllValues" name ="selectAllValues"></th>
                         <th>ID</th>
                         <th>Distributor</th>
                         <th>Location</th>
@@ -1051,7 +1118,7 @@ License: GPL2
                     </thead>
                     <tfoot>
                     <tr>
-                        <th><input type="checkbox"></th>
+                        <th></th>
                         <th>ID</th>
                         <th>Distributor</th>
                         <th>Location</th>
@@ -1189,11 +1256,18 @@ License: GPL2
                     </select>
 
                 </div>
+                <script>
+                    jQuery(function ($) {
+                        $('#selectAllValues').on('click', function () {
+                            $(':checkbox').prop("checked", $(this).is(':checked'));
+                        });
+                    })
+                </script>
                 <br class="clear">
                 <table class="widefat" name="tableRequestsinformation" id="idTableRequestInformation">
                     <thead>
                     <tr>
-                        <th><input type="checkbox"></th>
+                        <th><input type="checkbox" id="selectAllValues" name ="selectAllValues"></th>
                         <th>Id</th>
                         <th>User</th>
                         <th>Email</th>
@@ -1350,11 +1424,18 @@ License: GPL2
                         <input id="doaction" class="button action" value="Apply" type="submit" name="actionOfferInformation">
                     </select>
                 </div>
+                <script>
+                    jQuery(function ($) {
+                        $('#selectAllValues').on('click', function () {
+                            $(':checkbox').prop("checked", $(this).is(':checked'));
+                        });
+                    })
+                </script>
                 <br class="clear">
                 <table class="widefat" name="tablePendingFiles" id="idTablePendingFiles">
                     <thead>
                     <tr>
-                        <th><input type="checkbox"></th>
+                        <th><input type="checkbox" id="selectAllValues" name ="selectAllValues"></th>
                         <th>Id</th>
                         <th>User Id</th>
                         <th>User Name</th>
@@ -1508,11 +1589,18 @@ License: GPL2
                             <input id="doaction" class="button action" value="Apply" type="submit" name="actionPurchaseOrders">
                         </select>
                     </div>
+                    <script>
+                        jQuery(function ($) {
+                            $('#selectAllValues').on('click', function () {
+                                $(':checkbox').prop("checked", $(this).is(':checked'));
+                            });
+                        })
+                    </script>
                     <br class="clear">
                     <table class="widefat" name="tablePendingFiles" id="idTablePendingFiles">
                         <thead>
                         <tr>
-                            <th><input type="checkbox"></th>
+                            <th><input type="checkbox" id="selectAllValues" name ="selectAllValues"></th>
                             <th>Id</th>
                             <th>User Name</th>
                             <th>User Email</th>
