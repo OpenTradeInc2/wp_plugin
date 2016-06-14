@@ -1709,7 +1709,6 @@ License: GPL2
                 $_GET['message-error'] = $errors[0];
             }
         }
-
     }
     
     if(isset($_POST["actionViewDetails"])){
@@ -1874,7 +1873,6 @@ License: GPL2
             $_GET['message-error']="Please select one action!";
             $_GET['view-user-distributor'] = true;
         }
-        
     }
 
     if(isset($_POST["actionBulkAssignedUsers"])){
@@ -1919,7 +1917,6 @@ License: GPL2
             $_GET['message-error']="Please select one action!";
             $_GET['view-user-distributor'] = true;
         }
-
     }
 
     if(isset($_POST["actionNewUser"])){
@@ -2344,13 +2341,4 @@ License: GPL2
             $_GET['idOfferInfo'] = $_POST['idOfferInfo'];
         }
     }
-
-    
-    ?>
-
-<script type="application/javascript">
-    function prueba($texto) {
-        alert("Entra");
-    }
-</script>
-
+?>
