@@ -148,10 +148,12 @@
             update_post_meta( $post_id, '_sale_price_dates_from', "" );
             update_post_meta( $post_id, '_sale_price_dates_to', "" );
             update_post_meta( $post_id, '_price', $price );
-            update_post_meta( $post_id, '_sold_individually', "yes" );
+            update_post_meta( $post_id, '_sold_individually', "no" );
             update_post_meta( $post_id, '_manage_stock', "yes" );
             update_post_meta( $post_id, '_backorders', "no" );
             update_post_meta( $post_id, '_stock', $product->quantity );
+
+            setPlaceLocator($post_id, $product->distributor_sku_description, $product->warehouse_location_address);
         }
         else
         {
@@ -342,6 +344,20 @@
         }
 
         return $result;
+    }
+
+    function setPlaceLocator($postId, $skuDescription, $wareHouseLocation){
+        global $wpdb;
+
+        if($wpdb->check_connection()){
+            $userEmail = getCurrentUser()->user_email;
+
+            $wpdb->query("INSERT INTO `".$wpdb->prefix."places_locator`
+                            (`post_id`, `feature`, `post_status`, `post_type`, `post_title`, `lat`, `long`, `street_number`, `street_name`, `street`, `apt`, `city`, `state`, `state_long`, `zipcode`, `country`, `country_long`, `address`, `formatted_address`, `phone`, `fax`, `email`, `website`, `map_icon`)
+                          VALUES
+                            (".$postId.", 0, 'publish', 'product', '".$skuDescription."', 40.168049, -74.507874, 0, '".$wareHouseLocation."', '".$wareHouseLocation."', '', '', '', '', '', '', '','".$wareHouseLocation."', '".$wareHouseLocation."', '', '', '".$userEmail."', '', '_default.png');");
+        }
+
     }
 
     function zerofill($mStretch, $iLength = 2)
