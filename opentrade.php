@@ -1545,6 +1545,10 @@ License: GPL2
                             foreach ($purchaseOrders as $purchaseOrder) {
                                 $user = get_user_by('ID', $purchaseOrder->user_id);
                                 $products = $wpdb->get_results("SELECT * FROM `ot_custom_product_purchase_order`  WHERE `purchase_order_id` = " . $purchaseOrder->purchase_order_id . ";");
+                                $url = $purchaseOrder->file_patch;
+                                $name = $purchaseOrder->file_name;
+                                $arreglo = explode("/",$purchaseOrder->file_patch);
+                                $ruta = $arreglo[1]."/".$arreglo[2]."/".$arreglo[3];
                                 ?>
                                 <tr>
                                     <?php
@@ -1554,7 +1558,7 @@ License: GPL2
                                     echo "<td>" . $user->user_email . "</td>";
                                     echo "<td>" . sizeof($products) . "</td>";
                                     echo "<td>$" . $purchaseOrder->total_amount . "</td>";
-                                    echo "<td><a href='" . $purchaseOrder->file_patch . "'>" . $purchaseOrder->file_name . "</a></td>";
+                                    echo "<td><a href='../wp-content/plugins/woocommerce/templates/checkout/". $ruta."' download>" . $name . "</a></td>";
                                     echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idPurchaseOrder\" value=\"$purchaseOrder->purchase_order_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionPurchaseOrderViewProducts\"></form></td>";
                                     ?>
                                 </tr>
@@ -2242,4 +2246,13 @@ License: GPL2
             $_GET['idOfferInfo'] = $_POST['idOfferInfo'];
         }
     }
+
+    
     ?>
+
+<script type="application/javascript">
+    function prueba($texto) {
+        alert("Entra");
+    }
+</script>
+
