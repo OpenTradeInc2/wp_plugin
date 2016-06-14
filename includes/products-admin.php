@@ -139,7 +139,7 @@
             update_post_meta( $post_id, '_sale_price', $price );
             update_post_meta( $post_id, '_purchase_note', "" );
             update_post_meta( $post_id, '_featured', "no" );
-            update_post_meta( $post_id, '_weight', "" );
+            update_post_meta( $post_id, '_weight', $product->total_weight_lb );
             update_post_meta( $post_id, '_length', "" );
             update_post_meta( $post_id, '_width', "" );
             update_post_meta( $post_id, '_height', "" );
