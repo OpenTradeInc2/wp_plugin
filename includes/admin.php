@@ -85,6 +85,7 @@
         if($wpdb->check_connection()){
             $warehouse = $wpdb->get_results("SELECT
                                                 w.`warehouse_name`,
+                                                w.`warehouse_file_id`,
                                                 wl.`location_id`,
                                                 wl.`warehouse_id`,
                                                 wl.`zipcode`,

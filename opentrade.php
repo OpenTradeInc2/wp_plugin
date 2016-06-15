@@ -927,6 +927,7 @@ License: GPL2
                         <th><input type="checkbox" id="selectAllValues" name ="selectAllValues"></th>
                         <th>ID</th>
                         <th>Name</th>
+                        <th>Warehouse location ID</th>
                         <th>ZipCode</th>
                         <th>Latitude</th>
                         <th>Longitude</th>
@@ -941,6 +942,7 @@ License: GPL2
                         <th></th>
                         <th>ID</th>
                         <th>Name</th>
+                        <th>Warehouse location ID</th>
                         <th>ZipCode</th>
                         <th>Latitude</th>
                         <th>Longitude</th>
@@ -956,7 +958,7 @@ License: GPL2
 
                     if($wpdb->check_connection()){
                         $idDistributor = $_POST['idDistributor'];
-                        $warehouses =  $wpdb->get_results("SELECT cwl.`warehouse_id`, cw.`warehouse_name`, cwl.`zipcode`, cwl.`latitude`, cwl.`longitude`, cwl.`location`, cwl.`city`, user.`user_login`, cwl.`added_date`
+                        $warehouses =  $wpdb->get_results("SELECT cwl.`warehouse_id`, cw.`warehouse_name`, cw.`warehouse_file_id`, cwl.`zipcode`, cwl.`latitude`, cwl.`longitude`, cwl.`location`, cwl.`city`, user.`user_login`, cwl.`added_date`
                                                              FROM `ot_custom_warehouse_location` as cwl 
                                                              INNER JOIN `ot_custom_warehouse` AS cw ON cwl.`warehouse_id` = cw.`warehouse_id`
                                                              INNER JOIN `ot_custom_distributor_warehouse` AS cdw ON cdw.`warehouse_id` = cw.`warehouse_id`
@@ -968,7 +970,8 @@ License: GPL2
                                 <?php
                                 echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idWarehouses[]\" value=" . $warehouse->warehouse_id . "></td>";
                                 echo "<td>" . $warehouse->warehouse_id . "</td>";
-                                echo "<td>" . $warehouse->warehouse_name . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idWarehouse\" value=\"$warehouse->warehouse_id\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditWareHouse\"></span></div></form></td>";
+                                echo "<td>" . $warehouse->warehouse_name . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idDistributor\" value=\"$idDistributor\"><input type=\"hidden\" name=\"idWarehouse\" value=\"$warehouse->warehouse_id\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditWareHouse\"></span></div></form></td>";
+                                echo "<td>" . $warehouse->warehouse_file_id . "</td>";
                                 echo "<td>" . $warehouse->zipcode . "</td>";
                                 echo "<td>" . $warehouse->latitude . "</td>";
                                 echo "<td>" . $warehouse->longitude . "</td>";
@@ -1025,11 +1028,25 @@ License: GPL2
                         <?php
                         if(isset($_POST['editWarehouse']) and $_POST['editWarehouse'] == true){
                             ?>
-                            <td align="left"><input readonly name="name" id="name" value="<?php echo $_POST['name'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                            <td align="left"><input name="name" id="name" value="<?php echo $_POST['name'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
                             <?php
                         }else{
                             ?>
                             <td align="left"><input name="name" id="name" value="<?php echo $_POST['name'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                            <?php
+                        }
+                        ?>
+                    </tr>
+                    <tr>
+                        <th align="left" scope="row"><label for="name">Warehouse location ID</label></th>
+                        <?php
+                        if(isset($_POST['editWarehouse']) and $_POST['editWarehouse'] == true){
+                            ?>
+                            <td align="left"><input name="file_id" id="file_id" value="<?php echo $_POST['file_id'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
+                            <?php
+                        }else{
+                            ?>
+                            <td align="left"><input name="file_id" id="file_id" value="<?php echo $_POST['file_id'];?>" aria-required="true" autocapitalize="none" autocorrect="off" maxlength="60" type="text" ></td>
                             <?php
                         }
                         ?>
@@ -1816,7 +1833,9 @@ License: GPL2
             } else if ($selectOption == 'approve') {
                 if (isset($_POST['idProduct'])) {
                     $idProductsFile = $_POST["idProduct"];
-                    approveProductsFiles($idProductsFile);
+                    if(approveProductsFiles($idProductsFile)){
+                        $_GET['message-success'] = 'File Approve!';
+                    }
                 } else {
                     errorMessage('Please select a file to approve!');
                 }
@@ -2070,7 +2089,7 @@ License: GPL2
 
     if(isset($_POST["actionCreateWarehouse"])){
         if(isset($_POST["name"]) and $_POST["name"] !== ""){
-            createWarehouse($_POST["name"],$_POST["zipcode"],$_POST["latitude"],$_POST["longitude"],$_POST["location"],$_POST["city"],$_POST['idDistributor']);
+            createWarehouse($_POST["name"],$_POST["zipcode"],$_POST["latitude"],$_POST["longitude"],$_POST["location"],$_POST["city"],$_POST['idDistributor'],$_POST['file_id']);
             $_GET['idDistributor'] = $_POST['idDistributor'];
             $_GET['view-warehouse-list'] = true;
 
@@ -2125,10 +2144,12 @@ License: GPL2
 
     if(isset($_POST["actionEditWareHouse"])){
         $_GET['view-add-new-warehouse'] = true;
+        $_GET['idDistributor'] = $_POST['idDistributor'];
         $idWarehouse = $_POST['idWarehouse'];
         $warehouse = getWarehouseByID($idWarehouse);
         $_POST['idWarehouse'] = $warehouse->warehouse_id;
         $_POST['name']= $warehouse->warehouse_name;
+        $_POST['file_id']= $warehouse->warehouse_file_id;
         $_POST['zipcode'] = $warehouse->zipcode;
         $_POST['latitude'] = $warehouse->latitude;
         $_POST['longitude'] = $warehouse->longitude;
@@ -2139,8 +2160,7 @@ License: GPL2
 
     if(isset($_POST["actionUpdateWarehouse"])){
         if(isset($_POST["name"]) and $_POST["name"] !== ""){
-            updateWarehouse($_POST["idWarehouse"], $_POST["zipcode"], $_POST["latitude"], $_POST["longitude"], $_POST["location"], $_POST["city"]);
-            $_POST['idDistributor'] = $_POST['idDistributor'];
+            updateWarehouse($_POST["idWarehouse"], $_POST["zipcode"], $_POST["latitude"], $_POST["longitude"], $_POST["location"], $_POST["city"], $_POST["file_id"], $_POST["name"]);
             $_GET['view-warehouse-list'] = true;
 
         }else{

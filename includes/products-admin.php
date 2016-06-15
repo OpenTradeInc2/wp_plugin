@@ -154,6 +154,8 @@
             update_post_meta( $post_id, '_stock', $product->quantity );
 
             setPlaceLocator($post_id, $product->distributor_sku_description, $product->warehouse_location_address);
+
+            setWareHouse($post_id, $product->warehouse_location_id, $product->warehouse_location_address, $product->distributor_id);
         }
         else
         {
@@ -355,7 +357,82 @@
             $wpdb->query("INSERT INTO `".$wpdb->prefix."places_locator`
                             (`post_id`, `feature`, `post_status`, `post_type`, `post_title`, `lat`, `long`, `street_number`, `street_name`, `street`, `apt`, `city`, `state`, `state_long`, `zipcode`, `country`, `country_long`, `address`, `formatted_address`, `phone`, `fax`, `email`, `website`, `map_icon`)
                           VALUES
-                            (".$postId.", 0, 'publish', 'product', '".$skuDescription."', 40.168049, -74.507874, 0, '".$wareHouseLocation."', '".$wareHouseLocation."', '', '', '', '', '', '', '','".$wareHouseLocation."', '".$wareHouseLocation."', '', '', '".$userEmail."', '', '_default.png');");
+                            (".$postId.", 0, 'publish', 'product', '".$skuDescription."', 0, 0, 0, '".$wareHouseLocation."', '".$wareHouseLocation."', '', '', '', '', '', '', '','".$wareHouseLocation."', '".$wareHouseLocation."', '', '', '".$userEmail."', '', '_default.png');");
+        }
+
+    }
+
+    function setWareHouse($post_id, $warehouseLocationId, $warehouseLocationAddress, $distributorID){
+        global $wpdb;
+
+        $user = getCurrentUser();
+        $date = getFormatDate();
+
+        if($wpdb->check_connection()){
+
+            $totalIDs = $wpdb->get_results("SELECT w.`warehouse_id` as warehouse_id
+                                                 FROM `ot_custom_warehouse` AS w INNER JOIN `ot_custom_distributor_warehouse` AS dw ON w.`warehouse_id` = dw.`warehouse_id`
+                                                 WHERE w.`warehouse_file_id` = '".$warehouseLocationId."' and dw.`distributor_id` = ".$distributorID.";");
+            if(sizeof($totalIDs) !== 0){
+                $warehouse_id = $totalIDs[0]->warehouse_id;
+
+                $wpdb->query("INSERT INTO `ot_custom_warehouse_product`
+                                (`warehouse_id`,
+                                `product_id`,
+                                `added_by`,
+                                `added_date`)
+                              VALUES
+                                (".$warehouse_id.",
+                                ".$post_id.",
+                                ".$user->ID.",
+                                '".$date."');");
+
+            }else{
+                errorMessage('Some warehouses must be updated');
+                $wpdb->query("INSERT INTO `ot_custom_warehouse`
+                                (`warehouse_name`,
+                                `added_by`,
+                                `added_date`,
+                                `warehouse_file_id`)
+                             VALUES
+                            ('', 
+                            ".$user->ID.",
+                            '".$date."',
+                            '".$warehouseLocationId."');");
+
+                $warehouseId = $wpdb->insert_id;
+
+                $wpdb->query("INSERT INTO `ot_custom_warehouse_location`
+                                (`warehouse_id`,
+                                `zipcode`,
+                                `latitude`,
+                                `longitude`,
+                                `location`,
+                                `city`,
+                                `added_by`,
+                                `added_date`)
+                              VALUES
+                                (".$warehouseId.",
+                                '',
+                                '',
+                                '',
+                                '".$warehouseLocationAddress."',
+                                '',
+                                ".$user->ID.",
+                                '".$date."');");
+
+                $wpdb->query("INSERT INTO `ot_custom_distributor_warehouse`
+                                (`distributor_id`,
+                                `warehouse_id`,
+                                `added_by`,
+                                `added_date`)
+                              VALUES
+                                (".$distributorID.",
+                                ".$warehouseId.",
+                                ".$user->ID.",
+                                '".$date."');");
+
+            }
         }
 
     }
@@ -441,7 +518,7 @@
         }
     }
 
-    function createWarehouse($name, $zipCode, $latitude,$longitude, $location, $city, $distributorID){
+    function createWarehouse($name, $zipCode, $latitude,$longitude, $location, $city, $distributorID,$file_id){
 
         global $wpdb;
 
@@ -450,11 +527,13 @@
             $wpdb->query("INSERT INTO `ot_custom_warehouse`
                                 (`warehouse_name`,
                                 `added_by`,
-                                `added_date`)
+                                `added_date`,
+                                `warehouse_file_id`)
                              VALUES
                             ('".$name."', 
                             ".getCurrentUser()->ID.",
-                            '".getFormatDate()."');");
+                            '".getFormatDate()."',
+                            '".$file_id."');");
 
             $warehouseId = $wpdb->insert_id;
 
@@ -518,11 +597,17 @@
         }
     }
 
-    function updateWarehouse($IdWarehouse, $zipCode, $latitude,$longitude, $location, $city){
+    function updateWarehouse($IdWarehouse, $zipCode, $latitude,$longitude, $location, $city, $file_id, $name){
 
         global $wpdb;
 
         if($wpdb->check_connection()){
+
+            $wpdb->query("UPDATE `ot_custom_warehouse`
+                          SET
+                            `warehouse_name` = '".$name."',
+                            `warehouse_file_id` = '".$file_id."'                            
+                          WHERE `warehouse_id` =".$IdWarehouse.";");
 
             $wpdb->query("UPDATE `ot_custom_warehouse_location`
                           SET                        
@@ -534,6 +619,15 @@
                             `edited_by` = ".getCurrentUser()->ID.",
                             `edited_date` = '".getFormatDate()."'
                           WHERE `warehouse_id` =".$IdWarehouse.";");
+
+            $productsID= $wpdb->get_results("SELECT `product_id` FROM `ot_custom_warehouse_product` WHERE  `warehouse_id` =".$IdWarehouse.";");
+
+            foreach ($productsID as $productID){
+
+                $query = "UPDATE `".$wpdb->prefix."places_locator` SET `lat` = ".$latitude.", `long` = ".$longitude.", `city` = '".$city."', `zipcode` = '".$zipCode."', `address` = '".$location."', `formatted_address` = '".$location."' WHERE `post_id` = ".$productID->product_id.";";
+
+                $wpdb->query($query);
+            }
 
             return true;
         }
