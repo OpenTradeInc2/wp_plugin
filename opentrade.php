@@ -447,16 +447,44 @@ License: GPL2
                     </div>
                     <script>
                         jQuery(function ($) {
-                            $('#selectAllValues').on('click', function () {
+                            $('#selectAllValuesHead').on('click', function () {
                                 $(':checkbox').prop("checked", $(this).is(':checked'));
                             });
                         })
+                    </script>
+                    <script language="JavaScript">
+                        function verifyChecks(ele) {
+                            var checkboxes = document.getElementsByTagName('input');
+                            if (ele.checked) {
+                                var countTotalChecks = 0;
+                                var countTotalChecksChecked = 0;
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'selectAllValues') {
+                                            countTotalChecks++;
+                                            if (checkboxes[i].checked){
+                                                countTotalChecksChecked++;
+                                            }
+                                        }
+                                    }
+                                }
+                                if ((countTotalChecks>0) && (countTotalChecksChecked>0) && (countTotalChecks== countTotalChecksChecked)){
+                                    var checkHead = document.getElementById('selectAllValuesHead');
+                                    checkHead.checked = true;
+                                }
+                            }
+                            else {
+                                var checkHead = document.getElementById('selectAllValuesHead');
+                                checkHead.checked = false;
+                            }
+                        }
                     </script>
                     <br class="clear">
                     <table class="widefat" name="tablePendingFiles" id="idTablePendingFiles">
                         <thead>
                         <tr>
-                            <th><input type="checkbox" id="selectAllValues" name ="selectAllValues"></th>
+                            <th><input type="checkbox" id="selectAllValuesHead" name ="selectAllValuesHead"></th>
                             <th>File Name</th>
                             <th>Quantity of Products</th>
                             <th>Added By</th>
@@ -490,7 +518,7 @@ License: GPL2
                                 ?>
                                 <tr>
                                     <?php
-                                    echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idProduct[]\" value=" . $product_file->inventory_id . "></td>";
+                                    echo "<td><input onchange='verifyChecks(this)' id='selectAllValues' style='margin-left:8px;' type=\"checkbox\" name=\"idProduct[]\" value=" . $product_file->inventory_id . "></td>";
                                     echo "<td>" . $product_file->file_md5 . "</td>";
                                     echo "<td>" . $product_file->items_count . "</td>";
                                     echo "<td>" . $product_file->added_by . "</td>";
@@ -610,21 +638,47 @@ License: GPL2
                                 for (var i = 0; i < checkboxes.length; i++) {
                                     if (checkboxes[i].type == 'checkbox') {
                                         var currentValue =checkboxes[i].id;
-                                        if(currentValue.toString() == 'IdAssignedUsers') {
+                                        if(currentValue.toString() == 'chkAssignedUsers') {
                                             checkboxes[i].checked = true;
                                         }
                                     }
                                 }
                             } else {
                                 for (var i = 0; i < checkboxes.length; i++) {
-                                    console.log(i)
                                     if (checkboxes[i].type == 'checkbox') {
                                         var currentValue =checkboxes[i].id;
-                                        if(currentValue.toString() == 'IdAssignedUsers') {
+                                        if(currentValue.toString() == 'chkAssignedUsers') {
                                             checkboxes[i].checked = false;
                                         }
                                     }
                                 }
+                            }
+                        }
+
+                        function verifyChecks(ele) {
+                            var checkboxes = document.getElementsByTagName('input');
+                            if (ele.checked) {
+                                var countTotalChecks = 0;
+                                var countTotalChecksChecked = 0;
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'chkAssignedUsers') {
+                                            countTotalChecks++;
+                                            if (checkboxes[i].checked){
+                                                countTotalChecksChecked++;
+                                            }
+                                        }
+                                    }
+                                }
+                                if ((countTotalChecks>0) && (countTotalChecksChecked>0) && (countTotalChecks== countTotalChecksChecked)){
+                                    var checkHead = document.getElementById('headChkAssignedUsers');
+                                    checkHead.checked = true;
+                                }
+                            }
+                            else {
+                                var checkHead = document.getElementById('headChkAssignedUsers');
+                                checkHead.checked = false;
                             }
                         }
                     </script>
@@ -633,7 +687,7 @@ License: GPL2
                 <table class="widefat">
                     <thead>
                     <tr>
-                        <th><input type="checkbox" onchange="checkAssigned(this)" name="chk[]" id="IdAssignedUsers" /> </th>
+                        <th><input type="checkbox" onchange="checkAssigned(this)" name="chk[]" id="headChkAssignedUsers" /> </th>
                         <th>ID</th>
                         <th>Username</th>
                         <th>Full Name</th>
@@ -676,7 +730,7 @@ License: GPL2
                             ?>
                             <tr>
                                 <?php
-                                echo "<td><input  id=\"IdAssignedUsers\" style='margin-left:8px;' type=\"checkbox\" name=\"idAssignedUsers[]\" value=" . $user->distributor_user_userid . "></td>";
+                                echo "<td><input onchange='verifyChecks(this)'  id=\"chkAssignedUsers\" style='margin-left:8px;' type=\"checkbox\" name=\"idAssignedUsers[]\" value=" . $user->distributor_user_userid . "></td>";
                                 echo "<td>" . $user->distributor_user_userid . "</td>";
                                 echo "<td>" . $user->user_login . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idUser\" value=\"$user->distributor_user_userid\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditUser\"></span></div></form></td>";
                                 echo "<td>" . $user->display_name . "</td>";
@@ -722,7 +776,7 @@ License: GPL2
                                 for (var i = 0; i < checkboxes.length; i++) {
                                     if (checkboxes[i].type == 'checkbox') {
                                         var currentValue =checkboxes[i].id;
-                                         if(currentValue.toString() == 'IdUnassignedUsers') {
+                                         if(currentValue.toString() == 'chkUnassignedUsers') {
                                             checkboxes[i].checked = true;
                                         }
                                     }
@@ -732,20 +786,48 @@ License: GPL2
                                     console.log(i)
                                     if (checkboxes[i].type == 'checkbox') {
                                         var currentValue =checkboxes[i].id;
-                                        if(currentValue.toString() == 'IdUnassignedUsers') {
+                                        if(currentValue.toString() == 'chkUnassignedUsers') {
                                             checkboxes[i].checked = false;
                                         }
                                     }
                                 }
                             }
                         }
+
+                        function verifyChecksUnassignedUsers(ele) {
+                            var checkboxes = document.getElementsByTagName('input');
+                            if (ele.checked) {
+                                var countTotalChecks = 0;
+                                var countTotalChecksChecked = 0;
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'chkUnassignedUsers') {
+                                            countTotalChecks++;
+                                            if (checkboxes[i].checked){
+                                                countTotalChecksChecked++;
+                                            }
+                                        }
+                                    }
+                                }
+                                if ((countTotalChecks>0) && (countTotalChecksChecked>0) && (countTotalChecks== countTotalChecksChecked)){
+                                    var checkHead = document.getElementById('headChkUnAssignedUsers');
+                                    checkHead.checked = true;
+                                }
+                            }
+                            else {
+                                var checkHead = document.getElementById('headChkUnAssignedUsers');
+                                checkHead.checked = false;
+                            }
+                        }
+
                     </script>
 
                     <input type="hidden" name="idDistributor" value="<?php _e($_GET['idDistributor']) ?>">
                 <table class="widefat">
                     <thead>
                     <tr>
-                        <th><input type="checkbox" onchange="checkAll(this)" name="chk[]" id="IdUnassignedUsers" /> </th>
+                        <th><input type="checkbox" onchange="checkAll(this)" name="chk[]" id="headChkUnAssignedUsers" /> </th>
                         <th>ID</th>
                         <th>Username</th>
                         <th>Full Name</th>
@@ -775,7 +857,7 @@ License: GPL2
                             ?>
                             <tr>
                                 <?php
-                                echo "<td><input id=\"IdUnassignedUsers\" style='margin-left:8px;' type=\"checkbox\" name=\"idUsers[]\" value=" . $user->ID . "></td>";
+                                echo "<td><input onchange='verifyChecksUnassignedUsers(this)'  id=\"chkUnassignedUsers\" style='margin-left:8px;' type=\"checkbox\" name=\"idUsers[]\" value=" . $user->ID . "></td>";
                                 echo "<td>" . $user->ID . "</td>";
                                 echo "<td>" . $user->user_login . "</td>";
                                 echo "<td>" . $user->display_name . "</td>";
@@ -895,10 +977,38 @@ License: GPL2
                 <input id="actionu" class="button action" value="Back Distributor List" type="submit" name="actionBackDistributorList">
                 <script>
                     jQuery(function ($) {
-                        $('#selectAllValues').on('click', function () {
+                        $('#selectAllValuesHead').on('click', function () {
                             $(':checkbox').prop("checked", $(this).is(':checked'));
                         });
                     })
+                </script>
+                <script language="JavaScript">
+                    function verifyChecks(ele) {
+                        var checkboxes = document.getElementsByTagName('input');
+                        if (ele.checked) {
+                            var countTotalChecks = 0;
+                            var countTotalChecksChecked = 0;
+                            for (var i = 0; i < checkboxes.length; i++) {
+                                if (checkboxes[i].type == 'checkbox') {
+                                    var currentValue =checkboxes[i].id;
+                                    if(currentValue.toString() == 'selectAllValues') {
+                                        countTotalChecks++;
+                                        if (checkboxes[i].checked){
+                                            countTotalChecksChecked++;
+                                        }
+                                    }
+                                }
+                            }
+                            if ((countTotalChecks>0) && (countTotalChecksChecked>0) && (countTotalChecks== countTotalChecksChecked)){
+                                var checkHead = document.getElementById('selectAllValuesHead');
+                                checkHead.checked = true;
+                            }
+                        }
+                        else {
+                            var checkHead = document.getElementById('selectAllValuesHead');
+                            checkHead.checked = false;
+                        }
+                    }
                 </script>
             <br>
             <br>
@@ -924,7 +1034,7 @@ License: GPL2
                 <table class="widefat">
                     <thead>
                     <tr>
-                        <th><input type="checkbox" id="selectAllValues" name ="selectAllValues"></th>
+                        <th><input type="checkbox" id="selectAllValuesHead" name ="selectAllValuesHead"></th>
                         <th>ID</th>
                         <th>Name</th>
                         <th>ZipCode</th>
@@ -966,7 +1076,7 @@ License: GPL2
                             ?>
                             <tr>
                                 <?php
-                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idWarehouses[]\" value=" . $warehouse->warehouse_id . "></td>";
+                                echo "<td><input onchange='verifyChecks(this)' id='selectAllValues'  style='margin-left:8px;' type=\"checkbox\" name=\"idWarehouses[]\" value=" . $warehouse->warehouse_id . "></td>";
                                 echo "<td>" . $warehouse->warehouse_id . "</td>";
                                 echo "<td>" . $warehouse->warehouse_name . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idWarehouse\" value=\"$warehouse->warehouse_id\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditWareHouse\"></span></div></form></td>";
                                 echo "<td>" . $warehouse->zipcode . "</td>";
@@ -1103,15 +1213,43 @@ License: GPL2
                 </div>
                 <script>
                     jQuery(function ($) {
-                        $('#selectAllValues').on('click', function () {
+                        $('#selectAllValuesHead').on('click', function () {
                             $(':checkbox').prop("checked", $(this).is(':checked'));
                         });
                     })
                 </script>
+                    <script language="JavaScript">
+                        function verifyChecks(ele) {
+                            var checkboxes = document.getElementsByTagName('input');
+                            if (ele.checked) {
+                                var countTotalChecks = 0;
+                                var countTotalChecksChecked = 0;
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'selectAllValues') {
+                                            countTotalChecks++;
+                                            if (checkboxes[i].checked){
+                                                countTotalChecksChecked++;
+                                            }
+                                        }
+                                    }
+                                }
+                                if ((countTotalChecks>0) && (countTotalChecksChecked>0) && (countTotalChecks== countTotalChecksChecked)){
+                                    var checkHead = document.getElementById('selectAllValuesHead');
+                                    checkHead.checked = true;
+                                }
+                            }
+                            else {
+                                var checkHead = document.getElementById('selectAllValuesHead');
+                                checkHead.checked = false;
+                            }
+                        }
+                    </script>
                 <table class="widefat">
                     <thead>
                     <tr>
-                        <th><input type="checkbox" id="selectAllValues" name ="selectAllValues"></th>
+                        <th><input type="checkbox" id="selectAllValuesHead" name ="selectAllValuesHead"></th>
                         <th>ID</th>
                         <th>Distributor</th>
                         <th>Location</th>
@@ -1147,7 +1285,7 @@ License: GPL2
                             ?>
                             <tr>
                                 <?php
-                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idDistributors[]\" value=" . $distributor->distributor_id . "></td>";
+                                echo "<td><input onchange='verifyChecks(this)' id='selectAllValues' style='margin-left:8px;' type=\"checkbox\" name=\"idDistributors[]\" value=" . $distributor->distributor_id . "></td>";
                                 echo "<td>" . $distributor->distributor_id . "</td>";
                                 echo "<td>" . $distributor->distributor_name . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idDistributor\" value=\"$distributor->distributor_id\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditDistributor\"></span></div></form></td>";
                                 echo "<td>" . $distributor->location . "</td>";
@@ -1267,16 +1405,44 @@ License: GPL2
                 </div>
                 <script>
                     jQuery(function ($) {
-                        $('#selectAllValues').on('click', function () {
+                        $('#selectAllValuesHead').on('click', function () {
                             $(':checkbox').prop("checked", $(this).is(':checked'));
                         });
                     })
+                </script>
+                <script language="JavaScript">
+                    function verifyChecks(ele) {
+                        var checkboxes = document.getElementsByTagName('input');
+                        if (ele.checked) {
+                            var countTotalChecks = 0;
+                            var countTotalChecksChecked = 0;
+                            for (var i = 0; i < checkboxes.length; i++) {
+                                if (checkboxes[i].type == 'checkbox') {
+                                    var currentValue =checkboxes[i].id;
+                                    if(currentValue.toString() == 'selectAllValues') {
+                                        countTotalChecks++;
+                                        if (checkboxes[i].checked){
+                                            countTotalChecksChecked++;
+                                        }
+                                    }
+                                }
+                            }
+                            if ((countTotalChecks>0) && (countTotalChecksChecked>0) && (countTotalChecks== countTotalChecksChecked)){
+                                var checkHead = document.getElementById('selectAllValuesHead');
+                                checkHead.checked = true;
+                            }
+                        }
+                        else {
+                            var checkHead = document.getElementById('selectAllValuesHead');
+                            checkHead.checked = false;
+                        }
+                    }
                 </script>
                 <br class="clear">
                 <table class="widefat" name="tableRequestsinformation" id="idTableRequestInformation">
                     <thead>
                     <tr>
-                        <th><input type="checkbox" id="selectAllValues" name ="selectAllValues"></th>
+                        <th><input type="checkbox" id="selectAllValuesHead" name ="selectAllValuesHead"></th>
                         <th>Id</th>
                         <th>User</th>
                         <th>Email</th>
@@ -1315,7 +1481,7 @@ License: GPL2
                             ?>
                             <tr>
                                 <?php
-                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idRequestInformation[]\" value=" . $request_information->requestId . "></td>";
+                                echo "<td><input onchange='verifyChecks(this)' id='selectAllValues' style='margin-left:8px;' type=\"checkbox\" name=\"idRequestInformation[]\" value=" . $request_information->requestId . "></td>";
                                 echo "<td>" . $request_information->requestId . "</td>";
                                 //echo "<td>" . $request_information->product_description . "</td>";
                                 echo "<td>" . $request_information->user_name . "</td>";
@@ -1435,16 +1601,44 @@ License: GPL2
                 </div>
                 <script>
                     jQuery(function ($) {
-                        $('#selectAllValues').on('click', function () {
+                        $('#selectAllValuesHead').on('click', function () {
                             $(':checkbox').prop("checked", $(this).is(':checked'));
                         });
                     })
+                </script>
+                <script language="JavaScript">
+                    function verifyChecks(ele) {
+                        var checkboxes = document.getElementsByTagName('input');
+                        if (ele.checked) {
+                            var countTotalChecks = 0;
+                            var countTotalChecksChecked = 0;
+                            for (var i = 0; i < checkboxes.length; i++) {
+                                if (checkboxes[i].type == 'checkbox') {
+                                    var currentValue =checkboxes[i].id;
+                                    if(currentValue.toString() == 'selectAllValues') {
+                                        countTotalChecks++;
+                                        if (checkboxes[i].checked){
+                                            countTotalChecksChecked++;
+                                        }
+                                    }
+                                }
+                            }
+                            if ((countTotalChecks>0) && (countTotalChecksChecked>0) && (countTotalChecks== countTotalChecksChecked)){
+                                var checkHead = document.getElementById('selectAllValuesHead');
+                                checkHead.checked = true;
+                            }
+                        }
+                        else {
+                            var checkHead = document.getElementById('selectAllValuesHead');
+                            checkHead.checked = false;
+                        }
+                    }
                 </script>
                 <br class="clear">
                 <table class="widefat" name="tablePendingFiles" id="idTablePendingFiles">
                     <thead>
                     <tr>
-                        <th><input type="checkbox" id="selectAllValues" name ="selectAllValues"></th>
+                        <th><input type="checkbox" id="selectAllValuesHead" name ="selectAllValuesHead"></th>
                         <th>Id</th>
                         <th>User Id</th>
                         <th>User Name</th>
@@ -1481,7 +1675,7 @@ License: GPL2
                             ?>
                             <tr>
                                 <?php
-                                echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idProductOfferList[]\" value=" . $product_item->offer_information_id . "></td>";
+                                echo "<td><input  onchange='verifyChecks(this)' id='selectAllValues' style='margin-left:8px;' type=\"checkbox\" name=\"idProductOfferList[]\" value=" . $product_item->offer_information_id . "></td>";
                                 echo "<td>"  . $product_item->offer_information_id . "</td>";
                                 echo "<td>"  . $user->ID . "</td>";
                                 echo "<td>"  . $user->user_login . "</td>";
@@ -1600,16 +1794,44 @@ License: GPL2
                     </div>
                     <script>
                         jQuery(function ($) {
-                            $('#selectAllValues').on('click', function () {
+                            $('#selectAllValuesHead').on('click', function () {
                                 $(':checkbox').prop("checked", $(this).is(':checked'));
                             });
                         })
+                    </script>
+                    <script language="JavaScript">
+                        function verifyChecks(ele) {
+                            var checkboxes = document.getElementsByTagName('input');
+                            if (ele.checked) {
+                                var countTotalChecks = 0;
+                                var countTotalChecksChecked = 0;
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'selectAllValues') {
+                                            countTotalChecks++;
+                                            if (checkboxes[i].checked){
+                                                countTotalChecksChecked++;
+                                            }
+                                        }
+                                    }
+                                }
+                                if ((countTotalChecks>0) && (countTotalChecksChecked>0) && (countTotalChecks== countTotalChecksChecked)){
+                                    var checkHead = document.getElementById('selectAllValuesHead');
+                                    checkHead.checked = true;
+                                }
+                            }
+                            else {
+                                var checkHead = document.getElementById('selectAllValuesHead');
+                                checkHead.checked = false;
+                            }
+                        }
                     </script>
                     <br class="clear">
                     <table class="widefat" name="tablePendingFiles" id="idTablePendingFiles">
                         <thead>
                         <tr>
-                            <th><input type="checkbox" id="selectAllValues" name ="selectAllValues"></th>
+                            <th><input type="checkbox" id="selectAllValuesHead" name ="selectAllValuesHead"></th>
                             <th>Id</th>
                             <th>User Name</th>
                             <th>User Email</th>
@@ -1649,7 +1871,7 @@ License: GPL2
                                 ?>
                                 <tr>
                                     <?php
-                                    echo "<td><input style='margin-left:8px;' type=\"checkbox\" name=\"idPurchaseOrders[]\" value=" . $purchaseOrder->purchase_order_id . "></td>";
+                                    echo "<td><input  onchange='verifyChecks(this)' id='selectAllValues'  style='margin-left:8px;' type=\"checkbox\" name=\"idPurchaseOrders[]\" value=" . $purchaseOrder->purchase_order_id . "></td>";
                                     echo "<td>" . $purchaseOrder->purchase_order_id . "</td>";
                                     echo "<td>" . $user->nickname . "</td>";
                                     echo "<td>" . $user->user_email . "</td>";
