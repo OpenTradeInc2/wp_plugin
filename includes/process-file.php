@@ -745,6 +745,8 @@
 
             wp_update_post($post);
 
+            setPlaceLocatorUpload($product[1], $product[6], $product[20]);
+            
         }
 
     }
