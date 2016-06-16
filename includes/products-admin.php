@@ -151,11 +151,11 @@
             update_post_meta( $post_id, '_sold_individually', "no" );
             update_post_meta( $post_id, '_manage_stock', "yes" );
             update_post_meta( $post_id, '_backorders', "no" );
-            update_post_meta( $post_id, '_stock', $product->quantity );
-
-            setPlaceLocator($post_id, $product->distributor_sku_description, $product->warehouse_location_address);
+            update_post_meta( $post_id, '_stock', $product->quantity );            
 
             setWareHouse($post_id, $product->warehouse_location_id, $product->warehouse_location_address, $product->distributor_id);
+
+            setPlaceLocator($post_id, $product->distributor_sku_description, $product->warehouse_location_address);
         }
         else
         {
