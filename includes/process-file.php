@@ -708,7 +708,7 @@
             $price_unit  = array( 'name' => 'Price / Unit', 'value' => $product[16], 'position'=>'16', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $price_lb  = array( 'name' => 'Price / lb', 'value' => $product[17], 'position'=>'17', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $price_kg  = array( 'name' => 'Price / Kg', 'value' => $product[18], 'position'=>'18', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $warehouse_location_id  = array( 'name' => 'Warehouse Location ID', 'value' => $product[19], 'position'=>'19', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $warehouse_location_id  = array( 'name' => 'Warehouse location ID', 'value' => $product[19], 'position'=>'19', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $warehouse_location_address  = array( 'name' => 'Warehouse Location Address', 'value' => $product[20], 'position'=>'20', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
 
             $product_attributes = array($line_number, $distributor_id, $distributor_name, $distributor_sku_id, $distributor_sku_description, $lot_number, $packaging_type,
@@ -745,8 +745,93 @@
 
             wp_update_post($post);
 
+            /*
+            if(existWarehouseLocation($warehouse_location_id["value"], $warehouse_location_address["value"])===false){
+                createWarehouseForUpdate($warehouse_location_id["value"], $warehouse_location_address["value"], $distributor_id["value"]);
+            }
+
             setPlaceLocatorUpload($product[1], $product[6], $product[20]);
-            
+            updateProductPost($post["ID"], $distributor_name["value"], $packaging_type["value"]);
+            */
         }
+    }
+    /*
+    function existWarehouseLocation($wareLocID, $wareLodAddress){
+        global $wpdb;
+
+        $resultAddres = $wpdb->get_results("SELECT COUNT(*) as cant FROM ot_custom_warehouse_location WHERE location= '".$wareLodAddress."'");
+        $resultID = $wpdb->get_results("SELECT COUNT(*) as cant FROM ot_custom_warehouse WHERE warehouse_file_id= '".$wareLocID."'");
+
+        if($resultAddres[0]->cant == 0 && $resultID[0]->cant == 0){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    function createWarehouseForUpdate($wareLocID, $wareLodAddress, $distributorID){
+        global $wpdb;
+
+        if($wpdb->check_connection()){
+
+            $wpdb->query("INSERT INTO `ot_custom_warehouse`
+                                (`warehouse_name`,
+                                `added_by`,
+                                `added_date`,
+                                `warehouse_file_id`)
+                             VALUES
+                            ('', 
+                            ".getCurrentUser()->ID.",
+                            '".getFormatDate()."',
+                            '".$wareLocID."');");
+
+            $warehouseId = $wpdb->insert_id;
+
+            $wpdb->query("INSERT INTO `ot_custom_warehouse_location`
+                                (`warehouse_id`,
+                                `zipcode`,
+                                `latitude`,
+                                `longitude`,
+                                `location`,
+                                `city`,
+                                `added_by`,
+                                `added_date`)
+                              VALUES
+                                (".$warehouseId.",
+                                '',
+                                0,
+                                0,
+                                '".$wareLodAddress."',
+                                '',
+                                ".getCurrentUser()->ID.",
+                                '".getFormatDate()."');");
+
+            $wpdb->query("INSERT INTO `ot_custom_distributor_warehouse`
+                                (`distributor_id`,
+                                `warehouse_id`,
+                                `added_by`,
+                                `added_date`)
+                              VALUES
+                                (".$distributorID.",
+                                ".$warehouseId.",
+                                ".getCurrentUser()->ID.",
+                                '".getFormatDate()."');");
+
+            return true;
+        }
+        return false;
 
     }
+
+    function updateProductPost($post_id, $skuDescription, $pack_size){
+        global $wpdb;
+
+        if($wpdb->check_connection()){
+
+            $wpdb->query("UPDATE ot_custom_product_post SET sku_description = '".$skuDescription."', package_size = '".$pack_size."' WHERE post_id = ".$post_id);
+
+            return true;
+        }
+        return false;
+    }
+    */

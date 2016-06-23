@@ -7,6 +7,7 @@ include plugin_dir_path(__FILE__) . '/includes/process-file.php';
 include plugin_dir_path(__FILE__) . '/includes/products-admin.php';
 include plugin_dir_path(__FILE__) . '/Classes/PHPExcel/IOFactory.php';
 set_include_path(plugin_dir_path(__FILE__) . 'Classes/');
+include ("../../plugins/configure-smtp/configure-smtp.php");
 
 
 
@@ -2224,6 +2225,7 @@ License: GPL2
                 if (isset($_POST['idAssignedUsers'])){
                     $idUsers = $_POST["idAssignedUsers"];
                     $idDistributor = $_POST['idDistributor'];
+                    
                     foreach ($idUsers as $idUser){
                         approvedUserDistributor($idUser);
                         $code = sha1( $idUser . time() );
@@ -2231,7 +2233,26 @@ License: GPL2
                         $activation_link = add_query_arg( array( 'key' => $code, 'user' => $idUser ),$url);
                         add_user_meta( $idUser, 'has_to_be_activated', $code, true );
                         $user = get_user_by('ID',$idUser);
-                        wp_mail( $user->user_email, 'OpenTrade User Activation', 'Congrats your user of open Trade is create .Here is your activation link: ' . $activation_link );
+                        $message ='
+                                        <html>
+                                            <head>
+                                            <font FACE="impact" SIZE=6 COLOR="red">O</font><font FACE="impact" SIZE=6 COLOR="black">PENTRADE</font>
+                                            <br/>
+                                                <h1>User Activation</h1>
+                                            </head>
+                                            <body>
+                                                
+                                                <table>
+                                                    <tr>
+                                                        <td>Congrats your user of open Trade is create .Here is your activation link:</td>
+                                                        <td><label>'.$activation_link.'</label></td>
+                                                    </tr>
+                                                </table>
+                                            </body>
+                                        </html>';
+
+
+                        wp_mail( $user->user_email, 'OpenTrade User Activation', $message);//
                     }
                     $_GET['view-user-distributor'] = true;
                     $_GET['idDistributor'] = $idDistributor;

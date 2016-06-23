@@ -912,19 +912,18 @@
 
     if($wpdb->check_connection()){
 
-        //Se hace el primer select para obtener el ID del warehouse
         $warehouse = $wpdb->get_results("SELECT * FROM ot_custom_warehouse_location WHERE location = '".$wareHouseLocation."'");
         $locationId = $warehouse[0]->location_id;
 
-        if(($warehouse[0]->latitude !== 0 || $warehouse[0]->longitude !== 0)&&($warehouse[0]->latitude !== "" && $warehouse[0]->longitude !== "")){
+        if(($warehouse[0]->latitude !== '0' || $warehouse[0]->longitude !== '0')&&($warehouse[0]->latitude !== "" && $warehouse[0]->longitude !== "")){
             $userEmail = getCurrentUser()->user_email;
 
-            $wpdb->query("UPDATE wp_places_locator SET post_title = '".$skuDescription."', lat =".$warehouse[0]->latitude." , `long` =".$warehouse[0]->longitude." , street_name='".$wareHouseLocation."', street='".$wareHouseLocation."', address='".$wareHouseLocation."', formatted_address='".$wareHouseLocation."' where post_id = ".$postId);
+            $wpdb->query("UPDATE wp_places_locator SET post_title = '".$skuDescription."', lat ='".$warehouse[0]->latitude."' , `long` ='".$warehouse[0]->longitude."' , street_name='".$wareHouseLocation."', street='".$wareHouseLocation."', address='".$wareHouseLocation."', formatted_address='".$wareHouseLocation."' where post_id = ".$postId);
 
         }else{
             $userEmail = getCurrentUser()->user_email;
 
-            $wpdb->query("UPDATE wp_places_locator SET post_title = '".$skuDescription."', lat =0 , `long` =0 , street_name='".$wareHouseLocation."', street='".$wareHouseLocation."', address='".$wareHouseLocation."', formatted_address='".$wareHouseLocation."' where post_id = ".$postId);
+            $wpdb->query("UPDATE wp_places_locator SET post_title = '".$skuDescription."', lat ='0' , `long` ='0' , street_name='".$wareHouseLocation."', street='".$wareHouseLocation."', address='".$wareHouseLocation."', formatted_address='".$wareHouseLocation."' where post_id = ".$postId);
         }
 
     }
