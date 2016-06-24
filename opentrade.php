@@ -7,8 +7,6 @@ include plugin_dir_path(__FILE__) . '/includes/process-file.php';
 include plugin_dir_path(__FILE__) . '/includes/products-admin.php';
 include plugin_dir_path(__FILE__) . '/Classes/PHPExcel/IOFactory.php';
 set_include_path(plugin_dir_path(__FILE__) . 'Classes/');
-include ("../../plugins/configure-smtp/configure-smtp.php");
-
 
 
 /*
