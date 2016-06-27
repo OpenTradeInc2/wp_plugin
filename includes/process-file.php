@@ -691,13 +691,13 @@
             $product[17] = str_replace("$", "", $product[17]);
             $product[18] = str_replace("$", "", $product[18]);
 
-            $line_number  = array( 'name' => 'Line #', 'value' => $product[2], 'position'=>'2', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $distributor_id  = array( 'name' => 'Distributor ID', 'value' => $product[3], 'position'=>'3', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $line_number  = array( 'name' => 'Line #', 'value' => $product[2], 'position'=>'2', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $distributor_id  = array( 'name' => 'Distributor ID', 'value' => $product[3], 'position'=>'3', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $distributor_name  = array( 'name' => 'Distributor Name', 'value' => $product[4], 'position'=>'4', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $distributor_sku_id  = array( 'name' => 'Distributor SKU ID', 'value' => $product[5], 'position'=>'5', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $distributor_sku_description  = array( 'name' => 'Distributor SKU Description', 'value' => $product[6], 'position'=>'6', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $lot_number  = array( 'name' => 'Lot#', 'value' => $product[7], 'position'=>'7', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $packaging_type  = array( 'name' => 'Packaging Type', 'value' => $product[8], 'position'=>'8', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_type  = array( 'name' => 'Packaging Type', 'value' => $product[8], 'position'=>'8', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $packaging_unit  = array( 'name' => 'Packaging Unit', 'value' => $product[9], 'position'=>'9', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $packaging_measure  = array( 'name' => 'Packaging Measure', 'value' => $product[10], 'position'=>'10', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $packaging_weight_lb  = array( 'name' => 'Packaging Weight (lb)', 'value' => $product[11], 'position'=>'11', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
@@ -708,7 +708,7 @@
             $price_unit  = array( 'name' => 'Price / Unit', 'value' => $product[16], 'position'=>'16', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $price_lb  = array( 'name' => 'Price / lb', 'value' => $product[17], 'position'=>'17', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $price_kg  = array( 'name' => 'Price / Kg', 'value' => $product[18], 'position'=>'18', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $warehouse_location_id  = array( 'name' => 'Warehouse location ID', 'value' => $product[19], 'position'=>'19', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $warehouse_location_id  = array( 'name' => 'Warehouse location ID', 'value' => $product[19], 'position'=>'19', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $warehouse_location_address  = array( 'name' => 'Warehouse Location Address', 'value' => $product[20], 'position'=>'20', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
 
             $product_attributes = array($line_number, $distributor_id, $distributor_name, $distributor_sku_id, $distributor_sku_description, $lot_number, $packaging_type,
@@ -735,7 +735,7 @@
             $post = array(
                 'ID'=> $product[1],
                 'post_author' => $user_id,
-                'post_content' => $product[6].' '.$product[8].' '.$product[9].' '.$weight.' '.$product[10],
+                'post_content' => $product[6].' '.$product[8],
                 'post_status' => "publish",
                 'post_title' => $product[6],
                 'post_parent' => '',
