@@ -52,7 +52,7 @@
         $headersQuantity = count($allDataInSheet[1]);
 
 		//if($headersQuantity == 15 ){
-        if($headersQuantity == 19){
+        if($headersQuantity == 20){
             $result = true;
         }else{
             $result= false;
@@ -167,7 +167,10 @@
         }		
 		if (!in_array('Warehouse Location Address', $headers)) {
             $result = false;
-        }	
+        }
+        if (!in_array('Category', $headers)) {
+            $result = false;
+        }
         return $result;
     }
 
@@ -280,6 +283,9 @@
 		if ($headers['S'] !== 'Warehouse Location Address') {
             $result = false;
         }
+        if ($headers['T'] !== 'Category') {
+            $result = false;
+        }
 
         return $result;
     }
@@ -342,7 +348,9 @@
 			$warehouseLocationId = trim($allDataInSheet[$i]["R"]);
             $product[18]=$warehouseLocationId;
 			$warehouseLocationAddress = trim($allDataInSheet[$i]["S"]);
-            $product[19]=$warehouseLocationAddress;			
+            $product[19]=$warehouseLocationAddress;
+            $category = trim($allDataInSheet[$i]["T"]);
+            $product[20]=$category;
             $products[$i-1]=$product;
         }
         return $products;
@@ -408,7 +416,8 @@
 													  `price_kg`,
 													  `warehouse_location_id`,
 													  `warehouse_location_address`,
-													  `distributor_file_id`) 
+													  `distributor_file_id`,
+													  `category`) 
                                            VALUES 
                                                       ('$idProductFile',
 													  $distributorID,
@@ -434,7 +443,8 @@
 													  '$priceKg',
 													  '$product[18]',
 													  '$product[19]',
-													  '$product[2]')");
+													  '$product[2]',
+													  '$product[20]')");
 				
             }
         }
@@ -462,7 +472,7 @@
         $headersQuantity = count($allDataInSheet[1]);
 
         //if($headersQuantity == 15 ){
-        if($headersQuantity == 20){
+        if($headersQuantity == 21){
             $result = true;
         }else{
             $result= false;
@@ -535,6 +545,9 @@
     if (!in_array('Warehouse Location Address', $headers)) {
         $result = false;
     }
+    if (!in_array('Category', $headers)) {
+        $result = false;
+    }
     return $result;
 }
 
@@ -601,6 +614,9 @@
         $result = false;
     }
     if ($headers['T'] !== 'Warehouse Location Address') {
+        $result = false;
+    }
+    if ($headers['U'] !== 'Category') {
         $result = false;
     }
 
@@ -678,6 +694,8 @@
         $product[19]=$warehouseLocationId;
         $warehouseLocationAddress = trim($allDataInSheet[$i]["T"]);
         $product[20]=$warehouseLocationAddress;
+        $category = trim($allDataInSheet[$i]["U"]);
+        $product[21]=$category;
         $products[$i-1]=$product;
     }
     return $products;
@@ -716,7 +734,6 @@
 
             $price = str_replace("$", "", $product[16]);
 
-
             update_post_meta( $product[1], '_regular_price', $price );
             update_post_meta( $product[1], '_sale_price', $price );
             update_post_meta( $product[1], '_price', $price );
@@ -745,82 +762,10 @@
 
             wp_update_post($post);
 
-            /*
-            if(existWarehouseLocation($warehouse_location_id["value"], $warehouse_location_address["value"])===false){
-                createWarehouseForUpdate($warehouse_location_id["value"], $warehouse_location_address["value"], $distributor_id["value"]);
-            }
-
             setPlaceLocatorUpload($product[1], $product[6], $product[20]);
             updateProductPost($post["ID"], $distributor_name["value"], $packaging_type["value"]);
-            */
+            updateCategory($post["ID"], $product[21]);
         }
-    }
-    /*
-    function existWarehouseLocation($wareLocID, $wareLodAddress){
-        global $wpdb;
-
-        $resultAddres = $wpdb->get_results("SELECT COUNT(*) as cant FROM ot_custom_warehouse_location WHERE location= '".$wareLodAddress."'");
-        $resultID = $wpdb->get_results("SELECT COUNT(*) as cant FROM ot_custom_warehouse WHERE warehouse_file_id= '".$wareLocID."'");
-
-        if($resultAddres[0]->cant == 0 && $resultID[0]->cant == 0){
-            return false;
-        }else{
-            return true;
-        }
-    }
-
-    function createWarehouseForUpdate($wareLocID, $wareLodAddress, $distributorID){
-        global $wpdb;
-
-        if($wpdb->check_connection()){
-
-            $wpdb->query("INSERT INTO `ot_custom_warehouse`
-                                (`warehouse_name`,
-                                `added_by`,
-                                `added_date`,
-                                `warehouse_file_id`)
-                             VALUES
-                            ('', 
-                            ".getCurrentUser()->ID.",
-                            '".getFormatDate()."',
-                            '".$wareLocID."');");
-
-            $warehouseId = $wpdb->insert_id;
-
-            $wpdb->query("INSERT INTO `ot_custom_warehouse_location`
-                                (`warehouse_id`,
-                                `zipcode`,
-                                `latitude`,
-                                `longitude`,
-                                `location`,
-                                `city`,
-                                `added_by`,
-                                `added_date`)
-                              VALUES
-                                (".$warehouseId.",
-                                '',
-                                0,
-                                0,
-                                '".$wareLodAddress."',
-                                '',
-                                ".getCurrentUser()->ID.",
-                                '".getFormatDate()."');");
-
-            $wpdb->query("INSERT INTO `ot_custom_distributor_warehouse`
-                                (`distributor_id`,
-                                `warehouse_id`,
-                                `added_by`,
-                                `added_date`)
-                              VALUES
-                                (".$distributorID.",
-                                ".$warehouseId.",
-                                ".getCurrentUser()->ID.",
-                                '".getFormatDate()."');");
-
-            return true;
-        }
-        return false;
-
     }
 
     function updateProductPost($post_id, $skuDescription, $pack_size){
@@ -834,4 +779,28 @@
         }
         return false;
     }
-    */
+
+    function updateCategory($post_id, $category){
+
+        global $wpdb;
+
+        $wpdb->query("DELETE FROM `".$wpdb->prefix."term_relationships` WHERE `object_id` = ".$post_id.";");
+
+        $product_type = term_exists('simple', 'product_type');
+        $category = term_exists($category, 'product_cat');
+
+        if ($product_type !== 0 && $product_type !== null) {
+            insertTermRelationships($wpdb,$post_id,$product_type[term_id]);
+        }else{
+            $termID = insertTerm($wpdb, 'simple', 'product_type');
+            insertTermRelationships($wpdb,$post_id,$termID);
+        }
+
+        if ($category !== 0 && $category !== null) {
+            insertTermRelationships($wpdb,$post_id,$category[term_id]);
+        }else{
+            $termID = insertTerm($wpdb, $category, 'product_cat');
+            insertTermRelationships($wpdb,$post_id,$termID);
+        }
+    }
+    

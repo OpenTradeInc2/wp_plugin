@@ -773,7 +773,7 @@
 
                 $columnsTitles = array('Post ID','Line#', 'Distributor ID', 'Distributor Name', 'Distributor SKU ID', 'Distributor SKU Description', 'Lot#',
                     'PackagingType', 'Packaging Unit', 'Packaging Measure', 'Packaging Weight (lb)', 'Packaging Weight (kg)', 'Quantity',
-                    'Total Weight (lb)', 'Total Weight (Kg)', 'Price / Unit', 'Price / lb', 'Price / Kg', 'Warehouse location ID', 'Warehouse Location Address');
+                    'Total Weight (lb)', 'Total Weight (Kg)', 'Price / Unit', 'Price / lb', 'Price / Kg', 'Warehouse location ID', 'Warehouse Location Address', 'Category');
 
                 $phpExcel->setActiveSheetIndex(0)->setCellValue("A1",$columnsTitles[0]);
                 $phpExcel->setActiveSheetIndex(0)->getColumnDimension('A')->setAutoSize(true);
@@ -815,15 +815,16 @@
                 $phpExcel->setActiveSheetIndex(0)->getColumnDimension('S')->setAutoSize(true);
                 $phpExcel->setActiveSheetIndex(0)->setCellValue("T1",$columnsTitles[19]);
                 $phpExcel->setActiveSheetIndex(0)->getColumnDimension('T')->setAutoSize(true);
+                $phpExcel->setActiveSheetIndex(0)->setCellValue("U1",$columnsTitles[20]);
+                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('U')->setAutoSize(true);
 
                 $rowStart = 2;
                 foreach ($rows as $row) {
 
                     $post = get_post($row->post_id);
-                    $post_meta_regular_price = get_post_meta($row->post_id, '_regular_price', true);
                     $post_meta_price = get_post_meta($row->post_id, '_price', true);
                     $post_meta_product_attributes = get_post_meta($row->post_id, '_product_attributes', true);
-
+                    $categories = getCategory($row->post_id);
 
                     foreach ($post_meta_product_attributes as $product_atributte) {
 
@@ -868,6 +869,9 @@
                         }
                     }
 
+                    $priceUnit = $post_meta_price;
+                    $distributorSKUName = $post->post_title;
+
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('A'.$rowStart, $row->post_id);
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('B'.$rowStart, $line);
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('C'.$rowStart, $distributorID);
@@ -888,9 +892,9 @@
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('R'.$rowStart, "$".$priceKg);
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('S'.$rowStart, $warehouseID);
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('T'.$rowStart, $warehouseName);
+                    $phpExcel->setActiveSheetIndex(0)->setCellValue('U'.$rowStart, $categories);
 
                     $rowStart++;
-
                 }
 
                 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -900,7 +904,6 @@
                 $objWriter = PHPExcel_IOFactory::createWriter($phpExcel, 'Excel2007');
                 $objWriter->save('php://output');
                 exit;
-
             }
         }else{
             $_GET['message-error'] = "No data!";
@@ -913,19 +916,22 @@
     if($wpdb->check_connection()){
 
         $warehouse = $wpdb->get_results("SELECT * FROM ot_custom_warehouse_location WHERE location = '".$wareHouseLocation."'");
-        $locationId = $warehouse[0]->location_id;
-
         if(($warehouse[0]->latitude !== '0' || $warehouse[0]->longitude !== '0')&&($warehouse[0]->latitude !== "" && $warehouse[0]->longitude !== "")){
-            $userEmail = getCurrentUser()->user_email;
-
-            $wpdb->query("UPDATE wp_places_locator SET post_title = '".$skuDescription."', lat ='".$warehouse[0]->latitude."' , `long` ='".$warehouse[0]->longitude."' , street_name='".$wareHouseLocation."', street='".$wareHouseLocation."', address='".$wareHouseLocation."', formatted_address='".$wareHouseLocation."' where post_id = ".$postId);
+            $wpdb->query("UPDATE ".$wpdb->prefix."places_locator SET post_title = '".$skuDescription."', lat ='".$warehouse[0]->latitude."' , `long` ='".$warehouse[0]->longitude."' , street_name='".$wareHouseLocation."', street='".$wareHouseLocation."', address='".$wareHouseLocation."', formatted_address='".$wareHouseLocation."' where post_id = ".$postId);
 
         }else{
-            $userEmail = getCurrentUser()->user_email;
-
-            $wpdb->query("UPDATE wp_places_locator SET post_title = '".$skuDescription."', lat ='0' , `long` ='0' , street_name='".$wareHouseLocation."', street='".$wareHouseLocation."', address='".$wareHouseLocation."', formatted_address='".$wareHouseLocation."' where post_id = ".$postId);
+            $wpdb->query("UPDATE ".$wpdb->prefix."places_locator SET post_title = '".$skuDescription."', lat ='0' , `long` ='0' , street_name='".$wareHouseLocation."', street='".$wareHouseLocation."', address='".$wareHouseLocation."', formatted_address='".$wareHouseLocation."' where post_id = ".$postId);
         }
-
     }
 
 }
+
+    function getCategory($post_id){
+
+        global $wpdb;
+
+        $term_relationships = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."term_relationships` WHERE `object_id` = ".$post_id.";");
+        $term = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."terms` WHERE `term_id` = ".$term_relationships[1]->term_taxonomy_id.";");
+
+        return $term[0]->name;
+    }
