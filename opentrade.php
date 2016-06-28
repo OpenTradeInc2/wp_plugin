@@ -2690,4 +2690,3 @@ License: GPL2
             $_GET['idOfferInfo'] = $_POST['idOfferInfo'];
         }
     }
-?>
