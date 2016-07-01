@@ -2150,7 +2150,7 @@ License: GPL2
                                         </html>';
 
 
-                            add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
+                            //add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
                             add_filter('wp_mail_from','mqw_email_from');
 
                             function mqw_email_from($content_type) {
