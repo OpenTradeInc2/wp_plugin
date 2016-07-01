@@ -2230,23 +2230,23 @@ License: GPL2
                         add_user_meta( $idUser, 'has_to_be_activated', $code, true );
                         $user = get_user_by('ID',$idUser);
                         $headers = 'Content-type: text/html; charset=utf-8' . "\r\n";
-                        $message ='
-                                        <html>
-                                            <head>
+                        $message ='<html>
+                                        <head>
                                             <font FACE="impact" SIZE=6 COLOR="red">O</font><font FACE="impact" SIZE=6 COLOR="black">PENTRADE</font>
                                             <br/>
-                                                <h1>User Activation</h1>
-                                            </head>
-                                            <body>
-                                                
-                                                <table>
-                                                    <tr>
-                                                        <td>Congrats your user of open Trade is create .Here is your activation link:</td>
-                                                        <td><label>'.$activation_link.'</label></td>
-                                                    </tr>
-                                                </table>
-                                            </body>
-                                        </html>';
+                                            <h1>User Activation</h1>
+                                        </head>
+                                        <body>   
+                                            <table>
+                                                <tr>
+                                                    <td>Congrats your user of open Trade is create .Here is your activation link:</td>
+                                                </tr>
+                                                <tr>
+                                                <td><label>'.$activation_link.'</label></td>
+                                                </tr>
+                                            </table>
+                                        </body>
+                                </html>';
 
                         //add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
 
