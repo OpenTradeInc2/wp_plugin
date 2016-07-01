@@ -2229,7 +2229,7 @@ License: GPL2
                         $activation_link = add_query_arg( array( 'key' => $code, 'user' => $idUser ),$url);
                         add_user_meta( $idUser, 'has_to_be_activated', $code, true );
                         $user = get_user_by('ID',$idUser);
-                        //$headers = 'Content-type: text/html; charset=utf-8' . "\r\n";
+                        $headers = 'Content-type: text/html; charset=utf-8' . "\r\n";
                         $message ='
                                         <html>
                                             <head>
@@ -2248,10 +2248,10 @@ License: GPL2
                                             </body>
                                         </html>';
 
-                        add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
+                        //add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
 
 
-                        wp_mail( $user->user_email, 'OpenTrade User Activation', $message);//
+                        wp_mail( $user->user_email, 'OpenTrade User Activation', $message,$headers);//
                     }
                     $_GET['view-user-distributor'] = true;
                     $_GET['idDistributor'] = $idDistributor;
