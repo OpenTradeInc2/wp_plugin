@@ -2113,8 +2113,6 @@ License: GPL2
                             $distributor = $wpdb->get_results(" SELECT * FROM `ot_custom_distributor` WHERE `distributor_id` = ".$idDistributor.";")[0];
                             $to = array($distributor->email_administrator);
                             $subject='Your Company Is approved';
-                            $headers = 'MIME-Version: 1.0' . "\r\n";
-                            $headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
                             $headers .= 'Reply-to: '.'Michael'.' '.'Lin'.' <'.'michael.lin@opentradeinc.com'.'>' . "\r\n";
                             $userData = $current_user->data;
                             $formatDate = date("Y-m-d h:i:s");
@@ -2150,7 +2148,7 @@ License: GPL2
                                         </html>';
 
 
-                            //add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
+                            add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
                             add_filter('wp_mail_from','mqw_email_from');
 
                             function mqw_email_from($content_type) {
