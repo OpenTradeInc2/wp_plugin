@@ -2164,7 +2164,7 @@ License: GPL2
                     }
                 } else {
                     $_GET['message-error'] = "Please select a distributor!";
-                }                
+                }
             }
         }
         else{
@@ -2221,7 +2221,7 @@ License: GPL2
                 if (isset($_POST['idAssignedUsers'])){
                     $idUsers = $_POST["idAssignedUsers"];
                     $idDistributor = $_POST['idDistributor'];
-                    
+
                     foreach ($idUsers as $idUser){
                         approvedUserDistributor($idUser);
                         $code = sha1( $idUser . time() );
@@ -2229,8 +2229,7 @@ License: GPL2
                         $activation_link = add_query_arg( array( 'key' => $code, 'user' => $idUser ),$url);
                         add_user_meta( $idUser, 'has_to_be_activated', $code, true );
                         $user = get_user_by('ID',$idUser);
-                        $headers = 'MIME-Version: 1.0' . "\r\n";
-                        $headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
+                        //$headers = 'Content-type: text/html; charset=utf-8' . "\r\n";
                         $message ='
                                         <html>
                                             <head>
@@ -2252,7 +2251,7 @@ License: GPL2
                         add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
 
 
-                        wp_mail( $user->user_email, 'OpenTrade User Activation', $message, $headers);//
+                        wp_mail( $user->user_email, 'OpenTrade User Activation', $message);//
                     }
                     $_GET['view-user-distributor'] = true;
                     $_GET['idDistributor'] = $idDistributor;
