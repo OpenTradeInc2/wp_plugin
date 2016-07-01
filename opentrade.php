@@ -2251,7 +2251,7 @@ License: GPL2
                         //add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
 
 
-                        wp_mail( $user->user_email, 'OpenTrade User Activation', $message,$headers);//
+                        wp_mail( $user->user_email, 'OpenTrade User Activation', $message, $headers);//
                     }
                     $_GET['view-user-distributor'] = true;
                     $_GET['idDistributor'] = $idDistributor;
