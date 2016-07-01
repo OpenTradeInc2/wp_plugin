@@ -2113,7 +2113,7 @@ License: GPL2
                             $distributor = $wpdb->get_results(" SELECT * FROM `ot_custom_distributor` WHERE `distributor_id` = ".$idDistributor.";")[0];
                             $to = array($distributor->email_administrator);
                             $subject='Your Company Is approved';
-                            $headers .= 'Reply-to: '.'Michael'.' '.'Lin'.' <'.'michael.lin@opentradeinc.com'.'>' . "\r\n";
+                            $headers = 'Reply-to: '.'Michael'.' '.'Lin'.' <'.'michael.lin@opentradeinc.com'.'>' . "\r\n";
                             $userData = $current_user->data;
                             $formatDate = date("Y-m-d h:i:s");
                             $message ='<html>
@@ -2229,6 +2229,8 @@ License: GPL2
                         $activation_link = add_query_arg( array( 'key' => $code, 'user' => $idUser ),$url);
                         add_user_meta( $idUser, 'has_to_be_activated', $code, true );
                         $user = get_user_by('ID',$idUser);
+                        $headers = 'MIME-Version: 1.0' . "\r\n";
+                        $headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
                         $message ='
                                         <html>
                                             <head>
@@ -2247,8 +2249,10 @@ License: GPL2
                                             </body>
                                         </html>';
 
+                        add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
 
-                        wp_mail( $user->user_email, 'OpenTrade User Activation', $message);//
+
+                        wp_mail( $user->user_email, 'OpenTrade User Activation', $message, $headers);//
                     }
                     $_GET['view-user-distributor'] = true;
                     $_GET['idDistributor'] = $idDistributor;
