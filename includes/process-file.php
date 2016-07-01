@@ -763,17 +763,17 @@
             wp_update_post($post);
 
             setPlaceLocatorUpload($product[1], $product[6], $product[20]);
-            updateProductPost($post["ID"], $distributor_name["value"], $packaging_type["value"]);
+            updateProductPost($post["ID"], $distributor_id["value"], $distributor_name["value"], $warehouse_location_id["value"], $packaging_type["value"]);
             updateCategory($post["ID"], $product[21]);
         }
     }
 
-    function updateProductPost($post_id, $skuDescription, $pack_size){
+    function updateProductPost($post_id, $sku_Distributor, $skuDescription, $warehouse,  $pack_size){
         global $wpdb;
 
         if($wpdb->check_connection()){
 
-            $wpdb->query("UPDATE ot_custom_product_post SET sku_description = '".$skuDescription."', package_size = '".$pack_size."' WHERE post_id = ".$post_id);
+            $wpdb->query("UPDATE ot_custom_product_post SET sku_distributor = '".$sku_Distributor."', sku_description = '".$skuDescription."', warehouse = '".$warehouse."', package_size = '".$pack_size."' WHERE post_id = ".$post_id);
 
             return true;
         }

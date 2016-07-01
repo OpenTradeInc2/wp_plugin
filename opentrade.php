@@ -2114,6 +2114,7 @@ License: GPL2
                             $to = array($distributor->email_administrator);
                             $subject='Your Company Is approved';
                             $headers = 'Reply-to: '.'Michael'.' '.'Lin'.' <'.'michael.lin@opentradeinc.com'.'>' . "\r\n";
+                            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
                             $userData = $current_user->data;
                             $formatDate = date("Y-m-d h:i:s");
                             $message ='
