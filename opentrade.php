@@ -2118,36 +2118,36 @@ License: GPL2
                             $headers .= 'Reply-to: '.'Michael'.' '.'Lin'.' <'.'michael.lin@opentradeinc.com'.'>' . "\r\n";
                             $userData = $current_user->data;
                             $formatDate = date("Y-m-d h:i:s");
-                            $message ='<html><head>
-                                            <font FACE="impact" SIZE=6 COLOR="red">O</font><font FACE="impact" SIZE=6 COLOR="black">PENTRADE</font>
-                                            <br/>
-                                                <h1>Your company has been approved to add inventory at the site of openTrade.</h1>
-                                            </head>
-                                            <body>
-                                                <table>                    
-                                                    <tr>
-                                                        <th>Company Name:</th>
-                                                        <td>'.$distributor->distributor_name.'</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Location:</th>
-                                                        <td>'.$distributor->location.'</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Tax Id:</th>
-                                                        <td>'.$distributor->tax_id.'</td>
-                                                    </tr>                                                                                  
-                                                </table>                    
-                                                <br/>
-                                                <table>
-                                                    <tr>
-                                                        <th>Date:</th>
-                                                        <td><label>'.$formatDate.'</label></td>
-                                                    </tr>
-                                                </table>
-                                            </body>
+                            $message ='<html>
+                                        <head>
+                                        <font FACE="impact" SIZE=6 COLOR="red">O</font><font FACE="impact" SIZE=6 COLOR="black">PENTRADE</font>
+                                        <br/>
+                                        <h1>Your company has been approved to add inventory at the site of openTrade.</h1>
+                                        </head>
+                                        <body>
+                                        <table>                    
+                                        <tr>
+                                        <th>Company Name:</th>
+                                        <td>'.$distributor->distributor_name.'</td>
+                                        </tr>
+                                        <tr>
+                                        <th>Location:</th>
+                                        <td>'.$distributor->location.'</td>
+                                        </tr>
+                                        <tr>
+                                        <th>Tax Id:</th>
+                                        <td>'.$distributor->tax_id.'</td>
+                                        </tr>                                                                                  
+                                        </table>                    
+                                        <br/>
+                                        <table>
+                                        <tr>
+                                        <th>Date:</th>
+                                        <td><label>'.$formatDate.'</label></td>
+                                        </tr>
+                                        </table>
+                                        </body>
                                         </html>';
-
 
 
                             add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
