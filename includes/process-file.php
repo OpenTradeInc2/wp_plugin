@@ -738,6 +738,7 @@
             update_post_meta( $product[1], '_sale_price', $price );
             update_post_meta( $product[1], '_price', $price );
             update_post_meta( $product[1], '_weight', '' );
+            update_post_meta( $product[1], '_stock', $product[13] );
 
             update_post_meta($product[1],'_product_attributes',$product_attributes);
 

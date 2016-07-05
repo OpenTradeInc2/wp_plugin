@@ -825,6 +825,7 @@
                     $post = get_post($row->post_id);
                     $post_meta_price = get_post_meta($row->post_id, '_price', true);
                     $post_meta_product_attributes = get_post_meta($row->post_id, '_product_attributes', true);
+                    $quantity = get_post_meta( $row->post_id, '_stock', true);
                     $categories = getCategory($row->post_id);
 
                     foreach ($post_meta_product_attributes as $product_atributte) {
@@ -852,7 +853,7 @@
                         } else if($product_atributte["name"] == "Packaging Weight (kg)"){
                             $packingWeightKG = $product_atributte["value"];
                         } else if($product_atributte["name"] == "Units in Stock"){
-                            $quantity = $product_atributte["value"];
+                            //$quantity = $product_atributte["value"];
                         } else if($product_atributte["name"] == "Total Weight (lb)"){
                             $totalWeightLB = $product_atributte["value"];
                         } else if($product_atributte["name"] == "Total Weight (Kg)"){
