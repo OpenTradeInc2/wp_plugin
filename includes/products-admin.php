@@ -92,11 +92,11 @@
             $distributor_sku_description  = array( 'name' => 'Distributor SKU Description', 'value' => $product->distributor_sku_description, 'position'=>'6', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $lot_number  = array( 'name' => 'Lot#', 'value' => $product->lot_number, 'position'=>'7', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $packaging_type  = array( 'name' => 'Packaging Type', 'value' => $product->packaging_type, 'position'=>'8', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $packaging_unit  = array( 'name' => 'Packaging Unit', 'value' => $product->packaging_unit, 'position'=>'9', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_unit  = array( 'name' => 'Packaging Unit', 'value' => $product->packaging_unit, 'position'=>'9', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $packaging_measure  = array( 'name' => 'Packaging Measure', 'value' => $product->packaging_measure, 'position'=>'10', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $packaging_weight_lb  = array( 'name' => 'Packaging Weight (lb)', 'value' => $product->packaging_weight_lb, 'position'=>'11', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $packaging_weight_kg  = array( 'name' => 'Packaging Weight (kg)', 'value' => $product->packaging_weight_kg, 'position'=>'12', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $quantity  = array( 'name' => 'Quantity', 'value' => $product->quantity, 'position'=>'13', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $quantity  = array( 'name' => 'Units in Stock', 'value' => $product->quantity, 'position'=>'13', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $total_weight_lb  = array( 'name' => 'Total Weight (lb)', 'value' => $product->total_weight_lb, 'position'=>'14', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $total_weight_kg  = array( 'name' => 'Total Weight (Kg)', 'value' => $product->total_weight_kg, 'position'=>'15', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $price_unit  = array( 'name' => 'Price / Unit', 'value' => $product->price_unit, 'position'=>'16', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
@@ -139,7 +139,8 @@
             update_post_meta( $post_id, '_sale_price', $price );
             update_post_meta( $post_id, '_purchase_note', "" );
             update_post_meta( $post_id, '_featured', "no" );
-            update_post_meta( $post_id, '_weight', $product->total_weight_lb );
+           // update_post_meta( $post_id, '_weight', $product->total_weight_lb );
+            update_post_meta( $post_id, '_weight', '' );
             update_post_meta( $post_id, '_length', "" );
             update_post_meta( $post_id, '_width', "" );
             update_post_meta( $post_id, '_height', "" );
@@ -850,7 +851,7 @@
                             $packingWeightLB = $product_atributte["value"];
                         } else if($product_atributte["name"] == "Packaging Weight (kg)"){
                             $packingWeightKG = $product_atributte["value"];
-                        } else if($product_atributte["name"] == "Quantity"){
+                        } else if($product_atributte["name"] == "Units in Stock"){
                             $quantity = $product_atributte["value"];
                         } else if($product_atributte["name"] == "Total Weight (lb)"){
                             $totalWeightLB = $product_atributte["value"];

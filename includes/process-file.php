@@ -716,11 +716,11 @@
             $distributor_sku_description  = array( 'name' => 'Distributor SKU Description', 'value' => $product[6], 'position'=>'6', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $lot_number  = array( 'name' => 'Lot#', 'value' => $product[7], 'position'=>'7', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $packaging_type  = array( 'name' => 'Packaging Type', 'value' => $product[8], 'position'=>'8', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $packaging_unit  = array( 'name' => 'Packaging Unit', 'value' => $product[9], 'position'=>'9', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $packaging_measure  = array( 'name' => 'Packaging Measure', 'value' => $product[10], 'position'=>'10', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_unit  = array( 'name' => 'Packaging Unit', 'value' => $product[9], 'position'=>'9', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_measure  = array( 'name' => 'Packaging Measure', 'value' => $product[10], 'position'=>'10', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $packaging_weight_lb  = array( 'name' => 'Packaging Weight (lb)', 'value' => $product[11], 'position'=>'11', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $packaging_weight_kg  = array( 'name' => 'Packaging Weight (kg)', 'value' => $product[12], 'position'=>'12', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $quantity  = array( 'name' => 'Quantity', 'value' => $product[13], 'position'=>'13', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $quantity  = array( 'name' => 'Units in Stock', 'value' => $product[13], 'position'=>'13', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $total_weight_lb  = array( 'name' => 'Total Weight (lb)', 'value' => $product[14], 'position'=>'14', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $total_weight_kg  = array( 'name' => 'Total Weight (Kg)', 'value' => $product[15], 'position'=>'15', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $price_unit  = array( 'name' => 'Price / Unit', 'value' => $product[16], 'position'=>'16', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
@@ -737,6 +737,7 @@
             update_post_meta( $product[1], '_regular_price', $price );
             update_post_meta( $product[1], '_sale_price', $price );
             update_post_meta( $product[1], '_price', $price );
+            update_post_meta( $product[1], '_weight', '' );
 
             update_post_meta($product[1],'_product_attributes',$product_attributes);
 
