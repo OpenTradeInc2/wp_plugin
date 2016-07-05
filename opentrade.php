@@ -9,6 +9,7 @@ include plugin_dir_path(__FILE__) . '/Classes/PHPExcel/IOFactory.php';
 set_include_path(plugin_dir_path(__FILE__) . 'Classes/');
 
 
+
 /*
 Plugin Name: Open Trade 2.0
 Plugin URI: http://URI_De_La_P?gina_Que_Describe_el_Plugin_y_Actualizaciones
@@ -38,6 +39,9 @@ License: GPL2
     /**
      * Register a main menu page.
      */
+
+
+    global $woocommerce;
 
     add_action( 'admin_init', 'my_remove_menu_pages' );
     function my_remove_menu_pages() {
@@ -2106,16 +2110,19 @@ License: GPL2
                 if (isset($_POST['idDistributors'])) {
                     $idDistributors = $_POST["idDistributors"];
                     foreach ($idDistributors as $idDistributor) {
+                        global $wpdb;
+
                         approveDistributor($idDistributor);
 
-                        global $wpdb;
                         if($wpdb->check_connection()){
                             $distributor = $wpdb->get_results(" SELECT * FROM `ot_custom_distributor` WHERE `distributor_id` = ".$idDistributor.";")[0];
+
                             $to = array($distributor->email_administrator);
                             $subject='Your Company Is approved';
                             $headers = 'Reply-to: '.'Michael'.' '.'Lin'.' <'.'michael.lin@opentradeinc.com'.'>' . "\r\n";
                             $userData = $current_user->data;
                             $formatDate = date("Y-m-d h:i:s");
+
                             $message ='<html>
                                         <head>
                                         <font FACE="impact" SIZE=6 COLOR="red">O</font><font FACE="impact" SIZE=6 COLOR="black">PENTRADE</font>
@@ -2135,7 +2142,7 @@ License: GPL2
                                         <tr>
                                         <th>Tax Id:</th>
                                         <td>'.$distributor->tax_id.'</td>
-                                        </tr>                                                                                  
+                                        </tr>                                   
                                         </table>                    
                                         <br/>
                                         <table>
