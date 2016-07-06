@@ -104,9 +104,10 @@
             $price_kg  = array( 'name' => 'Price / Kg', 'value' => $product->price_kg, 'position'=>'18', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $warehouse_location_id  = array( 'name' => 'Warehouse location ID', 'value' => $product->warehouse_location_id, 'position'=>'19', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $warehouse_location_address  = array( 'name' => 'Warehouse Location Address', 'value' => $product->warehouse_location_address, 'position'=>'20', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $cas_number  = array( 'name' => 'CAS #', 'value' => $product->cas_number, 'position'=>'21', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
 
             $product_attributes = array($line_number, $distributor_id, $distributor_name, $distributor_sku_id, $distributor_sku_description, $lot_number, $packaging_type,
-                $packaging_unit, $packaging_measure, $packaging_weight_lb,$packaging_weight_kg, $quantity, $total_weight_lb, $total_weight_kg, $price_unit, $price_lb, $price_kg, $warehouse_location_id, $warehouse_location_address );
+                $packaging_unit, $packaging_measure, $packaging_weight_lb,$packaging_weight_kg, $quantity, $total_weight_lb, $total_weight_kg, $price_unit, $price_lb, $price_kg, $warehouse_location_id, $warehouse_location_address, $cas_number);
 
             if(strtolower($product->packaging_measure) =='kg'){
                 $weight = $product->packaging_weight_kg;
@@ -774,7 +775,7 @@
 
                 $columnsTitles = array('Post ID','Line#', 'Distributor ID', 'Distributor Name', 'Distributor SKU ID', 'Distributor SKU Description', 'Lot#',
                     'PackagingType', 'Packaging Unit', 'Packaging Measure', 'Packaging Weight (lb)', 'Packaging Weight (kg)', 'Quantity',
-                    'Total Weight (lb)', 'Total Weight (Kg)', 'Price / Unit', 'Price / lb', 'Price / Kg', 'Warehouse location ID', 'Warehouse Location Address', 'Category');
+                    'Total Weight (lb)', 'Total Weight (Kg)', 'Price / Unit', 'Price / lb', 'Price / Kg', 'Warehouse location ID', 'Warehouse Location Address', 'Category', 'CAS #');
 
                 $phpExcel->setActiveSheetIndex(0)->setCellValue("A1",$columnsTitles[0]);
                 $phpExcel->setActiveSheetIndex(0)->getColumnDimension('A')->setAutoSize(true);
@@ -818,6 +819,8 @@
                 $phpExcel->setActiveSheetIndex(0)->getColumnDimension('T')->setAutoSize(true);
                 $phpExcel->setActiveSheetIndex(0)->setCellValue("U1",$columnsTitles[20]);
                 $phpExcel->setActiveSheetIndex(0)->getColumnDimension('U')->setAutoSize(true);
+                $phpExcel->setActiveSheetIndex(0)->setCellValue("V1",$columnsTitles[21]);
+                $phpExcel->setActiveSheetIndex(0)->getColumnDimension('V')->setAutoSize(true);
 
                 $rowStart = 2;
                 foreach ($rows as $row) {
@@ -868,6 +871,8 @@
                             $warehouseID = $product_atributte["value"];
                         }else if($product_atributte["name"] == "Warehouse Location Address"){
                             $warehouseName = $product_atributte["value"];
+                        }else if($product_atributte["name"] == "CAS #"){
+                            $cas_number = $product_atributte["value"];
                         }
                     }
 
@@ -895,6 +900,7 @@
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('S'.$rowStart, $warehouseID);
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('T'.$rowStart, $warehouseName);
                     $phpExcel->setActiveSheetIndex(0)->setCellValue('U'.$rowStart, $categories);
+                    $phpExcel->setActiveSheetIndex(0)->setCellValue('V'.$rowStart, $cas_number);
 
                     $rowStart++;
                 }
