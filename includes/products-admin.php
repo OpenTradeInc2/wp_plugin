@@ -106,8 +106,8 @@
             $warehouse_location_id  = array( 'name' => 'Warehouse location ID', 'value' => $product->warehouse_location_id, 'position'=>'20', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $warehouse_location_address  = array( 'name' => 'Warehouse Location Address', 'value' => $product->warehouse_location_address, 'position'=>'21', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
 
-            $product_attributes = array($line_number, $distributor_id, $distributor_name, $distributor_sku_id, $distributor_sku_description, $lot_number, $packaging_type,
-                $packaging_unit, $packaging_measure, $packaging_weight_lb,$packaging_weight_kg, $quantity, $total_weight_lb, $total_weight_kg, $price_unit, $price_lb, $price_kg, $warehouse_location_id, $warehouse_location_address, $cas_number);
+            $product_attributes = array($line_number, $distributor_id, $distributor_name, $distributor_sku_id, $distributor_sku_description, $cas_number, $lot_number, $packaging_type,
+                $packaging_unit, $packaging_measure, $packaging_weight_lb,$packaging_weight_kg, $quantity, $total_weight_lb, $total_weight_kg, $price_unit, $price_lb, $price_kg, $warehouse_location_id, $warehouse_location_address);
 
             if(strtolower($product->packaging_measure) =='kg'){
                 $weight = $product->packaging_weight_kg;
