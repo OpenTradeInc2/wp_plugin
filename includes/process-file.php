@@ -734,22 +734,22 @@
             $distributor_name  = array( 'name' => 'Distributor Name', 'value' => $product[4], 'position'=>'4', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $distributor_sku_id  = array( 'name' => 'Distributor SKU ID', 'value' => $product[5], 'position'=>'5', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
             $distributor_sku_description  = array( 'name' => 'Distributor SKU Description', 'value' => $product[6], 'position'=>'6', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $lot_number  = array( 'name' => 'Lot#', 'value' => $product[7], 'position'=>'7', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $packaging_type  = array( 'name' => 'Packaging Type', 'value' => $product[8], 'position'=>'8', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $packaging_unit  = array( 'name' => 'Packaging Unit', 'value' => $product[9], 'position'=>'9', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $packaging_measure  = array( 'name' => 'Packaging Measure', 'value' => $product[10], 'position'=>'10', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $packaging_weight_lb  = array( 'name' => 'Packaging Weight (lb)', 'value' => $product[11], 'position'=>'11', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $packaging_weight_kg  = array( 'name' => 'Packaging Weight (kg)', 'value' => $product[12], 'position'=>'12', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $quantity  = array( 'name' => 'Units in Stock', 'value' => $product[13], 'position'=>'13', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $total_weight_lb  = array( 'name' => 'Total Weight (lb)', 'value' => $product[14], 'position'=>'14', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $total_weight_kg  = array( 'name' => 'Total Weight (Kg)', 'value' => $product[15], 'position'=>'15', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $price_unit  = array( 'name' => 'Price / Unit', 'value' => $product[16], 'position'=>'16', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $price_lb  = array( 'name' => 'Price / lb', 'value' => $product[17], 'position'=>'17', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $price_kg  = array( 'name' => 'Price / Kg', 'value' => $product[18], 'position'=>'18', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $warehouse_location_id  = array( 'name' => 'Warehouse location ID', 'value' => $product[19], 'position'=>'19', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $warehouse_location_address  = array( 'name' => 'Warehouse Location Address', 'value' => $product[20], 'position'=>'20', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-            $cas_number  = array( 'name' => 'CAS #', 'value' => $product[22], 'position'=>'21', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
-
+            $cas_number  = array( 'name' => 'CAS #', 'value' => $product[22], 'position'=>'7', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $lot_number  = array( 'name' => 'Lot#', 'value' => $product[7], 'position'=>'8', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_type  = array( 'name' => 'Packaging Type', 'value' => $product[8], 'position'=>'9', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_unit  = array( 'name' => 'Packaging Unit', 'value' => $product[9], 'position'=>'10', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_measure  = array( 'name' => 'Packaging Measure', 'value' => $product[10], 'position'=>'11', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_weight_lb  = array( 'name' => 'Packaging Weight (lb)', 'value' => $product[11], 'position'=>'12', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $packaging_weight_kg  = array( 'name' => 'Packaging Weight (kg)', 'value' => $product[12], 'position'=>'13', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $quantity  = array( 'name' => 'Units in Stock', 'value' => $product[13], 'position'=>'14', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $total_weight_lb  = array( 'name' => 'Total Weight (lb)', 'value' => $product[14], 'position'=>'15', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $total_weight_kg  = array( 'name' => 'Total Weight (Kg)', 'value' => $product[15], 'position'=>'16', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $price_unit  = array( 'name' => 'Price / Unit', 'value' => $product[16], 'position'=>'17', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $price_lb  = array( 'name' => 'Price / lb', 'value' => $product[17], 'position'=>'18', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $price_kg  = array( 'name' => 'Price / Kg', 'value' => $product[18], 'position'=>'19', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $warehouse_location_id  = array( 'name' => 'Warehouse location ID', 'value' => $product[19], 'position'=>'20', 'is_visible'=>'0', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            $warehouse_location_address  = array( 'name' => 'Warehouse Location Address', 'value' => $product[20], 'position'=>'21', 'is_visible'=>'1', 'is_variation'=>'0', 'is_taxonomy'=>'0' );
+            
             $product_attributes = array($line_number, $distributor_id, $distributor_name, $distributor_sku_id, $distributor_sku_description, $lot_number, $packaging_type,
             $packaging_unit, $packaging_measure, $packaging_weight_lb,$packaging_weight_kg, $quantity, $total_weight_lb, $total_weight_kg, $price_unit, $price_lb, $price_kg, $warehouse_location_id, $warehouse_location_address, $cas_number);
 
