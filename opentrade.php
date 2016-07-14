@@ -1779,6 +1779,269 @@ License: GPL2
             <?php
 
         }
+        else if(isset($_GET['edit-purchase-order']) and $_GET['edit-purchase-order'] == true){
+        ?>
+            <div class="wrap">
+                <h4>Open Trade 2.0</h4>
+                <h3>Edit Purchase Order</h3>
+                <?php
+                if (isset($_GET['message-error'])) {
+                    ?>
+                    <div id="message" class="error">
+                        <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                    </div>
+                    <?php
+                }
+                ?>
+                <form action="" method="post" enctype="multipart/form-data">
+                    <input id="actionu" class="button action" value="Back Purchase Order List" type="submit" name="actionBackPurchaseOrderList">
+                    <h4>Products</h4>
+                    <div class="alignleft actions bulkactions">
+                        <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
+                        <select name="selectActionAssignedUsers" id="bulk-action-selector-top">
+                            <option value="-1">Actions</option>
+                            <option value="delete" class="hide-if-no-js">Delete</option>
+                            <input id="doAction" class="button action" value="Apply" type="submit" name="actionBulkAssignedPurchaseOrder">
+                        </select>
+                    </div>
+                    <script language="JavaScript">
+                        function checkAssigned(ele) {
+                            var checkboxes = document.getElementsByTagName('input');
+                            if (ele.checked) {
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'chkAssignedProduct') {
+                                            checkboxes[i].checked = true;
+                                        }
+                                    }
+                                }
+                            } else {
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'chkAssignedProduct') {
+                                            checkboxes[i].checked = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        function verifyChecks(ele) {
+                            var checkboxes = document.getElementsByTagName('input');
+                            if (ele.checked) {
+                                var countTotalChecks = 0;
+                                var countTotalChecksChecked = 0;
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'chkAssignedProduct') {
+                                            countTotalChecks++;
+                                            if (checkboxes[i].checked){
+                                                countTotalChecksChecked++;
+                                            }
+                                        }
+                                    }
+                                }
+                                if ((countTotalChecks>0) && (countTotalChecksChecked>0) && (countTotalChecks== countTotalChecksChecked)){
+                                    var checkHead = document.getElementById('headChkAssignedProduct');
+                                    checkHead.checked = true;
+                                }
+                            }
+                            else {
+                                var checkHead = document.getElementById('headChkAssignedProduct');
+                                checkHead.checked = false;
+                            }
+                        }
+                    </script>
+
+                    <input type="hidden" name="idPurchaseOrder" value="<?php _e($_GET['idPurchaseOrder']) ?>">
+                    <table class="widefat">
+                        <thead>
+                        <tr>
+                            <th><input type="checkbox" onchange="checkAssigned(this)" name="chk[]" id="headChkAssignedProduct" /> </th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price Unit</th>
+                            <th>Quantity</th>
+                            <th>Stock Quantity</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price Unit</th>
+                            <th>Quantity</th>
+                            <th>Stock Quantity</th>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                        <?php
+                        global $wpdb;
+
+                        if($wpdb->check_connection()){
+                            $idPurchaseOrder= $_GET['idPurchaseOrder'];
+                            $products =  $wpdb->get_results("select product_id, quantity from ot_custom_product_purchase_order where purchase_order_id = ".$idPurchaseOrder. ";");
+                            foreach ($products as $product) {
+                                $postMetaProduct = get_post_meta($product->product_id, '_product_attributes', true);
+                                ?>
+                                <tr>
+                                    <?php
+                                    echo "<td><input onchange='verifyChecks(this)'  id=\"chkAssignedProduct\" style='margin-left:8px;' type=\"checkbox\" name=\"idAssignedProduct[]\" value=" . $product->product_id . "></td>";
+                                    foreach ($postMetaProduct as $product_atributte){
+
+                                        if($product_atributte["name"] == "Distributor SKU Description"){
+                                            $distributorSKUName = $product_atributte["value"];
+                                        } else if($product_atributte["name"] == "Units in Stock"){
+                                            $quantity = $product_atributte["value"];
+                                        } else if($product_atributte["name"] == "Price / Unit"){
+                                            $priceUnit = $product_atributte["value"];
+                                        }
+                                    }
+
+                                    echo "<td>" . $product->product_id . "</td>";
+                                    echo "<td>" . $distributorSKUName . "</td>";
+                                    echo "<td>" . $priceUnit . "</td>";
+                                    echo "<td><input type='text' style='width: 85px;' value='" . $product->quantity . "'/></td>";
+                                    echo "<td>" . $quantity . "</td>";
+                                    ?>
+                                </tr>
+                                <?php
+                            }
+                        }
+                        ?>
+                        </tbody>
+                    </table>
+                </form>
+                <br>
+                <form action="" method="post" enctype="multipart/form-data">
+                    <h4>All Products</h4>
+                    <div class="alignleft actions bulkactions">
+                        <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
+                        <select name="selectActionAssignedProducts" id="bulk-action-selector-top">
+                            <option value="-1">Actions</option>
+                            <option value="add" class="hide-if-no-js">Add</option>
+                            <input id="doActionApply" class="button action" value="Apply" type="submit" name="actionBulkAddProductPurchaseOrder">
+                        </select>
+                    </div>
+                    <script language="JavaScript">
+                        function checkAssignedAll(ele) {
+                            var checkboxes = document.getElementsByTagName('input');
+                            if (ele.checked) {
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'chkAssignedProductAll') {
+                                            checkboxes[i].checked = true;
+                                        }
+                                    }
+                                }
+                            } else {
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'chkAssignedProductAll') {
+                                            checkboxes[i].checked = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        function verifyChecksAll(ele) {
+                            var checkboxes = document.getElementsByTagName('input');
+                            if (ele.checked) {
+                                var countTotalChecks = 0;
+                                var countTotalChecksChecked = 0;
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'chkAssignedProductAll') {
+                                            countTotalChecks++;
+                                            if (checkboxes[i].checked){
+                                                countTotalChecksChecked++;
+                                            }
+                                        }
+                                    }
+                                }
+                                if ((countTotalChecks>0) && (countTotalChecksChecked>0) && (countTotalChecks== countTotalChecksChecked)){
+                                    var checkHead = document.getElementById('headChkAssignedProductAll');
+                                    checkHead.checked = true;
+                                }
+                            }
+                            else {
+                                var checkHead = document.getElementById('headChkAssignedProductAll');
+                                checkHead.checked = false;
+                            }
+                        }
+                    </script>
+                    <input type="hidden" name="idPurchaseOrderAll" value="<?php _e($_GET['idPurchaseOrder']) ?>">
+                    <table class="widefat">
+                        <thead>
+                        <tr>
+                            <th><input type="checkbox" onchange="checkAssignedAll(this)" name="chk[]" id="headChkAssignedProductAll" /> </th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price Unit</th>
+                            <th>Quantity</th>
+                            <th>Stock Quantity</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price Unit</th>
+                            <th>Quantity</th>
+                            <th>Stock Quantity</th>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                        <?php
+                        global $wpdb;
+
+                        if($wpdb->check_connection()){
+                            $idPurchaseOrder= $_GET['idPurchaseOrder'];
+                            $products =  $wpdb->get_results("select * from wp_f9d0rrf6rz_posts where post_type='product' and ID not in(select product_id from ot_custom_product_purchase_order where purchase_order_id = ".$idPurchaseOrder.");");
+                            foreach ($products as $product) {
+                                $postMetaProduct = get_post_meta($product->ID, '_product_attributes', true);
+                                ?>
+                                <tr>
+                                    <?php
+                                    echo "<td><input onchange='verifyChecksAll(this)'  id=\"chkAssignedProductAll\" style='margin-left:8px;' type=\"checkbox\" name=\"idAssignedProductAll[]\" value=" . $product->ID . "></td>";
+                                    foreach ($postMetaProduct as $product_atributte){
+
+                                        if($product_atributte["name"] == "Distributor SKU Description"){
+                                            $distributorSKUName = $product_atributte["value"];
+                                        } else if($product_atributte["name"] == "Units in Stock"){
+                                            $quantity = $product_atributte["value"];
+                                        } else if($product_atributte["name"] == "Price / Unit"){
+                                            $priceUnit = $product_atributte["value"];
+                                        }
+                                    }
+
+                                    echo "<td>" . $product->ID . "</td>";
+                                    echo "<td>" . $distributorSKUName . "</td>";
+                                    echo "<td>" . $priceUnit . "</td>";
+                                    echo "<td><input type='text' style='width: 85px;' value='' id='txt".$product->ID."' name='txt".$product->ID."' /></td>";
+                                    echo "<td>" . $quantity . "</td>";
+                                    ?>
+                                </tr>
+                                <?php
+                            }
+                        }
+                        ?>
+                        </tbody>
+                    </table>
+                </form>
+
+            </div>
+        <?php
+        }
         else {
             ?>
             <div class="wrap">
@@ -1892,7 +2155,7 @@ License: GPL2
                                 <tr>
                                     <?php
                                     echo "<td><input  onchange='verifyChecks(this)' id='selectAllValues'  style='margin-left:8px;' type=\"checkbox\" name=\"idPurchaseOrders[]\" value=" . $purchaseOrder->purchase_order_id . "></td>";
-                                    echo "<td>" . $purchaseOrder->purchase_order_id . "</td>";
+                                    echo "<td>" . $purchaseOrder->purchase_order_id . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idPurchaseOrderLink\" value=\"$purchaseOrder->purchase_order_id\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditPurchaseOrder\"></span></div></form></td>";
                                     echo "<td>" . $user->nickname . "</td>";
                                     echo "<td>" . $user->user_email . "</td>";
                                     echo "<td>" . sizeof($products) . "</td>";
@@ -2696,5 +2959,52 @@ License: GPL2
         if(isset($_POST["idOfferInfo"])){
             $_GET['view-products-offer'] = false;
             $_GET['idOfferInfo'] = $_POST['idOfferInfo'];
+        }
+    }
+
+    if(isset($_POST["actionEditPurchaseOrder"])){
+        $_GET['edit-purchase-order'] = true;
+        $_GET['idPurchaseOrder'] = $_POST["idPurchaseOrderLink"];
+    }
+
+    if(isset($_POST["actionBackPurchaseOrderList"])){
+
+    }
+
+     if(isset($_POST["actionBulkAddProductPurchaseOrder"])){
+        if(isset($_POST["selectActionAssignedProducts"]) && $_POST["selectActionAssignedProducts"] !== "-1"){
+            if($_POST["selectActionAssignedProducts"] === "add"){
+                if(isset($_POST["idAssignedProductAll"])){
+                    global $wpbd;
+                    $idProducts = $_POST["idAssignedProductAll"];
+                    $current_user = get_current_user_id();
+                    $idPurchaseOrder = $_POST["idPurchaseOrderAll"];
+                    $exit = true;
+                    foreach ($idProducts as $id){
+                        $name = "txt".$id;
+                        $quantity = $_POST[$name];
+                        if($quantity !== ""){
+                            if($wpdb->check_connection()){
+                                $wpdb->query("INSERT INTO ot_custom_product_purchase_order (product_id, purchase_order_id, quantity, added_by, added_date, edited_by, edited_date) VALUES (".$id.", ".$idPurchaseOrder.", ".$quantity.", ".$current_user.", sysdate(), '', '');");
+                            }
+                        }else{
+                            $exit = false;
+                        }
+                    }
+                    if($exit === false){
+                        $_GET['message-error'] = "Some products no contains quantity";
+                    }
+                    $_GET['idPurchaseOrder'] = $_POST['idPurchaseOrderAll'];
+
+                }else{
+                    $_GET['message-error']="Please select product!";
+                    $_GET['idPurchaseOrder'] = $_POST['idPurchaseOrderAll'];
+                    $_GET['edit-purchase-order'] = true;
+                }
+            }
+        }else{
+            $_GET['message-error']="Please select one action!";
+            $_GET['idPurchaseOrder'] = $_POST['idPurchaseOrderAll'];
+            $_GET['edit-purchase-order'] = true;
         }
     }
