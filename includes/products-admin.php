@@ -420,6 +420,17 @@
 
                 $warehouseId = $wpdb->insert_id;
 
+                $wpdb->query("INSERT INTO `ot_custom_warehouse_product`
+                                (`warehouse_id`,
+                                `product_id`,
+                                `added_by`,
+                                `added_date`)
+                              VALUES
+                                (".$warehouseId.",
+                                ".$post_id.",
+                                ".$user->ID.",
+                                '".$date."');");
+
                 $wpdb->query("INSERT INTO `ot_custom_warehouse_location`
                                 (`warehouse_id`,
                                 `zipcode`,
@@ -631,7 +642,7 @@
                           SET                        
                             `zipcode` = '".$zipCode."',
                             `latitude` = '".$latitude."',
-                            `longitude` = '".$longitude."',
+                            `longitude` = '".$longitude."',                            
                             `location` = '".$location."',
                             `city` = '".$city."',
                             `edited_by` = ".getCurrentUser()->ID.",
@@ -640,10 +651,24 @@
 
             $productsID= $wpdb->get_results("SELECT `product_id` FROM `ot_custom_warehouse_product` WHERE  `warehouse_id` =".$IdWarehouse.";");
 
-            foreach ($productsID as $productID){
+            foreach ($productsID as $productID) {
 
-                $query = "UPDATE `".$wpdb->prefix."places_locator` SET `lat` = ".$latitude.", `long` = ".$longitude.", `city` = '".$city."', `zipcode` = '".$zipCode."', `address` = '".$location."', `formatted_address` = '".$location."' WHERE `post_id` = ".$productID->product_id.";";
+                $query = "UPDATE `" . $wpdb->prefix . "places_locator` SET `lat` = " . $latitude . ", `long` = " . $longitude . ", `city` = '" . $city . "', `zipcode` = '" . $zipCode . "', `address` = '" . $location . "', `street` = '" . $location . "', `street_name` = '" . $location . "', `formatted_address` = '" . $location . "' WHERE `post_id` = " . $productID->product_id . ";";
 
+                $post_meta_product_attributes = get_post_meta($productID->product_id, '_product_attributes', true);
+
+                if ($post_meta_product_attributes) {
+                    $new_post_meta_product_attributes = array();
+                    foreach ($post_meta_product_attributes as $product_attribute) {
+
+                        if ($product_attribute["name"] == "Warehouse Location Address") {
+                            $product_attribute["value"] = $location;
+                        }
+
+                        array_push($new_post_meta_product_attributes, $product_attribute);
+                    }
+                    update_post_meta($productID->product_id, '_product_attributes', $new_post_meta_product_attributes);
+                }
                 $wpdb->query($query);
             }
 
