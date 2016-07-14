@@ -66,14 +66,16 @@ License: GPL2
     function admin_menu(){
 
         add_menu_page(__( 'Open Trade 2.0', 'textdomain' ), 'Open Trade 2.0', 'manage_options', 'open-trade-menu', 'open_trade_admin' , 'dashicons-migrate', 6 );
-        add_submenu_page('open-trade-menu', 'Load Inventory', 'Load Inventory', 'manage_options', 'open-trade-menu' );
-        add_submenu_page('open-trade-menu', 'Pending Approval', 'Pending Approval', 'manage_options', 'open-trade-approve', 'wpdocs_pending_approval_submenu_page_callback' );
+        add_submenu_page('open-trade-menu', 'Load Products File', 'Load Products File', 'manage_options', 'open-trade-menu' );
+        add_submenu_page('open-trade-menu', 'Approve Products File', 'Approve Products File', 'manage_options', 'open-trade-approve', 'wpdocs_pending_approval_submenu_page_callback' );
         add_submenu_page('open-trade-menu', 'Distributors', 'Distributors', 'manage_options', 'open-trade-distributors', 'wpdocs_distributors_submenu_page_callback' );
+        add_submenu_page('open-trade-menu', 'End Users', 'End Users', 'manage_options', 'open-trade-end-users', 'wpdocs_end_users_submenu_page_callback' );
+        add_submenu_page('open-trade-menu', 'Brokers', 'Brokers', 'manage_options', 'open-trade-brokers', 'wpdocs_brokers_submenu_page_callback' );
         add_submenu_page('open-trade-menu', 'Request Information', 'Request Information', 'manage_options', 'open-trade-reques_information', 'wpdocs_reques_information_submenu_page_callback' );
         add_submenu_page('open-trade-menu', 'Post Offer', 'Post Offer', 'manage_options', 'open-trade-post-offer', 'wpdocs_post_offer_submenu_page_callback' );
         add_submenu_page('open-trade-menu', 'Purchase Order', 'Purchase Order', 'manage_options', 'open-trade-purchase-order', 'wpdocs_purchase_order_submenu_page_callback' );
-        add_submenu_page('open-trade-menu', 'Download Inventory', 'Download Inventory', 'manage_options', 'open-trade-download-inventory', 'wpdocs_download_inventory_submenu_page_callback' );
-        add_submenu_page('open-trade-menu', 'Upload Inventory', 'Upload Inventory', 'manage_options', 'open-trade-upload-inventory', 'wpdocs_upload_inventory_submenu_page_callback' );
+        add_submenu_page('open-trade-menu', 'Download Inventory File', 'Download Inventory File', 'manage_options', 'open-trade-download-inventory', 'wpdocs_download_inventory_submenu_page_callback' );
+        add_submenu_page('open-trade-menu', 'Load Inventory File', 'Load Inventory File', 'manage_options', 'open-trade-upload-inventory', 'wpdocs_upload_inventory_submenu_page_callback' );
     }
 
     function open_trade_admin(){
@@ -1300,7 +1302,9 @@ License: GPL2
                     global $wpdb;
 
                     if($wpdb->check_connection()){
-                        $distributors =  $wpdb->get_results("SELECT dist.`distributor_id`, dist.`distributor_name`, dist.`location`,dist.`tax_id`, user.`user_nicename` as `added_by`, dist.`added_date`, dist.`status` FROM `ot_custom_distributor` as dist INNER JOIN `".$wpdb->prefix."users` as user ON dist.`added_by` = user.`ID` ;");
+                        $distributors =  $wpdb->get_results("SELECT dist.`distributor_id`, dist.`distributor_name`, dist.`location`,dist.`tax_id`, user.`user_nicename` as `added_by`, dist.`added_date`, dist.`status` 
+                                                             FROM `ot_custom_distributor` as dist INNER JOIN `".$wpdb->prefix."users` as user ON dist.`added_by` = user.`ID` 
+                                                             WHERE `email_administrator` in (SELECT `ot_custom_distributor_user`.`distributor_user_username` FROM `ot_custom_distributor_user` WHERE `distributor_user_reg_type` = 'Distributor');");
                         foreach ($distributors as $distributor) {
                             ?>
                             <tr>
@@ -2270,6 +2274,253 @@ License: GPL2
     </div>
     <?php
 }
+
+    function wpdocs_end_users_submenu_page_callback(){
+
+        ?>
+        <div class="wrap">
+            <h4>Open Trade 2.0</h4>
+            <h3>End Users List</h3>
+            <br>
+            <?php
+            if (isset($_GET['message-error'])) {
+                ?>
+                <div id="message" class="error">
+                    <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                </div>
+                <?php
+            }
+            ?>
+            <form action="" method="post" enctype="multipart/form-data">
+                <div class="alignleft actions bulkactions">
+                    <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
+                    <select name="selectActionDistributors" id="bulk-action-selector-top">
+                        <option value="-1">Actions</option>
+                        <option value="delete" class="hide-if-no-js">Delete</option>
+                        <option value="approve">Approve</option>
+                        <input id="doAction" class="button action" value="Apply" type="submit" name="actionBulkDistributors">
+                    </select>
+                </div>
+                <script>
+                    jQuery(function ($) {
+                        $('#selectAllValuesHead').on('click', function () {
+                            $(':checkbox').prop("checked", $(this).is(':checked'));
+                        });
+                    })
+                </script>
+                <script language="JavaScript">
+                    function verifyChecks(ele) {
+                        var checkboxes = document.getElementsByTagName('input');
+                        if (ele.checked) {
+                            var countTotalChecks = 0;
+                            var countTotalChecksChecked = 0;
+                            for (var i = 0; i < checkboxes.length; i++) {
+                                if (checkboxes[i].type == 'checkbox') {
+                                    var currentValue =checkboxes[i].id;
+                                    if(currentValue.toString() == 'selectAllValues') {
+                                        countTotalChecks++;
+                                        if (checkboxes[i].checked){
+                                            countTotalChecksChecked++;
+                                        }
+                                    }
+                                }
+                            }
+                            if ((countTotalChecks>0) && (countTotalChecksChecked>0) && (countTotalChecks== countTotalChecksChecked)){
+                                var checkHead = document.getElementById('selectAllValuesHead');
+                                checkHead.checked = true;
+                            }
+                        }
+                        else {
+                            var checkHead = document.getElementById('selectAllValuesHead');
+                            checkHead.checked = false;
+                        }
+                    }
+                </script>
+                <table class="widefat">
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAllValuesHead" name ="selectAllValuesHead"></th>
+                        <th>ID</th>
+                        <th>Distributor</th>
+                        <th>Location</th>
+                        <th>Tax ID</th>
+                        <th>Added By</th>
+                        <th>Added Date</th>
+                        <th>Status</th>
+                        <th>User Email</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th></th>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Location</th>
+                        <th>Tax ID</th>
+                        <th>Added By</th>
+                        <th>Added Date</th>
+                        <th>Status</th>
+                        <th>User Email</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    <?php
+                    global $wpdb;
+
+                    if($wpdb->check_connection()){
+                        $distributors =  $wpdb->get_results("SELECT dist.`distributor_id`, dist.`distributor_name`, dist.`location`,dist.`tax_id`, user.`user_nicename` as `added_by`, dist.`added_date`, dist.`status`, dist.`email_administrator` 
+                                                             FROM `ot_custom_distributor` as dist INNER JOIN `".$wpdb->prefix."users` as user ON dist.`added_by` = user.`ID` 
+                                                             WHERE `email_administrator` in (SELECT `ot_custom_distributor_user`.`distributor_user_username` FROM `ot_custom_distributor_user` WHERE `distributor_user_reg_type` = 'End User');");
+                        foreach ($distributors as $distributor) {
+                            ?>
+                            <tr>
+                                <?php
+                                echo "<td><input onchange='verifyChecks(this)' id='selectAllValues' style='margin-left:8px;' type=\"checkbox\" name=\"idDistributors[]\" value=" . $distributor->distributor_id . "></td>";
+                                echo "<td>" . $distributor->distributor_id . "</td>";
+                                echo "<td>" . $distributor->distributor_name . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idDistributor\" value=\"$distributor->distributor_id\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditDistributor\"></span></div></form></td>";
+                                echo "<td>" . $distributor->location . "</td>";
+                                echo "<td>" . $distributor->tax_id . "</td>";
+                                echo "<td>" . $distributor->added_by . "</td>";
+                                echo "<td>" . $distributor->added_date . "</td>";
+                                echo "<td>" . str_replace("-", " ", ucfirst($distributor->status)) . "</td>";
+                                echo "<td>" . $distributor->email_administrator . "</td>";
+                                ?>
+                            </tr>
+                            <?php
+                        }
+                    }
+                    ?>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+        <?php
+
+    }
+
+    function wpdocs_brokers_submenu_page_callback(){
+
+        ?>
+        <div class="wrap">
+            <h4>Open Trade 2.0</h4>
+            <h3>Brokers List</h3>
+            <br>
+            <?php
+            if (isset($_GET['message-error'])) {
+                ?>
+                <div id="message" class="error">
+                    <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                </div>
+                <?php
+            }
+            ?>
+            <form action="" method="post" enctype="multipart/form-data">
+                <div class="alignleft actions bulkactions">
+                    <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
+                    <select name="selectActionDistributors" id="bulk-action-selector-top">
+                        <option value="-1">Actions</option>
+                        <option value="delete" class="hide-if-no-js">Delete</option>
+                        <option value="approve">Approve</option>
+                        <input id="doAction" class="button action" value="Apply" type="submit" name="actionBulkDistributors">
+                        <input id="doAction" class="button action" value="New Distributor" type="submit" name="actionNewDistributor">
+                    </select>
+                </div>
+                <script>
+                    jQuery(function ($) {
+                        $('#selectAllValuesHead').on('click', function () {
+                            $(':checkbox').prop("checked", $(this).is(':checked'));
+                        });
+                    })
+                </script>
+                <script language="JavaScript">
+                    function verifyChecks(ele) {
+                        var checkboxes = document.getElementsByTagName('input');
+                        if (ele.checked) {
+                            var countTotalChecks = 0;
+                            var countTotalChecksChecked = 0;
+                            for (var i = 0; i < checkboxes.length; i++) {
+                                if (checkboxes[i].type == 'checkbox') {
+                                    var currentValue =checkboxes[i].id;
+                                    if(currentValue.toString() == 'selectAllValues') {
+                                        countTotalChecks++;
+                                        if (checkboxes[i].checked){
+                                            countTotalChecksChecked++;
+                                        }
+                                    }
+                                }
+                            }
+                            if ((countTotalChecks>0) && (countTotalChecksChecked>0) && (countTotalChecks== countTotalChecksChecked)){
+                                var checkHead = document.getElementById('selectAllValuesHead');
+                                checkHead.checked = true;
+                            }
+                        }
+                        else {
+                            var checkHead = document.getElementById('selectAllValuesHead');
+                            checkHead.checked = false;
+                        }
+                    }
+                </script>
+                <table class="widefat">
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAllValuesHead" name ="selectAllValuesHead"></th>
+                        <th>ID</th>
+                        <th>Distributor</th>
+                        <th>Location</th>
+                        <th>Tax ID</th>
+                        <th>Added By</th>
+                        <th>Added Date</th>
+                        <th>Status</th>
+                        <th>User Email</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th></th>
+                        <th>ID</th>
+                        <th>Distributor</th>
+                        <th>Location</th>
+                        <th>Tax ID</th>
+                        <th>Added By</th>
+                        <th>Added Date</th>
+                        <th>Status</th>
+                        <th>User Email</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    <?php
+                    global $wpdb;
+
+                    if($wpdb->check_connection()){
+                        $distributors =  $wpdb->get_results("SELECT dist.`distributor_id`, dist.`distributor_name`, dist.`location`,dist.`tax_id`, user.`user_nicename` as `added_by`, dist.`added_date`, dist.`status`, dist.`email_administrator` 
+                                                             FROM `ot_custom_distributor` as dist INNER JOIN `".$wpdb->prefix."users` as user ON dist.`added_by` = user.`ID` 
+                                                             WHERE `email_administrator` in (SELECT `ot_custom_distributor_user`.`distributor_user_username` FROM `ot_custom_distributor_user` WHERE `distributor_user_reg_type` = 'Broker');");
+                        foreach ($distributors as $distributor) {
+                            ?>
+                            <tr>
+                                <?php
+                                echo "<td><input onchange='verifyChecks(this)' id='selectAllValues' style='margin-left:8px;' type=\"checkbox\" name=\"idDistributors[]\" value=" . $distributor->distributor_id . "></td>";
+                                echo "<td>" . $distributor->distributor_id . "</td>";
+                                echo "<td>" . $distributor->distributor_name . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idDistributor\" value=\"$distributor->distributor_id\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditDistributor\"></span></div></form></td>";
+                                echo "<td>" . $distributor->location . "</td>";
+                                echo "<td>" . $distributor->tax_id . "</td>";
+                                echo "<td>" . $distributor->added_by . "</td>";
+                                echo "<td>" . $distributor->added_date . "</td>";
+                                echo "<td>" . str_replace("-", " ", ucfirst($distributor->status)) . "</td>";
+                                echo "<td>" . $distributor->email_administrator . "</td>";
+                               ?>
+                            </tr>
+                            <?php
+                        }
+                    }
+                    ?>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+        <?php
+
+    }
 
     if(isset($_POST["actionUploadFile"])) {
 
