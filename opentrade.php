@@ -1792,16 +1792,30 @@ License: GPL2
                     </div>
                     <?php
                 }
+                if( isset($_GET['message-success']) ) {
+                    ?>
+                    <div id="message" class="updated">
+                        <p><strong><?php _e($_GET['message-success']) ?></strong></p>
+                    </div>
+                    <?php
+                }
+                if( isset($_GET['message-warning']) ) {
+                    ?>
+                    <div id="message" class="update-nag notice">
+                        <p><strong><?php _e($_GET['message-warning']) ?></strong></p>
+                    </div>
+                    <?php
+                }
                 ?>
                 <form action="" method="post" enctype="multipart/form-data">
                     <input id="actionu" class="button action" value="Back Purchase Order List" type="submit" name="actionBackPurchaseOrderList">
                     <h4>Products</h4>
                     <div class="alignleft actions bulkactions">
                         <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
-                        <select name="selectActionAssignedUsers" id="bulk-action-selector-top">
+                        <select name="selectActionAssignedProductPurchase" id="bulk-action-selector-top">
                             <option value="-1">Actions</option>
                             <option value="delete" class="hide-if-no-js">Delete</option>
-                            <input id="doAction" class="button action" value="Apply" type="submit" name="actionBulkAssignedPurchaseOrder">
+                            <input id="doAction" class="button action" value="Apply" type="submit" name="actionBulkDeleteProductPurchaseOrder">
                         </select>
                     </div>
                     <script language="JavaScript">
@@ -1905,8 +1919,8 @@ License: GPL2
                                     echo "<td>" . $product->product_id . "</td>";
                                     echo "<td>" . $distributorSKUName . "</td>";
                                     echo "<td>" . $priceUnit . "</td>";
-                                    echo "<td><input type='text' style='width: 85px;' value='" . $product->quantity . "'/></td>";
-                                    echo "<td>" . $quantity . "</td>";
+                                    echo "<td><input type='number' style='width: 85px;' value='" . $product->quantity . "' name='txt".$product->product_id."'/></td>";
+                                    echo "<td>" . $quantity . "<input type='hidden' name='lbl".$product->product_id."' value='".$quantity."'></td>";
                                     ?>
                                 </tr>
                                 <?php
@@ -1915,6 +1929,8 @@ License: GPL2
                         ?>
                         </tbody>
                     </table>
+                    <br>
+                    <input id="doActionUpdate" class="button button-primary" value="Update Purchase Order" type="submit" name="actionBulkUpdatePurchaseOrder">
                 </form>
                 <br>
                 <form action="" method="post" enctype="multipart/form-data">
@@ -1986,7 +2002,7 @@ License: GPL2
                             <th>ID</th>
                             <th>Name</th>
                             <th>Price Unit</th>
-                            <th>Quantity</th>
+                            <!--<th>Quantity</th>-->
                             <th>Stock Quantity</th>
                         </tr>
                         </thead>
@@ -1996,7 +2012,7 @@ License: GPL2
                             <th>ID</th>
                             <th>Name</th>
                             <th>Price Unit</th>
-                            <th>Quantity</th>
+                            <!--<th>Quantity</th>-->
                             <th>Stock Quantity</th>
                         </tr>
                         </tfoot>
@@ -2027,7 +2043,7 @@ License: GPL2
                                     echo "<td>" . $product->ID . "</td>";
                                     echo "<td>" . $distributorSKUName . "</td>";
                                     echo "<td>" . $priceUnit . "</td>";
-                                    echo "<td><input type='text' style='width: 85px;' value='' id='txt".$product->ID."' name='txt".$product->ID."' /></td>";
+                                    //echo "<td><input type='number' style='width: 85px;' value='' id='txt".$product->ID."' name='txt".$product->ID."' /></td>";
                                     echo "<td>" . $quantity . "</td>";
                                     ?>
                                 </tr>
@@ -2971,21 +2987,21 @@ License: GPL2
 
     }
 
-     if(isset($_POST["actionBulkAddProductPurchaseOrder"])){
+    if(isset($_POST["actionBulkAddProductPurchaseOrder"])){
         if(isset($_POST["selectActionAssignedProducts"]) && $_POST["selectActionAssignedProducts"] !== "-1"){
             if($_POST["selectActionAssignedProducts"] === "add"){
                 if(isset($_POST["idAssignedProductAll"])){
                     global $wpbd;
+
                     $idProducts = $_POST["idAssignedProductAll"];
-                    $current_user = get_current_user_id();
                     $idPurchaseOrder = $_POST["idPurchaseOrderAll"];
                     $exit = true;
                     foreach ($idProducts as $id){
                         $name = "txt".$id;
-                        $quantity = $_POST[$name];
-                        if($quantity !== ""){
+                        $quantity = 1;//$_POST[$name];
+                        if($quantity !== "" && $quantity > 0){
                             if($wpdb->check_connection()){
-                                $wpdb->query("INSERT INTO ot_custom_product_purchase_order (product_id, purchase_order_id, quantity, added_by, added_date, edited_by, edited_date) VALUES (".$id.", ".$idPurchaseOrder.", ".$quantity.", ".$current_user.", sysdate(), '', '');");
+                                $wpdb->query("INSERT INTO ot_custom_product_purchase_order (product_id, purchase_order_id, quantity, added_by, added_date, edited_by, edited_date) VALUES (".$id.", ".$idPurchaseOrder.", ".$quantity.", ".getCurrentUser()->ID.",".getFormatDate().", '', '');");
                             }
                         }else{
                             $exit = false;
@@ -2994,11 +3010,12 @@ License: GPL2
                     if($exit === false){
                         $_GET['message-error'] = "Some products no contains quantity";
                     }
-                    $_GET['idPurchaseOrder'] = $_POST['idPurchaseOrderAll'];
+                    $_GET['edit-purchase-order'] = true;
+                    $_GET['idPurchaseOrder'] = $idPurchaseOrder;
 
                 }else{
                     $_GET['message-error']="Please select product!";
-                    $_GET['idPurchaseOrder'] = $_POST['idPurchaseOrderAll'];
+                    $_GET['idPurchaseOrder'] = $idPurchaseOrder;
                     $_GET['edit-purchase-order'] = true;
                 }
             }
@@ -3007,4 +3024,65 @@ License: GPL2
             $_GET['idPurchaseOrder'] = $_POST['idPurchaseOrderAll'];
             $_GET['edit-purchase-order'] = true;
         }
+    }
+
+    if(isset($_POST["actionBulkDeleteProductPurchaseOrder"])){
+        if(isset($_POST["selectActionAssignedProductPurchase"]) && $_POST["selectActionAssignedProductPurchase"] !== "-1"){
+            if($_POST["selectActionAssignedProductPurchase"] === "delete"){
+                if(isset($_POST["idAssignedProduct"])){
+                    global $wpbd;
+
+                    $idProducts = $_POST["idAssignedProduct"];
+                    $idPurchaseOrder = $_POST["idPurchaseOrder"];
+                    $exit = true;
+                    foreach ($idProducts as $id){
+                        if($wpdb->check_connection()){
+                            $wpdb->query("delete from ot_custom_product_purchase_order where product_id = ".$id." and purchase_order_id = ".$idPurchaseOrder.";");
+                        }
+                    }
+                    $_GET['edit-purchase-order'] = true;
+                    $_GET['idPurchaseOrder'] = $idPurchaseOrder;
+
+                }else{
+                    $_GET['message-error']="Please select product!";
+                    $_GET['idPurchaseOrder'] = $idPurchaseOrder;
+                    $_GET['edit-purchase-order'] = true;
+                }
+            }
+        }
+        else{
+            $_GET['message-error']="Please select one action!";
+            $_GET['idPurchaseOrder'] = $_POST['idPurchaseOrder'];
+            $_GET['edit-purchase-order'] = true;
+        }
+    }
+
+    if(isset($_POST["actionBulkUpdatePurchaseOrder"])){
+
+        global $wpbd;
+
+        $idPurchaseOrder = $_POST["idPurchaseOrder"];
+
+        if($wpdb->check_connection()){
+            $result = $wpdb->get_results("select product_id from ot_custom_product_purchase_order where purchase_order_id = ".$idPurchaseOrder.";");
+        }
+
+        foreach($result as $row){
+            $name = "txt".$row->product_id;
+            $nameLbl = "lbl".$row->product_id;
+            if(isset($_POST[$name]) && $_POST[$name] !== ""){
+                if($_POST[$name] > 0 && $_POST[$name] <= $_POST[$nameLbl]){
+                    if($wpdb->check_connection()){
+                        $wpdb->query("UPDATE ot_custom_product_purchase_order SET quantity = ".$_POST[$name]." WHERE purchase_order_id = ".$idPurchaseOrder." AND product_id = ".$row->product_id.";");
+                    }
+                }else{
+                    $_GET['message-warning']="Some products can not updating, because the quantity is incorrect";
+                }
+
+            }
+        }
+        $_GET['message-success'] = "Products updated succesfully!";
+        $_GET['edit-purchase-order'] = true;
+        $_GET['idPurchaseOrder'] = $idPurchaseOrder;
+
     }
