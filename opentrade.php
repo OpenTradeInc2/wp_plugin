@@ -1918,8 +1918,8 @@ License: GPL2
 
                                     echo "<td>" . $product->product_id . "</td>";
                                     echo "<td>" . $distributorSKUName . "</td>";
-                                    echo "<td>" . $priceUnit . "</td>";
-                                    echo "<td><input type='number' style='width: 85px;' value='" . $product->quantity . "' name='txt".$product->product_id."'/></td>";
+                                    echo "<td>" . $priceUnit . "<input type='hidden' name='lblPriceUnit".$product->product_id."' value='".$priceUnit."'></td>";
+                                    echo "<td><input type='number' style='width: 85px;' value='" . $product->quantity . "' name='txt".$product->product_id."'/><input type='hidden' name='lblQuantityStart".$product->product_id."' value='".$product->quantity."'></td>";
                                     echo "<td>" . $quantity . "<input type='hidden' name='lbl".$product->product_id."' value='".$quantity."'></td>";
                                     ?>
                                 </tr>
@@ -2042,7 +2042,7 @@ License: GPL2
 
                                     echo "<td>" . $product->ID . "</td>";
                                     echo "<td>" . $distributorSKUName . "</td>";
-                                    echo "<td>" . $priceUnit . "</td>";
+                                    echo "<td>" . $priceUnit . "<input type='hidden' name='lblPriceUnitAll".$product->ID."' value='".$priceUnit."'></td>";
                                     //echo "<td><input type='number' style='width: 85px;' value='' id='txt".$product->ID."' name='txt".$product->ID."' /></td>";
                                     echo "<td>" . $quantity . "</td>";
                                     ?>
@@ -2996,17 +2996,25 @@ License: GPL2
                     $idProducts = $_POST["idAssignedProductAll"];
                     $idPurchaseOrder = $_POST["idPurchaseOrderAll"];
                     $exit = true;
+                    $totalAmount = 0;
                     foreach ($idProducts as $id){
                         $name = "txt".$id;
-                        $quantity = 1;//$_POST[$name];
+                        $namePriceUnit = "lblPriceUnitAll".$id;
+                        $quantity = 1;
                         if($quantity !== "" && $quantity > 0){
                             if($wpdb->check_connection()){
                                 $wpdb->query("INSERT INTO ot_custom_product_purchase_order (product_id, purchase_order_id, quantity, added_by, added_date, edited_by, edited_date) VALUES (".$id.", ".$idPurchaseOrder.", ".$quantity.", ".getCurrentUser()->ID.",".getFormatDate().", '', '');");
                             }
+                            $totalAmount = $totalAmount + $_POST[$namePriceUnit];
                         }else{
                             $exit = false;
                         }
                     }
+
+                    if($wpdb->check_connection()){
+                        $wpdb->query("UPDATE ot_custom_purchase_order set total_amount = (total_amount + ".$totalAmount.") where purchase_order_id = ".$idPurchaseOrder.";");
+                    }
+
                     if($exit === false){
                         $_GET['message-error'] = "Some products no contains quantity";
                     }
@@ -3035,11 +3043,24 @@ License: GPL2
                     $idProducts = $_POST["idAssignedProduct"];
                     $idPurchaseOrder = $_POST["idPurchaseOrder"];
                     $exit = true;
+                    $totalAmount = 0;
+
                     foreach ($idProducts as $id){
+
+                        $namePriceUnit = "lblPriceUnit".$id;
+                        $nameQuantityStart = "lblQuantityStart".$id;
+
                         if($wpdb->check_connection()){
                             $wpdb->query("delete from ot_custom_product_purchase_order where product_id = ".$id." and purchase_order_id = ".$idPurchaseOrder.";");
                         }
+
+                        $totalAmount = $totalAmount + ($_POST[$namePriceUnit] * $_POST[$nameQuantityStart]);
                     }
+
+                    if($wpdb->check_connection()){
+                        $wpdb->query("UPDATE ot_custom_purchase_order set total_amount = (total_amount - ".$totalAmount.") where purchase_order_id = ".$idPurchaseOrder.";");
+                    }
+
                     $_GET['edit-purchase-order'] = true;
                     $_GET['idPurchaseOrder'] = $idPurchaseOrder;
 
@@ -3067,20 +3088,31 @@ License: GPL2
             $result = $wpdb->get_results("select product_id from ot_custom_product_purchase_order where purchase_order_id = ".$idPurchaseOrder.";");
         }
 
+        $totalAmount = 0;
         foreach($result as $row){
             $name = "txt".$row->product_id;
             $nameLbl = "lbl".$row->product_id;
+            $nameQuantityStart = "lblQuantityStart".$row->product_id;
+            $namePriceUnit = "lblPriceUnit".$row->product_id;
+
             if(isset($_POST[$name]) && $_POST[$name] !== ""){
                 if($_POST[$name] > 0 && $_POST[$name] <= $_POST[$nameLbl]){
                     if($wpdb->check_connection()){
                         $wpdb->query("UPDATE ot_custom_product_purchase_order SET quantity = ".$_POST[$name]." WHERE purchase_order_id = ".$idPurchaseOrder." AND product_id = ".$row->product_id.";");
                     }
+                    $amountPrev = $_POST[$name] * $_POST[$namePriceUnit];
                 }else{
+                    $amountPrev = $_POST[$nameQuantityStart] * $_POST[$namePriceUnit];
                     $_GET['message-warning']="Some products can not updating, because the quantity is incorrect";
                 }
-
             }
+            $totalAmount = $totalAmount+ $amountPrev;
         }
+
+        if($wpdb->check_connection()){
+            $wpdb->query("UPDATE ot_custom_purchase_order SET total_amount = ".$totalAmount." WHERE purchase_order_id = ".$idPurchaseOrder.";");
+        }
+
         $_GET['message-success'] = "Products updated succesfully!";
         $_GET['edit-purchase-order'] = true;
         $_GET['idPurchaseOrder'] = $idPurchaseOrder;
