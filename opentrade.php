@@ -1738,8 +1738,9 @@ License: GPL2
                         <th>Product ID</th>
                         <th>Name</th>
                         <th>Description</th>
+                        <th>Quantity</th>
                         <th>Price</th>
-                        <th>Stock</th>
+                        <th>In Stock</th>
                     </tr>
                     </thead>
                     <tfoot>
@@ -1748,8 +1749,9 @@ License: GPL2
                         <th>Product ID</th>
                         <th>Name</th>
                         <th>Description</th>
+                        <th>Quantity</th>
                         <th>Price</th>
-                        <th>Stock</th>
+                        <th>In Stock</th>
                     </tr>
                     </tfoot>
                     <tbody>
@@ -1770,6 +1772,7 @@ License: GPL2
                             echo "<td>"  . $product->product_id . "</td>";
                             echo "<td>"  . $post->post_title . "</td>";
                             echo "<td>"  . $post->post_content . "</td>";
+                            echo "<td>"  . $product->quantity . "</td>";
                             echo "<td>$"  . $price . "</td>";
                             echo "<td>"  . $stock[0] . "</td>";
                             ?>
