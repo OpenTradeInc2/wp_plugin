@@ -2019,7 +2019,7 @@ License: GPL2
                             <tr>
                                 <?php
                                 echo "<td><input  onchange='verifyChecks(this)' id='selectAllValues' style='margin-left:8px;' type=\"checkbox\" name=\"idProductOfferList[]\" value=" . $product_item->offer_information_id . "></td>";
-                                echo "<td>"  . $product_item->offer_information_id . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idPostOfferLink\" value=\"".$product_item->offer_information_id."\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditPostOffer\"></span></div></form></td>";
+                                echo "<td>"  . $product_item->offer_information_id . "</td>";
                                 echo "<td>"  . $user->ID . "</td>";
                                 echo "<td>"  . $user->user_login . "</td>";
                                 echo "<td>"  . $user->user_email . "</td>";
@@ -3784,17 +3784,17 @@ License: GPL2
 
     }
 
-        if($wpdb->check_connection()){
-            $wpdb->query("UPDATE ot_custom_offer_information SET total_amount = ".$totalAmount." , total_offer = ". $totalOfferAmount." WHERE offer_information_id = ".$idPostOffer.";");
-        }
-
-
-
+    if($wpdb->check_connection()){
+        $wpdb->query("UPDATE ot_custom_offer_information SET total_amount = ".$totalAmount." , total_offer = ". $totalOfferAmount." WHERE offer_information_id = ".$idPostOffer.";");
+    }
+    
+    
+    
     $_GET['message-success'] = "Products updated succesfully!";
     $_GET['edit-products-offer'] = true;
     $_GET['idPostOffer'] = $idPostOffer;
-
-}
+    
+    }
 
     if(isset($_POST["actionBulkDeleteProductPostOffer"])){
 
@@ -3859,4 +3859,17 @@ License: GPL2
             $_GET['idPostOffer'] = $_POST['idPostOfferAll'];
             $_GET['edit-products-offer'] = true;
         }
+    }
+
+    if(isset($_POST["actionHistoricPurchaseOrders"])){
+        $_GET['historic-purchase-order'] = true;
+    }
+    
+    if(isset($_POST["actionPurchaseOrderViewProductsHistory"])){
+        $_GET['idPurchaseOrder'] = $_POST['idPurchaseOrder'];
+        $_GET['view-historic-products-purchase-order'] = true;
+    }
+    
+    if(isset($_POST["actionBackHistoricPurchaseList"])){
+        $_GET['historic-purchase-order'] = true;
     }
