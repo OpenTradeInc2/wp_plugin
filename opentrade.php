@@ -2384,6 +2384,137 @@ License: GPL2
             </div>
         <?php
         }
+        else if(isset($_GET['historic-purchase-order']) and $_GET['historic-purchase-order'] == true){
+            ?>
+            <div class="wrap">
+                <h4>Open Trade 2.0</h4>
+                <h3>Historic Purchase Orders</h3>
+                <br>
+                <form action="" method="post" enctype="multipart/form-data">
+                    <input id="actionu" class="button action" value="Back Purchase Order List" type="submit" name="actionBackPurchaseOrderList">
+                    <br class="clear">
+                    <table class="widefat" name="tablePendingFiles" id="idTablePendingFiles">
+                        <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>User Name</th>
+                            <th>User Email</th>
+                            <th>Quantity of Products</th>
+                            <th>Total Amount</th>
+                            <th>File Name</th>
+                            <th>View Products</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <th>Id</th>
+                            <th>User Name</th>
+                            <th>User Email</th>
+                            <th>Quantity of Products</th>
+                            <th>Total Amount</th>
+                            <th>File Name</th>
+                            <th>View Products</th>
+                            <th>Status</th>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                        <?php
+                        global $wpdb;
+
+                        $isConnected = $wpdb->check_connection();
+
+                        if ($isConnected) {
+                            $purchaseOrders = $wpdb->get_results("SELECT * FROM `ot_custom_purchase_order`  WHERE `status` in ('reject','approve') ORDER BY `added_date` DESC");
+                            foreach ($purchaseOrders as $purchaseOrder) {
+                                $user = get_user_by('ID', $purchaseOrder->user_id);
+                                $products = $wpdb->get_results("SELECT * FROM `ot_custom_product_purchase_order`  WHERE `purchase_order_id` = " . $purchaseOrder->purchase_order_id . ";");
+                                $url = $purchaseOrder->file_patch;
+                                $name = $purchaseOrder->file_name;
+                                $arreglo = explode("/",$purchaseOrder->file_patch);
+                                $ruta = $arreglo[1]."/".$arreglo[2]."/".$arreglo[3];
+                                ?>
+                                <tr>
+                                    <?php
+                                    echo "<td>" . $purchaseOrder->purchase_order_id . "</td>";
+                                    echo "<td>" . $user->nickname . "</td>";
+                                    echo "<td>" . $user->user_email . "</td>";
+                                    echo "<td>" . sizeof($products) . "</td>";
+                                    echo "<td>$" . $purchaseOrder->total_amount . "</td>";
+                                    echo "<td><a href='../wp-content/plugins/woocommerce/templates/checkout/". $ruta."' download>" . $name . "</a></td>";
+                                    echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idPurchaseOrder\" value=\"$purchaseOrder->purchase_order_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionPurchaseOrderViewProductsHistory\"></form></td>";
+                                    echo "<td>".ucfirst($purchaseOrder->status)."</td>";
+                                    ?>
+                                </tr>
+                                <?php
+                            }
+                        }
+                        ?>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+            <?php
+        }
+        else if( isset($_GET['view-historic-products-purchase-order']) and $_GET['view-historic-products-purchase-order'] == true ) {
+            ?>
+            <div class="wrap">
+                <h4>Open Trade 2.0</h4>
+                <h3>Products Detail</h3>
+                <form action="" method="post" enctype="multipart/form-data">
+                    <input id="actionDetails" class="button action" value="Back Historic Purchase Order List" type="submit" name="actionBackHistoricPurchaseList">
+                </form>
+                <table class="widefat">
+                    <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Product ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th>Id</th>
+                        <th>Product ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    <?php
+
+                    global $wpdb;
+                    $idPurchaseOrder = $_GET['idPurchaseOrder'];
+                    $products = $wpdb->get_results("SELECT * FROM `ot_custom_product_purchase_order`  WHERE `purchase_order_id` = ".$idPurchaseOrder.";");
+
+                    foreach ($products as $product) {
+                        $price = get_post_meta( $product->product_id, '_price', true );
+                        $post = get_post($product->product_id);
+                        $stock = get_post_meta( $product->product_id, '_stock' );
+                        ?>
+                        <tr>
+                            <?php
+                            echo "<td>"  . $product->product_purchase_order_id . "</td>";
+                            echo "<td>"  . $product->product_id . "</td>";
+                            echo "<td>"  . $post->post_title . "</td>";
+                            echo "<td>"  . $post->post_content . "</td>";
+                            echo "<td>"  . $product->quantity . "</td>";
+                            echo "<td>$"  . $price . "</td>";
+                            ?>
+                        </tr>
+                        <?php
+                    }
+                    ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php
+        }
         else {
             ?>
             <div class="wrap">
@@ -2415,6 +2546,7 @@ License: GPL2
                             <option value="approve" class="hide-if-no-js">Approve</option>
                             <option value="reject">Reject</option>
                             <input id="doaction" class="button action" value="Apply" type="submit" name="actionPurchaseOrders">
+                            <input id="doaction" class="button action" value="Historic" type="submit" name="actionHistoricPurchaseOrders">
                         </select>
                     </div>
                     <script>
