@@ -2019,7 +2019,7 @@ License: GPL2
                             <tr>
                                 <?php
                                 echo "<td><input  onchange='verifyChecks(this)' id='selectAllValues' style='margin-left:8px;' type=\"checkbox\" name=\"idProductOfferList[]\" value=" . $product_item->offer_information_id . "></td>";
-                                echo "<td>"  . $product_item->offer_information_id . "</td>";
+                                echo "<td>"  . $product_item->offer_information_id . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idPostOfferLink\" value=\"".$product_item->offer_information_id."\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditPostOffer\"></span></div></form></td>";
                                 echo "<td>"  . $user->ID . "</td>";
                                 echo "<td>"  . $user->user_login . "</td>";
                                 echo "<td>"  . $user->user_email . "</td>";
