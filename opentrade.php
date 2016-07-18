@@ -1590,6 +1590,325 @@ License: GPL2
         </div>
         <?php
         }
+        elseif(isset($_GET['edit-products-offer']) and $_GET['edit-products-offer'] == true){
+            ?>
+            <div class="wrap">
+                <h4>Open Trade 2.0</h4>
+                <h3>Edit Post Offer</h3>
+                <?php
+                if (isset($_GET['message-error'])) {
+                    ?>
+                    <div id="message" class="error">
+                        <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+                    </div>
+                    <?php
+                }
+                if( isset($_GET['message-success']) ) {
+                    ?>
+                    <div id="message" class="updated">
+                        <p><strong><?php _e($_GET['message-success']) ?></strong></p>
+                    </div>
+                    <?php
+                }
+                if( isset($_GET['message-warning']) ) {
+                    ?>
+                    <div id="message" class="update-nag notice">
+                        <p><strong><?php _e($_GET['message-warning']) ?></strong></p>
+                    </div>
+                    <?php
+                }
+                ?>
+                <form action="" method="post" enctype="multipart/form-data">
+                    <input id="actionu" class="button action" value="Back Post Offer List" type="submit" name="actionBackPostOfferList">
+                    <h4>Products</h4>
+                    <div class="alignleft actions bulkactions">
+                        <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
+                        <select name="selectActionAssignedProductPostOffer" id="bulk-action-selector-top">
+                            <option value="-1">Actions</option>
+                            <option value="delete" class="hide-if-no-js">Delete</option>
+                            <input id="doAction" class="button action" value="Apply" type="submit" name="actionBulkDeleteProductPostOffer">
+                        </select>
+                    </div>
+                    <script language="JavaScript">
+                        function checkAssigned(ele) {
+                            var checkboxes = document.getElementsByTagName('input');
+                            if (ele.checked) {
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'chkAssignedProduct') {
+                                            checkboxes[i].checked = true;
+                                        }
+                                    }
+                                }
+                            } else {
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'chkAssignedProduct') {
+                                            checkboxes[i].checked = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        function verifyChecks(ele) {
+                            var checkboxes = document.getElementsByTagName('input');
+                            if (ele.checked) {
+                                var countTotalChecks = 0;
+                                var countTotalChecksChecked = 0;
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'chkAssignedProduct') {
+                                            countTotalChecks++;
+                                            if (checkboxes[i].checked){
+                                                countTotalChecksChecked++;
+                                            }
+                                        }
+                                    }
+                                }
+                                if ((countTotalChecks>0) && (countTotalChecksChecked>0) && (countTotalChecks== countTotalChecksChecked)){
+                                    var checkHead = document.getElementById('headChkAssignedProduct');
+                                    checkHead.checked = true;
+                                }
+                            }
+                            else {
+                                var checkHead = document.getElementById('headChkAssignedProduct');
+                                checkHead.checked = false;
+                            }
+                        }
+                    </script>
+
+                    <input type="hidden" name="idPostOffer" value="<?php _e($_GET['idPostOffer']) ?>">
+                    <table class="widefat">
+                        <thead>
+                        <tr>
+                            <th><input type="checkbox" onchange="checkAssigned(this)" name="chk[]" id="headChkAssignedProduct" /> </th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Price</th>
+                            <th>Offer</th>
+                            <th>Stock</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Price</th>
+                            <th>Offer</th>
+                            <th>Stock</th>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                        <?php
+                        global $wpdb;
+
+                        if($wpdb->check_connection()){
+                            $idOfferInfo= $_GET['idPostOffer'];
+                            $products =  $wpdb->get_results("SELECT * FROM `ot_custom_product_offer_information`  WHERE `offer_information_id` = ".$idOfferInfo.";");
+                            foreach ($products as $product) {
+
+                                ?>
+                                <tr>
+                                    <?php
+                                    echo "<td><input onchange='verifyChecks(this)'  id=\"chkAssignedProduct\" style='margin-left:8px;' type=\"checkbox\" name=\"idAssignedProduct[]\" value=" . $product->product_id . "></td>";
+                                    $price = get_post_meta( $product->product_id, '_price', true );
+                                    $post = get_post($product->product_id);
+                                    $stock = get_post_meta( $product->product_id, '_stock' );
+
+                                    echo "<td>"  . $product->product_id . "</td>";
+                                    echo "<td>"  . $post->post_title . "</td>";
+                                    echo "<td>"  . $post->post_content . "</td>";
+                                    echo "<td>$"  . number_format($price, 2) . "<input type='hidden' name='lblPriceUnit".$product->product_id."' value='".$price."'></td>";
+                                    echo "<td><input type='text' name='txtPriceOffer".$product->product_id."' value='$".number_format($product->offer, 2)."' style='width:100px;' onblur='returnFormatCost(".$product->product_id.")' id='txtPriceOffer".$product->product_id."'><input type='hidden' name='lblPriceOfferOriginal".$product->product_id."' value='$".number_format($product->offer, 2)."'></td>";
+                                    echo "<td>"  . $stock[0] . "</td>";
+
+                                    ?>
+                                </tr>
+                                <?php
+                            }
+                        }
+                        ?>
+                        </tbody>
+                    </table>
+                    <br>
+                    <input id="doActionUpdate" class="button button-primary" value="Update Post Offer" type="submit" name="actionBulkUpdatePostOffer">
+                </form>
+                <br>
+                <form action="" method="post" enctype="multipart/form-data">
+                    <h4>All Products</h4>
+                    <div class="alignleft actions bulkactions">
+                        <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
+                        <select name="selectActionAssignedProducts" id="bulk-action-selector-top">
+                            <option value="-1">Actions</option>
+                            <option value="add" class="hide-if-no-js">Add</option>
+                            <input id="doActionApply" class="button action" value="Apply" type="submit" name="actionBulkAddProductPostOffer">
+                        </select>
+                    </div>
+                    <script language="JavaScript">
+                        function checkAssignedAll(ele) {
+                            var checkboxes = document.getElementsByTagName('input');
+                            if (ele.checked) {
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'chkAssignedProductAll') {
+                                            checkboxes[i].checked = true;
+                                        }
+                                    }
+                                }
+                            } else {
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'chkAssignedProductAll') {
+                                            checkboxes[i].checked = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        function verifyChecksAll(ele) {
+                            var checkboxes = document.getElementsByTagName('input');
+                            if (ele.checked) {
+                                var countTotalChecks = 0;
+                                var countTotalChecksChecked = 0;
+                                for (var i = 0; i < checkboxes.length; i++) {
+                                    if (checkboxes[i].type == 'checkbox') {
+                                        var currentValue =checkboxes[i].id;
+                                        if(currentValue.toString() == 'chkAssignedProductAll') {
+                                            countTotalChecks++;
+                                            if (checkboxes[i].checked){
+                                                countTotalChecksChecked++;
+                                            }
+                                        }
+                                    }
+                                }
+                                if ((countTotalChecks>0) && (countTotalChecksChecked>0) && (countTotalChecks== countTotalChecksChecked)){
+                                    var checkHead = document.getElementById('headChkAssignedProductAll');
+                                    checkHead.checked = true;
+                                }
+                            }
+                            else {
+                                var checkHead = document.getElementById('headChkAssignedProductAll');
+                                checkHead.checked = false;
+                            }
+                        }
+                    </script>
+                    <input type="hidden" name="idPostOfferAll" value="<?php _e($_GET['idPostOffer']) ?>">
+                    <table class="widefat">
+                        <thead>
+                        <tr>
+                            <th><input type="checkbox" onchange="checkAssignedAll(this)" name="chk[]" id="headChkAssignedProductAll" /> </th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price Unit</th>
+                            <th>Price Offer</th>
+                            <th>Stock Quantity</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price Unit</th>
+                            <th>Price Offer</th>
+                            <th>Stock Quantity</th>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                        <?php
+                        global $wpdb;
+
+                        if($wpdb->check_connection()){
+                            $idPostOffer= $_GET['idPostOffer'];
+                            $products =  $wpdb->get_results("select * from wp_f9d0rrf6rz_posts where post_type='product' and ID not in(select product_id from ot_custom_product_offer_information where offer_information_id = ".$idPostOffer.");");
+                            foreach ($products as $product) {
+                                $postMetaProduct = get_post_meta($product->ID, '_product_attributes', true);
+                                //$nameTxt = "txtPriceOfferAll".$product->ID;
+                                ?>
+                                <tr>
+                                    <?php
+                                    echo "<td><input onchange='verifyChecksAll(this)'  id=\"chkAssignedProductAll\" style='margin-left:8px;' type=\"checkbox\" name=\"idAssignedProductAll[]\" value=" . $product->ID . "></td>";
+                                    foreach ($postMetaProduct as $product_atributte){
+
+                                        if($product_atributte["name"] == "Distributor SKU Description"){
+                                            $distributorSKUName = $product_atributte["value"];
+                                        } else if($product_atributte["name"] == "Units in Stock"){
+                                            $quantity = $product_atributte["value"];
+                                        } else if($product_atributte["name"] == "Price / Unit"){
+                                            $priceUnit = $product_atributte["value"];
+                                        }
+                                    }
+
+                                    echo "<td>" . $product->ID . "</td>";
+                                    echo "<td>" . $distributorSKUName . "</td>";
+                                    echo "<td>" . $priceUnit . "<input type='hidden' name='lblPriceUnit".$product->ID."' value='".$priceUnit."'></td>";
+                                    echo "<td><input type='text' style='width: 85px;' id='txtPriceOffer".$product->ID."' name='txtPriceOffer".$product->ID."' onblur='returnFormatCost(".$product->ID.")'/></td>";
+                                    echo "<td>" . $quantity . "</td>";
+                                    ?>
+                                </tr>
+                                <?php
+                            }
+                        }
+                        ?>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+            <script language="JavaScript">
+
+                function returnFormatCost(idElement){
+                    var numero = document.getElementById("txtPriceOffer"+idElement).value;
+
+                    var numeroDecimal=0;
+                    if(numero.search("$") !== -1){
+                        numero = numero.replace("$","");
+                        numeroDecimal = number_format(numero, 2);
+                    }else{
+                        numeroDecimal = number_format(numero, 2);
+                    }
+                    document.getElementById("txtPriceOffer"+idElement).value = "$"+numeroDecimal;
+                }
+
+
+                 function number_format(amount, decimals) {
+
+                 amount += ''; // por si pasan un numero en vez de un string
+                 amount = parseFloat(amount.replace(/[^0-9\.]/g, '')); // elimino cualquier cosa que no sea numero o punto
+
+                 decimals = decimals || 0; // por si la variable no fue fue pasada
+
+                 // si no es un numero o es igual a cero retorno el mismo cero
+                 if (isNaN(amount) || amount === 0)
+                 return parseFloat(0).toFixed(decimals);
+
+                 // si es mayor o menor que cero retorno el valor formateado como numero
+                 amount = '' + amount.toFixed(decimals);
+
+                 var amount_parts = amount.split('.'),
+                 regexp = /(\d+)(\d{3})/;
+
+                 while (regexp.test(amount_parts[0])){
+                 amount_parts[0] = amount_parts[0].replace(regexp, '$1' + ',' + '$2');
+                 }
+
+
+                 return amount_parts.join('.');
+                 }
+
+            </script>
+
+            <?php
+        }
         else {
         ?>
         <div class="wrap">
@@ -1700,7 +2019,7 @@ License: GPL2
                             <tr>
                                 <?php
                                 echo "<td><input  onchange='verifyChecks(this)' id='selectAllValues' style='margin-left:8px;' type=\"checkbox\" name=\"idProductOfferList[]\" value=" . $product_item->offer_information_id . "></td>";
-                                echo "<td>"  . $product_item->offer_information_id . "</td>";
+                                echo "<td>"  . $product_item->offer_information_id . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idPostOfferLink\" value=\"".$product_item->offer_information_id."\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditPostOffer\"></span></div></form></td>";
                                 echo "<td>"  . $user->ID . "</td>";
                                 echo "<td>"  . $user->user_login . "</td>";
                                 echo "<td>"  . $user->user_email . "</td>";
@@ -3347,4 +3666,197 @@ License: GPL2
         $_GET['edit-purchase-order'] = true;
         $_GET['idPurchaseOrder'] = $idPurchaseOrder;
 
+    }
+
+    if(isset($_POST["actionEditPostOffer"])){
+        $_GET['edit-products-offer'] = true;
+        $_GET['idPostOffer'] = $_POST["idPostOfferLink"];
+    }
+
+    if(isset($_POST["actionBulkAddProductPostOffer"])){
+        if(isset($_POST["selectActionAssignedProducts"]) && $_POST["selectActionAssignedProducts"] !== "-1"){
+            if($_POST["selectActionAssignedProducts"] === "add"){
+                if(isset($_POST["idAssignedProductAll"])){
+                    global $wpbd;
+
+                    $idProducts = $_POST["idAssignedProductAll"];
+                    $idPostOffer = $_POST["idPostOfferAll"];
+                    $exit = true;
+                    $totalAmount =0;
+                    $totalAmountOffer =0;
+
+                    $exit = true;
+                    foreach ($idProducts as $id){
+                        $name = "txt".$id;
+                        $namePriceUnit = "lblPriceUnit".$id;
+                        $namePriceOffer = "txtPriceOffer".$id;
+
+                        $priceUnit = str_replace('$', '', $_POST[$namePriceUnit]);
+                        $priceUnit = str_replace(',', '', $priceUnit);
+
+                        $priceOffer = str_replace('$', '', $_POST[$namePriceOffer]);
+                        $priceOffer = str_replace(',', '', $priceOffer);
+
+                        if(isset($_POST[$namePriceOffer]) && $_POST[$namePriceOffer] !== "" && $priceOffer > 0 && $priceUnit > $priceOffer){
+                            if($wpdb->check_connection()){
+                                $wpdb->query("insert into ot_custom_product_offer_information (product_post_offer_information_id, product_id, offer_information_id, quantity, added_by, added_date, edited_by, edited_date, price, offer) values(0, ".$id.", ".$idPostOffer.", 1, ".getCurrentUser()->ID.", '".getFormatDate()."', '', '', ".$priceUnit.", ".$priceOffer.");");
+                            }
+
+                            $totalAmount = $totalAmount + $priceUnit;
+                            $totalAmountOffer = $totalAmountOffer + $priceOffer;
+
+                        }else{
+                            $exit=false;
+                        }
+
+                    }
+
+                    if($exit == false){
+                        $_GET['message-warning']="Some products can not added, because the price offer is incorrect!";
+                    }
+
+                    if($wpdb->check_connection()){
+                        $wpdb->query("UPDATE ot_custom_offer_information set total_amount = (total_amount + ".$totalAmount."), total_offer = (total_offer + ".$totalAmountOffer.") where offer_information_id = ".$idPostOffer.";");
+                    }
+
+                    $_GET['edit-products-offer'] = true;
+                    $_GET['idPostOffer'] = $idPostOffer;
+
+                }else{
+                    $_GET['message-error']="Please select product!";
+                    $_GET['idPostOffer'] = $idPostOffer;
+                    $_GET['edit-products-offer'] = true;
+                }
+            }
+        }else{
+            $_GET['message-error']="Please select one action!";
+            $_GET['idPostOffer'] = $_POST['idPostOfferAll'];
+            $_GET['edit-products-offer'] = true;
+        }
+    }
+
+    if(isset($_POST["actionBulkUpdatePostOffer"])){
+
+    global $wpbd;
+
+    $idPostOffer = $_POST["idPostOffer"];
+
+    if($wpdb->check_connection()){
+        $result = $wpdb->get_results("select product_id from ot_custom_product_offer_information where offer_information_id = ".$idPostOffer.";");
+    }
+
+        $totalAmount = 0;
+        $totalOfferAmount =0;
+    foreach($result as $row){
+
+        $name = "txtPriceOffer".$row->product_id;
+        $nameLbl = "lblPriceUnit".$row->product_id;
+        $nameOriginal = "lblPriceOfferOriginal".$row->product_id;
+
+        if(isset($_POST[$name]) && $_POST[$name] !== ""){
+
+            $priceOffer = str_replace("$","", $_POST[$name]);
+            $priceOffer = str_replace(",","", $priceOffer);
+
+            $priceUnit = str_replace("$", "", $_POST[$nameLbl]);
+            $priceUnit = str_replace(",", "", $priceUnit);
+
+            if( $priceOffer > 0 && $priceOffer <= $priceUnit){
+
+                if($wpdb->check_connection()){
+                    $wpdb->query("UPDATE ot_custom_product_offer_information SET offer = ". $priceOffer." WHERE product_id = ".$row->product_id." AND offer_information_id = ".$idPostOffer.";");
+                }
+
+                $totalAmount = $totalAmount+ + $priceUnit;
+                $totalOfferAmount = $totalOfferAmount + $priceOffer;
+
+            }else{
+
+                $totalAmount = $totalAmount+ + $priceUnit;
+                $priceOffer = str_replace("$","", $_POST[$nameOriginal]);
+                $priceOffer = str_replace(",","", $priceOffer);
+                $totalOfferAmount = $totalOfferAmount + $priceOffer;
+                $_GET['message-warning']="Some products can not updating, because the quantity is incorrect";
+
+            }
+
+        }
+
+    }
+
+        if($wpdb->check_connection()){
+            $wpdb->query("UPDATE ot_custom_offer_information SET total_amount = ".$totalAmount." , total_offer = ". $totalOfferAmount." WHERE offer_information_id = ".$idPostOffer.";");
+        }
+
+
+
+    $_GET['message-success'] = "Products updated succesfully!";
+    $_GET['edit-products-offer'] = true;
+    $_GET['idPostOffer'] = $idPostOffer;
+
+}
+
+    if(isset($_POST["actionBulkDeleteProductPostOffer"])){
+
+        if(isset($_POST["selectActionAssignedProductPostOffer"]) && $_POST["selectActionAssignedProductPostOffer"] !== "-1"){
+
+            if($_POST["selectActionAssignedProductPostOffer"] == "delete"){
+
+                if(isset($_POST["idAssignedProduct"])){
+                    global $wpbd;
+
+                    $idProducts = $_POST["idAssignedProduct"];
+                    $idPostOffer = $_POST["idPostOffer"];
+                    //$exit = true;
+                    $totalAmount =0;
+                    $totalAmountOffer =0;
+
+                    //$exit = true;
+                    foreach ($idProducts as $id){
+                        $name = "txt".$id;
+                        $namePriceUnit = "lblPriceUnit".$id;
+                        $namePriceOffer = "txtPriceOffer".$id;
+
+                        $priceUnit = str_replace('$', '', $_POST[$namePriceUnit]);
+                        $priceUnit = str_replace(',', '', $priceUnit);
+
+                        $priceOffer = str_replace('$', '', $_POST[$namePriceOffer]);
+                        $priceOffer = str_replace(',', '', $priceOffer);
+
+                        //if(isset($_POST[$namePriceOffer]) && $_POST[$namePriceOffer] !== "" && $priceOffer > 0 && $priceUnit > $priceOffer){
+                        if($wpdb->check_connection()){
+                            $wpdb->query("delete from ot_custom_product_offer_information where product_id = ".$id." and offer_information_id = ".$idPostOffer.";");
+                        }
+
+                        $totalAmount = $totalAmount + $priceUnit;
+                        $totalAmountOffer = $totalAmountOffer + $priceOffer;
+
+                        //}
+
+                    }
+
+                    /*
+                    if($exit == false){
+                        $_GET['message-warning']="Some products can not added, because the price offer is incorrect!";
+                    }
+                    */
+
+                    if($wpdb->check_connection()){
+                        $wpdb->query("UPDATE ot_custom_offer_information set total_amount = (total_amount - ".$totalAmount."), total_offer = (total_offer - ".$totalAmountOffer.") where offer_information_id = ".$idPostOffer.";");
+                    }
+
+                    $_GET['edit-products-offer'] = true;
+                    $_GET['idPostOffer'] = $idPostOffer;
+
+                }else{
+                    $_GET['message-error']="Please select product!";
+                    $_GET['idPostOffer'] = $idPostOffer;
+                    $_GET['edit-products-offer'] = true;
+                }
+            }
+        }else{
+            $_GET['message-error']="Please select one action!";
+            $_GET['idPostOffer'] = $_POST['idPostOfferAll'];
+            $_GET['edit-products-offer'] = true;
+        }
     }
