@@ -3801,7 +3801,6 @@ License: GPL2
         if(isset($_POST["selectActionAssignedProductPostOffer"]) && $_POST["selectActionAssignedProductPostOffer"] !== "-1"){
 
             if($_POST["selectActionAssignedProductPostOffer"] == "delete"){
-
                 if(isset($_POST["idAssignedProduct"])){
                     global $wpbd;
 
