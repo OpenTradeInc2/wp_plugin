@@ -95,7 +95,7 @@ License: GPL2
                             global $wpdb;
 
                             if($wpdb->check_connection()){
-                                $distributors =  $wpdb->get_results("SELECT `distributor_id`, `distributor_name` FROM `ot_custom_distributor`");
+                                $distributors =  $wpdb->get_results("SELECT `distributor_id`, `distributor_name` FROM `ot_custom_distributor` WHERE `email_administrator` in (SELECT `ot_custom_distributor_user`.`distributor_user_username` FROM `ot_custom_distributor_user` WHERE `distributor_user_reg_type` = 'Distributor');");
                                 foreach ($distributors as $distributor) {
                                     echo "<option value=\"$distributor->distributor_id\">$distributor->distributor_name</option>";
                                 }
