@@ -157,7 +157,7 @@
 
             setWareHouse($post_id, $product->warehouse_location_id, $product->warehouse_location_address, $product->distributor_id, $product->latitude, $product->longitude);
 
-            setPlaceLocator($post_id, $product->distributor_sku_description, $product->warehouse_location_id, $product->distributor_id);
+            setPlaceLocator($post_id, $product->distributor_sku_description, $product->warehouse_location_id, $product->warehouse_location_address, $product->distributor_id);
         }
         else
         {
@@ -350,13 +350,13 @@
         return $result;
     }
 
-    function setPlaceLocator($postId, $skuDescription, $wareHouseLocation, $idDistributor){
+    function setPlaceLocator($postId, $skuDescription, $wareHouseLocationID, $wareHouseLocation, $idDistributor){
         global $wpdb;
 
         if($wpdb->check_connection()){
 
             //Se hace el primer select para obtener el ID del warehouse
-            $sqlSelect = "SELECT `location_id`, WL.`warehouse_id`, `zipcode`, `latitude`, `longitude`, `location`, `city` FROM `ot_custom_warehouse_location` AS WL INNER JOIN `ot_custom_warehouse` AS W ON WL.`warehouse_id` = W.`warehouse_id` INNER JOIN `ot_custom_distributor_warehouse` AS DW ON W.`warehouse_id` = DW.`warehouse_id` WHERE `warehouse_file_id` = '".$wareHouseLocation."' AND DW.`distributor_id` = ".$idDistributor.";";
+            $sqlSelect = "SELECT `location_id`, WL.`warehouse_id`, `zipcode`, `latitude`, `longitude`, `location`, `city` FROM `ot_custom_warehouse_location` AS WL INNER JOIN `ot_custom_warehouse` AS W ON WL.`warehouse_id` = W.`warehouse_id` INNER JOIN `ot_custom_distributor_warehouse` AS DW ON W.`warehouse_id` = DW.`warehouse_id` WHERE `warehouse_file_id` = '".$wareHouseLocationID."' AND DW.`distributor_id` = ".$idDistributor.";";
             $warehouse = $wpdb->get_results($sqlSelect);
             $locationId = $warehouse[0]->location_id;
 
