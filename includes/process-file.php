@@ -52,7 +52,7 @@
         $headersQuantity = count($allDataInSheet[1]);
 
 		//if($headersQuantity == 15 ){
-        if($headersQuantity == 21){
+        if($headersQuantity == 23){
             $result = true;
         }else{
             $result= false;
@@ -174,6 +174,12 @@
         if (!in_array('CAS#', $headers)) {
             $result = false;
         }
+        if (!in_array('Latitude', $headers)) {
+            $result = false;
+        }
+        if (!in_array('Longitude', $headers)) {
+            $result = false;
+        }
 
         return $result;
     }
@@ -293,6 +299,12 @@
         if ($headers['U'] !== 'CAS#') {
             $result = false;
         }
+        if ($headers['V'] !== 'Latitude') {
+            $result = false;
+        }
+        if ($headers['W'] !== 'Longitude') {
+            $result = false;
+        }
 
         return $result;
     }
@@ -360,6 +372,19 @@
             $product[20]=$category;
             $cas = trim($allDataInSheet[$i]["U"]);
             $product[21]=$cas;
+            if($allDataInSheet[$i]["V"] == ""){
+                $latitude = 0;
+            }else{
+                $latitude = trim($allDataInSheet[$i]["V"]);
+            }
+            $product[22]=$latitude;
+            if($allDataInSheet[$i]["W"] == ""){
+                $longitude = 0;
+            }else{
+                $longitude = trim($allDataInSheet[$i]["W"]);
+            }
+            $product[23]=$longitude;
+
             $products[$i-1]=$product;
         }
         return $products;
@@ -427,7 +452,9 @@
 													  `warehouse_location_address`,
 													  `distributor_file_id`,
 													  `category`,
-													  `cas_number`) 
+													  `cas_number`,
+													  `latitude`,
+													  `longitude`) 
                                            VALUES 
                                                       ('$idProductFile',
 													  $distributorID,
@@ -455,7 +482,9 @@
 													  '$product[19]',
 													  '$product[2]',
 													  '$product[20]',
-													  '$product[21]')");
+													  '$product[21]',
+													  '$product[22]',
+													  '$product[23]')");
 				
             }
         }
