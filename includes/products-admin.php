@@ -155,9 +155,9 @@
             update_post_meta( $post_id, '_backorders', "no" );
             update_post_meta( $post_id, '_stock', $product->quantity );            
 
-            setWareHouse($post_id, $product->warehouse_location_id, $product->warehouse_location_address, $product->distributor_id, $product->latitude, $product->longitude);
+            setWareHouse($post_id, $product->warehouse_location_id, $product->warehouse_location_address, $product->distributor_id);
 
-            setPlaceLocator($post_id, $product->distributor_sku_description, $product->warehouse_location_id, $product->distributor_id);
+            setPlaceLocator($post_id, $product->distributor_sku_description, $product->warehouse_location_address);
         }
         else
         {
@@ -350,14 +350,13 @@
         return $result;
     }
 
-    function setPlaceLocator($postId, $skuDescription, $wareHouseLocation, $idDistributor){
+    function setPlaceLocator($postId, $skuDescription, $wareHouseLocation){
         global $wpdb;
 
         if($wpdb->check_connection()){
 
             //Se hace el primer select para obtener el ID del warehouse
-            $sqlSelect = "SELECT `location_id`, WL.`warehouse_id`, `zipcode`, `latitude`, `longitude`, `location`, `city` FROM `ot_custom_warehouse_location` AS WL INNER JOIN `ot_custom_warehouse` AS W ON WL.`warehouse_id` = W.`warehouse_id` INNER JOIN `ot_custom_distributor_warehouse` AS DW ON W.`warehouse_id` = DW.`warehouse_id` WHERE `warehouse_file_id` = '".$wareHouseLocation."' AND DW.`distributor_id` = ".$idDistributor.";";
-            $warehouse = $wpdb->get_results($sqlSelect);
+            $warehouse = $wpdb->get_results("SELECT * FROM ot_custom_warehouse_location WHERE location = '".$wareHouseLocation."'");
             $locationId = $warehouse[0]->location_id;
 
             if(($warehouse[0]->latitude !== 0 || $warehouse[0]->longitude !== 0)&&($warehouse[0]->latitude !== "" && $warehouse[0]->longitude !== "")){
@@ -381,7 +380,7 @@
 
     }
 
-    function setWareHouse($post_id, $warehouseLocationId, $warehouseLocationAddress, $distributorID, $latitude, $longitude){
+    function setWareHouse($post_id, $warehouseLocationId, $warehouseLocationAddress, $distributorID){
         global $wpdb;
 
         $user = getCurrentUser();
@@ -444,8 +443,8 @@
                               VALUES
                                 (".$warehouseId.",
                                 '',
-                                ".$latitude.",
-                                ".$longitude.",
+                                '',
+                                '',
                                 '".$warehouseLocationAddress."',
                                 '',
                                 ".$user->ID.",
