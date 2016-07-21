@@ -3991,7 +3991,6 @@ License: GPL2
                     }
 
                     /*
-                     * no se ocupa
                     if($exit == false){
                         $_GET['message-warning']="Some products can not added, because the price offer is incorrect!";
                     }
