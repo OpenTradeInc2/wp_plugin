@@ -785,6 +785,7 @@
     }
 
     function downloadInventory(){
+
         global $wpdb;
 
         $isConnected = $wpdb->check_connection();
@@ -930,17 +931,41 @@
                     $rowStart++;
                 }
 
-                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                header('Content-Disposition: attachment;filename="Inventory '.getFormatDate().'.xlsx"');
-                header('Cache-Control: max-age=0');
+               // header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+               // header('Content-Disposition: attachment;filename="Inventory'.getFormatDate().'.xlsx"');
+                //header('Cache-Control: max-age=0');
 
-                $objWriter = PHPExcel_IOFactory::createWriter($phpExcel, 'Excel2007');
-                $objWriter->save('php://output');
-                exit;
+                //$objWriter = PHPExcel_IOFactory::createWriter($phpExcel, 'Excel2007');
+
+                //ob_end_clean();
+
+                //$objWriter->save('php://output');
+
+                //$phpExcel->disconnectWorksheets();
+                //unset($phpExcel);
+
+                try
+                {
+
+                    header('Content-Type: application/vnd.ms-excel');
+                    header('Content-Disposition: attachment;filename="Inventory'.getFormatDate().'.xls"');
+                    header('Cache-Control: max-age=0');
+                    $writer = PHPExcel_IOFactory::createWriter($phpExcel, 'Excel5');
+                    ob_end_clean();
+                    $writer->save('php://output');
+                    $phpExcel->disconnectWorksheets();
+                    unset($phpExcel);
+                    unset($writer);
+                    exit();
+
+                } catch (Exception $e) {
+                    $_GET['message-error'] = $e->getMessage();
+                }
             }
         }else{
             $_GET['message-error'] = "No data!";
         }
+
     }
 
     function setPlaceLocatorUpload($postId, $skuDescription, $wareHouseLocation,$wareHouseLocationID, $idDistributor){

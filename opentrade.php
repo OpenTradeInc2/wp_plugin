@@ -3118,9 +3118,9 @@ License: GPL2
                         approveDistributor($idDistributor);
 
                         if($wpdb->check_connection()){
-                            $distributor = $wpdb->get_results(" SELECT * FROM `ot_custom_distributor` WHERE `distributor_id` = ".$idDistributor.";")[0];
+                            $distributor = $wpdb->get_results("SELECT * FROM `ot_custom_distributor` WHERE `distributor_id` = ".$idDistributor.";");
 
-                            $to = array($distributor->email_administrator);
+                            $to = array($distributor[0]->email_administrator);
                             $subject='Your Company Is approved';
                             $headers = 'Reply-to: '.'Michael'.' '.'Lin'.' <'.'michael.lin@opentradeinc.com'.'>' . "\r\n";
                             $userData = $current_user->data;
@@ -3171,9 +3171,9 @@ License: GPL2
 
                             wp_mail( $to, $subject, $message, $headers);
 
-                            $user = $wpdb->get_results("SELECT `distributor_user_userid` FROM `ot_custom_distributor_user` WHERE `distributor_user_username` = '".$distributor->email_administrator."';")[0];
+                            $user = $wpdb->get_results("SELECT `distributor_user_userid` FROM `ot_custom_distributor_user` WHERE `distributor_user_username` = '".$distributor[0]->email_administrator."';");
 
-                            approvedUser($user->distributor_user_userid);
+                            approvedUser($user[0]->distributor_user_userid);
                         }
                     }
                 } else {
@@ -3467,7 +3467,9 @@ License: GPL2
         global $wpdb;
         $idProduct = $_GET['idProduct'];
         if($wpdb->check_connection()) {
-            $product = $wpdb->get_results("SELECT * FROM `ot_custom_inventory_file_items` WHERE `inventory_file_item_id` = ".$_POST['idProduct'].";")[0];
+            $productSelect = $wpdb->get_results("SELECT * FROM `ot_custom_inventory_file_items` WHERE `inventory_file_item_id` = ".$_POST['idProduct'].";");
+
+            $product = $productSelect[0];
 
             $_POST['distributor_id'] = $product->distributor_file_id;
             $_POST['distributor_name'] = $product->distributor_name;
@@ -3637,7 +3639,7 @@ License: GPL2
         $_GET['view-details-idProductFile'] = $_POST['idProductFile'];
     }
 
-    if(isset($_POST["actionDownloadInventory"])) {
+    if(isset($_POST["actionDownloadInventory"])) {       
         downloadInventory();
     }
 

@@ -24,14 +24,15 @@
         return $products;
     }
 
-    function readContentFile($fullPatch){        
-
+    function readContentFile($fullPatch){
+        $objPHPExcel = PHPExcel_IOFactory::load($fullPatch);
         try {
-            $objPHPExcel = PHPExcel_IOFactory::load($fullPatch);
+            $allDataInSheet = $objPHPExcel->getActiveSheet()->toArray(null, true, true, true);
         } catch (Exception $e) {
             $_GET['message-error']='Error loading file "' . pathinfo($fullPatch, PATHINFO_BASENAME) . '": ' . $e->getMessage();
         }
-        $allDataInSheet = $objPHPExcel->getActiveSheet()->toArray(null, true, true, true);
+
+        unset($objPHPExcel);
 
         return $allDataInSheet;
     }
@@ -40,11 +41,13 @@
 
         try {
             $objPHPExcel = PHPExcel_IOFactory::load($fullPatch);
+            $result = $objPHPExcel->getActiveSheet()->getCell($cell.$row)->getOldCalculatedValue();
+            unset($objPHPExcel);
         } catch (Exception $e) {
             $_GET['message-error']='Error loading file "' . pathinfo($fullPatch, PATHINFO_BASENAME) . '": ' . $e->getMessage();
         }
 
-        return $objPHPExcel->getActiveSheet()->getCell($cell.$row)->getOldCalculatedValue();
+        return $result;
     }
 
     function validateQuantityHeaders($allDataInSheet){
