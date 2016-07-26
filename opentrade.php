@@ -1276,7 +1276,6 @@ License: GPL2
                         <th>Distributor</th>
                         <th>Location</th>
                         <th>Tax ID</th>
-                        <th>Added By</th>
                         <th>Added Date</th>
                         <th>Status</th>
                         <th>Users</th>
@@ -1290,7 +1289,6 @@ License: GPL2
                         <th>Distributor</th>
                         <th>Location</th>
                         <th>Tax ID</th>
-                        <th>Added By</th>
                         <th>Added Date</th>
                         <th>Status</th>
                         <th>Users</th>
@@ -1302,8 +1300,8 @@ License: GPL2
                     global $wpdb;
 
                     if($wpdb->check_connection()){
-                        $distributors =  $wpdb->get_results("SELECT dist.`distributor_id`, dist.`distributor_name`, dist.`location`,dist.`tax_id`, user.`user_nicename` as `added_by`, dist.`added_date`, dist.`status` 
-                                                             FROM `ot_custom_distributor` as dist INNER JOIN `".$wpdb->prefix."users` as user ON dist.`added_by` = user.`ID` 
+                        $distributors =  $wpdb->get_results("SELECT dist.`distributor_id`, dist.`distributor_name`, dist.`location`,dist.`tax_id`, dist.`added_date`, dist.`status` 
+                                                             FROM `ot_custom_distributor` as dist 
                                                              WHERE `email_administrator` in (SELECT `ot_custom_distributor_user`.`distributor_user_username` FROM `ot_custom_distributor_user` WHERE `distributor_user_reg_type` = 'Distributor');");
                         foreach ($distributors as $distributor) {
                             ?>
@@ -1314,7 +1312,6 @@ License: GPL2
                                 echo "<td>" . $distributor->distributor_name . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idDistributor\" value=\"$distributor->distributor_id\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditDistributor\"></span></div></form></td>";
                                 echo "<td>" . $distributor->location . "</td>";
                                 echo "<td>" . $distributor->tax_id . "</td>";
-                                echo "<td>" . $distributor->added_by . "</td>";
                                 echo "<td>" . $distributor->added_date . "</td>";
                                 echo "<td>" . str_replace("-", " ", ucfirst($distributor->status)) . "</td>";
                                 echo "<td><form action=\"\" method=\"post\"><input type=\"hidden\" name=\"idDistributor\" value=\"$distributor->distributor_id\"><input class=\"button action\" value=\"View\" type=\"submit\" name=\"actionViewUsers\"></form></td>";
@@ -2766,125 +2763,123 @@ License: GPL2
 
     function wpdocs_end_users_submenu_page_callback(){
 
-        ?>
-        <div class="wrap">
-            <h4>Open Trade 2.0</h4>
-            <h3>End Users List</h3>
-            <br>
-            <?php
-            if (isset($_GET['message-error'])) {
-                ?>
-                <div id="message" class="error">
-                    <p><strong><?php _e($_GET['message-error']) ?></strong></p>
-                </div>
-                <?php
-            }
+    ?>
+    <div class="wrap">
+        <h4>Open Trade 2.0</h4>
+        <h3>End Users List</h3>
+        <br>
+        <?php
+        if (isset($_GET['message-error'])) {
             ?>
-            <form action="" method="post" enctype="multipart/form-data">
-                <div class="alignleft actions bulkactions">
-                    <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
-                    <select name="selectActionDistributors" id="bulk-action-selector-top">
-                        <option value="-1">Actions</option>
-                        <option value="delete" class="hide-if-no-js">Delete</option>
-                        <option value="approve">Approve</option>
-                        <input id="doAction" class="button action" value="Apply" type="submit" name="actionBulkDistributors">
-                    </select>
-                </div>
-                <script>
-                    jQuery(function ($) {
-                        $('#selectAllValuesHead').on('click', function () {
-                            $(':checkbox').prop("checked", $(this).is(':checked'));
-                        });
-                    })
-                </script>
-                <script language="JavaScript">
-                    function verifyChecks(ele) {
-                        var checkboxes = document.getElementsByTagName('input');
-                        if (ele.checked) {
-                            var countTotalChecks = 0;
-                            var countTotalChecksChecked = 0;
-                            for (var i = 0; i < checkboxes.length; i++) {
-                                if (checkboxes[i].type == 'checkbox') {
-                                    var currentValue =checkboxes[i].id;
-                                    if(currentValue.toString() == 'selectAllValues') {
-                                        countTotalChecks++;
-                                        if (checkboxes[i].checked){
-                                            countTotalChecksChecked++;
-                                        }
+            <div id="message" class="error">
+                <p><strong><?php _e($_GET['message-error']) ?></strong></p>
+            </div>
+            <?php
+        }
+        ?>
+        <form action="" method="post" enctype="multipart/form-data">
+            <div class="alignleft actions bulkactions">
+                <label for="bulk-action-selector-top" class="screen-reader-text">Select bulk action</label>
+                <select name="selectActionDistributors" id="bulk-action-selector-top">
+                    <option value="-1">Actions</option>
+                    <option value="delete" class="hide-if-no-js">Delete</option>
+                    <option value="approve">Approve</option>
+                    <input id="doAction" class="button action" value="Apply" type="submit" name="actionBulkDistributors">
+                </select>
+            </div>
+            <script>
+                jQuery(function ($) {
+                    $('#selectAllValuesHead').on('click', function () {
+                        $(':checkbox').prop("checked", $(this).is(':checked'));
+                    });
+                })
+            </script>
+            <script language="JavaScript">
+                function verifyChecks(ele) {
+                    var checkboxes = document.getElementsByTagName('input');
+                    if (ele.checked) {
+                        var countTotalChecks = 0;
+                        var countTotalChecksChecked = 0;
+                        for (var i = 0; i < checkboxes.length; i++) {
+                            if (checkboxes[i].type == 'checkbox') {
+                                var currentValue =checkboxes[i].id;
+                                if(currentValue.toString() == 'selectAllValues') {
+                                    countTotalChecks++;
+                                    if (checkboxes[i].checked){
+                                        countTotalChecksChecked++;
                                     }
                                 }
                             }
-                            if ((countTotalChecks>0) && (countTotalChecksChecked>0) && (countTotalChecks== countTotalChecksChecked)){
-                                var checkHead = document.getElementById('selectAllValuesHead');
-                                checkHead.checked = true;
-                            }
                         }
-                        else {
+                        if ((countTotalChecks>0) && (countTotalChecksChecked>0) && (countTotalChecks== countTotalChecksChecked)){
                             var checkHead = document.getElementById('selectAllValuesHead');
-                            checkHead.checked = false;
+                            checkHead.checked = true;
                         }
                     }
-                </script>
-                <table class="widefat">
-                    <thead>
-                    <tr>
-                        <th><input type="checkbox" id="selectAllValuesHead" name ="selectAllValuesHead"></th>
-                        <th>ID</th>
-                        <th>Distributor</th>
-                        <th>Location</th>
-                        <th>Tax ID</th>
-                        <th>Added By</th>
-                        <th>Added Date</th>
-                        <th>Status</th>
-                        <th>User Email</th>
-                    </tr>
-                    </thead>
-                    <tfoot>
-                    <tr>
-                        <th></th>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Location</th>
-                        <th>Tax ID</th>
-                        <th>Added By</th>
-                        <th>Added Date</th>
-                        <th>Status</th>
-                        <th>User Email</th>
-                    </tr>
-                    </tfoot>
-                    <tbody>
-                    <?php
-                    global $wpdb;
+                    else {
+                        var checkHead = document.getElementById('selectAllValuesHead');
+                        checkHead.checked = false;
+                    }
+                }
+            </script>
+            <table class="widefat">
+                <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAllValuesHead" name ="selectAllValuesHead"></th>
+                    <th>ID</th>
+                    <th>Company Name</th>
+                    <th>Location</th>
+                    <th>Tax ID</th>
+                    <th>Added By</th>
+                    <th>Added Date</th>
+                    <th>Status</th>
+                    <th>User Email</th>
+                </tr>
+                </thead>
+                <tfoot>
+                <tr>
+                    <th></th>
+                    <th>ID</th>
+                    <th>Company Name</th>
+                    <th>Location</th>
+                    <th>Tax ID</th>
+                    <th>Added By</th>
+                    <th>Added Date</th>
+                    <th>Status</th>
+                    <th>User Email</th>
+                </tr>
+                </tfoot>
+                <tbody>
+                <?php
+                global $wpdb;
 
-                    if($wpdb->check_connection()){
-                        $distributors =  $wpdb->get_results("SELECT dist.`distributor_id`, dist.`distributor_name`, dist.`location`,dist.`tax_id`, user.`user_nicename` as `added_by`, dist.`added_date`, dist.`status`, dist.`email_administrator` 
-                                                             FROM `ot_custom_distributor` as dist INNER JOIN `".$wpdb->prefix."users` as user ON dist.`added_by` = user.`ID` 
-                                                             WHERE `email_administrator` in (SELECT `ot_custom_distributor_user`.`distributor_user_username` FROM `ot_custom_distributor_user` WHERE `distributor_user_reg_type` = 'End User');");
-                        foreach ($distributors as $distributor) {
-                            ?>
-                            <tr>
-                                <?php
-                                echo "<td><input onchange='verifyChecks(this)' id='selectAllValues' style='margin-left:8px;' type=\"checkbox\" name=\"idDistributors[]\" value=" . $distributor->distributor_id . "></td>";
-                                echo "<td>" . $distributor->distributor_id . "</td>";
-                                echo "<td>" . $distributor->distributor_name . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idDistributor\" value=\"$distributor->distributor_id\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditDistributor\"></span></div></form></td>";
-                                echo "<td>" . $distributor->location . "</td>";
-                                echo "<td>" . $distributor->tax_id . "</td>";
-                                echo "<td>" . $distributor->added_by . "</td>";
-                                echo "<td>" . $distributor->added_date . "</td>";
-                                echo "<td>" . str_replace("-", " ", ucfirst($distributor->status)) . "</td>";
-                                echo "<td>" . $distributor->email_administrator . "</td>";
-                                ?>
-                            </tr>
+                if($wpdb->check_connection()){
+                    $distributors =  $wpdb->get_results("SELECT dist.`distributor_id`, dist.`distributor_name`, dist.`location`,dist.`tax_id`, dist.`added_date`, dist.`status`, dist.`email_administrator` 
+                                                         FROM `ot_custom_distributor` as dist
+                                                         WHERE `email_administrator` in (SELECT `ot_custom_distributor_user`.`distributor_user_username` FROM `ot_custom_distributor_user` WHERE `distributor_user_reg_type` = 'End User');");
+                    foreach ($distributors as $distributor) {
+                        ?>
+                        <tr>
                             <?php
-                        }
+                            echo "<td><input onchange='verifyChecks(this)' id='selectAllValues' style='margin-left:8px;' type=\"checkbox\" name=\"idDistributors[]\" value=" . $distributor->distributor_id . "></td>";
+                            echo "<td>" . $distributor->distributor_id . "</td>";
+                            echo "<td>" . $distributor->distributor_name . "<form action=\"\" method=\"post\"><div class='row-actions'><span class='edit'><input type=\"hidden\" name=\"idDistributor\" value=\"$distributor->distributor_id\"><input type='submit' class=\"button-link\" value=\"Edit\" style=\"color:#0073aa; font-size: 13px;\" name=\"actionEditDistributor\"></span></div></form></td>";
+                            echo "<td>" . $distributor->location . "</td>";
+                            echo "<td>" . $distributor->tax_id . "</td>";
+                            echo "<td>" . $distributor->added_date . "</td>";
+                            echo "<td>" . str_replace("-", " ", ucfirst($distributor->status)) . "</td>";
+                            echo "<td>" . $distributor->email_administrator . "</td>";
+                            ?>
+                        </tr>
+                        <?php
                     }
-                    ?>
-                    </tbody>
-                </table>
-            </form>
-        </div>
-        <?php
-
+                }
+                ?>
+                </tbody>
+            </table>
+        </form>
+    </div>
+    <?php
     }
 
     function wpdocs_brokers_submenu_page_callback(){
@@ -2954,7 +2949,7 @@ License: GPL2
                     <tr>
                         <th><input type="checkbox" id="selectAllValuesHead" name ="selectAllValuesHead"></th>
                         <th>ID</th>
-                        <th>Distributor</th>
+                        <th>Company Name</th>
                         <th>Location</th>
                         <th>Tax ID</th>
                         <th>Added By</th>
@@ -2967,7 +2962,7 @@ License: GPL2
                     <tr>
                         <th></th>
                         <th>ID</th>
-                        <th>Distributor</th>
+                        <th>Company Name</th>
                         <th>Location</th>
                         <th>Tax ID</th>
                         <th>Added By</th>
@@ -2981,8 +2976,8 @@ License: GPL2
                     global $wpdb;
 
                     if($wpdb->check_connection()){
-                        $distributors =  $wpdb->get_results("SELECT dist.`distributor_id`, dist.`distributor_name`, dist.`location`,dist.`tax_id`, user.`user_nicename` as `added_by`, dist.`added_date`, dist.`status`, dist.`email_administrator` 
-                                                             FROM `ot_custom_distributor` as dist INNER JOIN `".$wpdb->prefix."users` as user ON dist.`added_by` = user.`ID` 
+                        $distributors =  $wpdb->get_results("SELECT dist.`distributor_id`, dist.`distributor_name`, dist.`location`,dist.`tax_id`, dist.`added_date`, dist.`status`, dist.`email_administrator` 
+                                                             FROM `ot_custom_distributor` as dist
                                                              WHERE `email_administrator` in (SELECT `ot_custom_distributor_user`.`distributor_user_username` FROM `ot_custom_distributor_user` WHERE `distributor_user_reg_type` = 'Broker');");
                         foreach ($distributors as $distributor) {
                             ?>
@@ -3099,7 +3094,6 @@ License: GPL2
 
     if(isset($_POST["actionBulkDistributors"])){
         if(isset($_POST['selectActionDistributors']) and $_POST['selectActionDistributors'] !== "-1"){
-            
             if($_POST['selectActionDistributors'] =='delete') {                
                 if (isset($_POST['idDistributors'])) {
                     $idDistributors = $_POST["idDistributors"];
@@ -3130,7 +3124,7 @@ License: GPL2
                                         <head>
                                         <font FACE="impact" SIZE=6 COLOR="red">O</font><font FACE="impact" SIZE=6 COLOR="black">PENTRADE</font>
                                         <br/>
-                                        <h1>Your company has been approved to add inventory at the site of openTrade.</h1>
+                                        <h1>Your company has been approved in openTrade.</h1>
                                         </head>
                                         <body>
                                         <table>                    

@@ -126,5 +126,5 @@
                         </body>
                 </html>';
 
-        wp_mail( $user->user_email, 'OpenTrade User Activation', $message, $headers);//
+        wp_mail( $user->user_email, 'OpenTrade User Activation', $message, $headers);
     }
