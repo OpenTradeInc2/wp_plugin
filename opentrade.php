@@ -3130,15 +3130,15 @@ License: GPL2
                                         <table>                    
                                         <tr>
                                         <th>Company Name:</th>
-                                        <td>'.$distributor->distributor_name.'</td>
+                                        <td>'.$distributor[0]->distributor_name.'</td>
                                         </tr>
                                         <tr>
                                         <th>Location:</th>
-                                        <td>'.$distributor->location.'</td>
+                                        <td>'.$distributor[0]->location.'</td>
                                         </tr>
                                         <tr>
                                         <th>Tax Id:</th>
-                                        <td>'.$distributor->tax_id.'</td>
+                                        <td>'.$distributor[0]->tax_id.'</td>
                                         </tr>                                   
                                         </table>                    
                                         <br/>
