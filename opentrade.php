@@ -1686,11 +1686,11 @@ License: GPL2
                             <th>ID</th>
                             <th>Name</th>
                             <th>Description</th>
-                            <th>Price</th>
+                            <th>Price Unit</th>
+                            <th>Price Offer Unit</th>
                             <th>Offer</th>
-                            <th>Stock</th>
                             <th>Quantity</th>
-                            <th>Total Offer</th>
+                            <th>Total Stock</th>
                         </tr>
                         </thead>
                         <tfoot>
@@ -1699,11 +1699,11 @@ License: GPL2
                             <th>ID</th>
                             <th>Name</th>
                             <th>Description</th>
-                            <th>Price</th>
+                            <th>Price Unit</th>
+                            <th>Price Offer Unit</th>
                             <th>Offer</th>
-                            <th>Stock</th>
                             <th>Quantity</th>
-                            <th>Total Offer</th>
+                            <th>Total Stock</th>
                         </tr>
                         </tfoot>
                         <tbody>
@@ -1723,15 +1723,17 @@ License: GPL2
                                     $post = get_post($product->product_id);
                                     $stock = get_post_meta( $product->product_id, '_stock' );
                                     $totalAmount = $product->offer * $product->quantity;
+                                    $priceByUnit = $product->offer / $product->quantity;
 
                                     echo "<td>"  . $product->product_id . "</td>";
                                     echo "<td>"  . $post->post_title . "</td>";
                                     echo "<td>"  . $post->post_content . "</td>";
                                     echo "<td>$"  . number_format($price, 2) . "<input type='hidden' name='lblPriceUnit".$product->product_id."' value='".$price."'></td>";
+                                    echo "<td><label id='lblOfferUnit".$product->product_id."'>$".number_format($priceByUnit,2)."</label><input type='hidden' id='lblOfferUnitHidden".$product->product_id."' name='lblOfferUnit".$product->product_id."' value='$".number_format($priceByUnit,2)."'></td>";
                                     echo "<td><input type='text' name='txtPriceOffer".$product->product_id."' value='$".number_format($product->offer, 2)."' style='width:100px;' onblur='returnFormatCost(".$product->product_id.")' id='txtPriceOffer".$product->product_id."'><input type='hidden' name='lblPriceOfferOriginal".$product->product_id."' value='$".number_format($product->offer, 2)."'></td>";
+                                    //echo "<td><label id='lblTotalPrice".$product->product_id."'>$".number_format($product->offer,2)."</label></td>";
+                                    echo "<td><input style='width:50px;' type='number' min='1' onchange='totalAmountQuantity(".$product->product_id.",0)' value='".$product->quantity."' id='quantity".$product->product_id."' name='quantity".$product->product_id."'></td>";
                                     echo "<td>"  . $stock[0] . "<input type='hidden' name='lblStock".$product->product_id."' value='".$stock[0]."'></td>";
-                                    echo "<td><input style='width:50px;' type='number' min='1' onchange='totalAmountQuantity(".$product->product_id.")' value='".$product->quantity."' id='quantity".$product->product_id."' name='quantity".$product->product_id."'></td>";
-                                    echo "<td><label id='lblTotalPrice".$product->product_id."'>$".number_format($totalAmount,2)."</label></td>";
                                     ?>
                                 </tr>
                                 <?php
@@ -1878,7 +1880,7 @@ License: GPL2
                         numeroDecimal = number_format(numero, 2);
                     }
                     document.getElementById("txtPriceOffer"+idElement).value = "$"+numeroDecimal;
-                    totalAmountQuantity(idElement);
+                    totalAmountQuantity(idElement,1);
                 }
 
                 function number_format(amount, decimals) {
@@ -1905,19 +1907,54 @@ License: GPL2
                     return amount_parts.join('.');
                  }
 
-                function totalAmountQuantity(idQuantity){
+                function totalAmountQuantity(idQuantity, type){
 
-                    var txtQuantity = document.getElementById("quantity"+idQuantity).value;
-                    var txtTotal =  document.getElementById("txtPriceOffer"+idQuantity).value;
+                    if(type == "1"){
 
-                    txtTotal = txtTotal.replace("$","");
-                    txtTotal = txtTotal.replace(",","");
-                    txtTotal = parseFloat(txtTotal);
+                        var txtQuantity = document.getElementById("quantity"+idQuantity).value;
+                        var txtTotal =  document.getElementById("txtPriceOffer"+idQuantity).value;
 
-                    var result = txtQuantity * txtTotal;
-                    result = number_format(result,2);
+                        txtTotal = txtTotal.replace("$","");
+                        txtTotal = txtTotal.replace(",","");
+                        txtTotal = parseFloat(txtTotal);
 
-                    document.getElementById("lblTotalPrice"+idQuantity).innerHTML = "$"+result;
+                        var resultUnit = parseFloat(txtTotal / txtQuantity);
+                        resultUnit = number_format(resultUnit,2);
+
+
+                        var result = txtQuantity * resultUnit;
+                        result = number_format(result,2);
+
+                        //document.getElementById("lblTotalPrice"+idQuantity).innerHTML = "$"+result;
+                        document.getElementById("lblOfferUnitHidden"+idQuantity).value = "$"+resultUnit;
+                        document.getElementById("lblOfferUnit"+idQuantity).innerHTML = "$"+resultUnit;
+                    }else{
+
+                        document.getElementById("txtPriceOffer"+idQuantity).blur();
+                        //alert("Precio Oferta: " + document.getElementById("txtPriceOffer"+idQuantity).value);
+
+                        var txtQuantity = document.getElementById("quantity"+idQuantity).value;
+                        var txtTotal =  document.getElementById("txtPriceOffer"+idQuantity).value;
+
+                        txtTotal = txtTotal.replace("$","");
+                        txtTotal = txtTotal.replace(",","");
+                        txtTotal = parseFloat(txtTotal);
+
+                        //alert("Precio Offer Unitario: " + txtTotal);
+
+
+                        var resultUnit = parseFloat(txtTotal / txtQuantity);
+                        resultUnit = number_format(resultUnit,2);
+
+
+                        //var result = txtQuantity / txtTotal;
+                        //result = number_format(result,2);
+                        //alert(txtQuantity + " * " + txtTotal + " = " + result);
+
+                        document.getElementById("lblOfferUnitHidden"+idQuantity).value ="$"+resultUnit;
+                        document.getElementById("lblOfferUnit"+idQuantity).innerHTML = "$"+resultUnit;
+                    }
+
 
                 }
 
@@ -3841,9 +3878,6 @@ License: GPL2
                         $priceUnit = str_replace('$', '', $_POST[$namePriceUnit]);
                         $priceUnit = str_replace(',', '', $priceUnit);
 
-                        //$priceOffer = str_replace('$', '', $_POST[$namePriceOffer]);
-                        //$priceOffer = str_replace(',', '', $priceOffer);
-
 
                         if($wpdb->check_connection()){
                             $wpdb->query("insert into ot_custom_product_offer_information (product_post_offer_information_id, product_id, offer_information_id, quantity, added_by, added_date, edited_by, edited_date, price, offer) values(0, ".$id.", ".$idPostOffer.", 1, ".getCurrentUser()->ID.", '".getFormatDate()."', '', '', ".$priceUnit.", ".$priceUnit.");");
@@ -3894,37 +3928,41 @@ License: GPL2
     foreach($result as $row){
 
         $name = "txtPriceOffer".$row->product_id;
-        $nameLbl = "lblPriceUnit".$row->product_id;
         $nameOriginal = "lblPriceOfferOriginal".$row->product_id;
         $nameQuantity = "quantity".$row->product_id;
         $nameStock = "lblStock".$row->product_id;
+        $nameOffer = "lblOfferUnit".$row->product_id;
+        $namePriceUnit = "lblPriceUnit".$row->product_id;
 
         if(isset($_POST[$name]) && $_POST[$name] !== ""){
 
             $priceOffer = str_replace("$","", $_POST[$name]);
             $priceOffer = str_replace(",","", $priceOffer);
 
-            $priceUnit = str_replace("$", "", $_POST[$nameLbl]);
+            $priceUnit = str_replace("$", "", $_POST[$namePriceUnit]);
             $priceUnit = str_replace(",", "", $priceUnit);
+
+            $priceOfferUnit = str_replace("$", "", $_POST[$nameOffer]);
+            $priceOfferUnit = str_replace(",", "", $priceOfferUnit);
 
             $quantity = $_POST[$nameQuantity];
             $stock = $_POST[$nameStock];
 
-            if( $priceOffer > 0 && $priceOffer <= $priceUnit && $quantity > 0 && $stock >= $quantity ){
+            if( $priceOffer > 0 && $priceOfferUnit <= $priceUnit && $quantity > 0 && $stock >= $quantity ){
 
                 if($wpdb->check_connection()){
                     $wpdb->query("UPDATE ot_custom_product_offer_information SET offer = ". $priceOffer.", quantity = ".$quantity." WHERE product_id = ".$row->product_id." AND offer_information_id = ".$idPostOffer.";");
                 }
 
                 $totalAmount = $totalAmount+ ($priceUnit*$quantity);
-                $totalOfferAmount = $totalOfferAmount + ($priceOffer*$quantity);
+                $totalOfferAmount = $totalOfferAmount + ($priceOfferUnit*$quantity);
 
             }else{
 
                 $totalAmount = $totalAmount + ($priceUnit*$quantity);
                 $priceOffer = str_replace("$","", $_POST[$nameOriginal]);
                 $priceOffer = str_replace(",","", $priceOffer);
-                $totalOfferAmount = $totalOfferAmount + ($priceOffer*$quantity);
+                $totalOfferAmount = $totalOfferAmount + $priceOffer;
                 $_GET['message-warning']="Some products can not updating, because the quantity or the price offer is incorrect";
 
             }
