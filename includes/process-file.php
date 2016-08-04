@@ -788,7 +788,7 @@
 
             wp_update_post($post);
 
-            setPlaceLocatorUpload($product[1], $product[6], $product[20]);
+            //setPlaceLocatorUpload($product[1], $product[6], $product[20]);
             updateProductPost($post["ID"], $distributor_id["value"], $distributor_name["value"], $warehouse_location_id["value"], $packaging_type["value"]);
             updateCategory($post["ID"], $product[21]);
         }
