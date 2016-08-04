@@ -47,7 +47,20 @@
 
         addUserDistributor($user_id, $distributorID);
 
-        wp_mail( $email, 'Welcome To Open Trade!', 'Your User Name: ' . $userName.', '.'Your Password: ' . $random_password );
+        $message = "<html>
+                            <head>
+                                <font FACE=\"impact\" SIZE=6 COLOR=\"red\">O</font><font FACE=\"impact\" SIZE=6 COLOR=\"black\">PENTRADE</font>
+                                <br/>
+                                <h1>Open Trade Credentials</h1>
+                            </head>
+                            <body>
+                                Welcome to Open Trade, Your user is : ".$userName." and your password is: ".$random_password."
+                            </body>
+                        </html>";
+
+        add_filter('wp_mail_content_type',create_function('', 'return "text/html";'));
+
+        wp_mail( $email, 'Welcome To Open Trade!', $message );
 
         return $user_id;
     }
