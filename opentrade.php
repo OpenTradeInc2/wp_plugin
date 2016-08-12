@@ -2869,7 +2869,6 @@ License: GPL2
                     <th>Tax ID</th>
                     <th>Added By</th>
                     <th>Added Date</th>
-                    <th>Status</th>
                     <th>User Email</th>
                 </tr>
                 </thead>
@@ -2882,7 +2881,6 @@ License: GPL2
                     <th>Tax ID</th>
                     <th>Added By</th>
                     <th>Added Date</th>
-                    <th>Status</th>
                     <th>User Email</th>
                 </tr>
                 </tfoot>
