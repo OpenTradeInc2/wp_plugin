@@ -994,3 +994,19 @@
         return $term[0]->name;
     }
 
+    function getAttribute($postID, $attributesName){
+        
+        $post_meta_product_attributes = get_post_meta($postID, '_product_attributes', true);
+        
+        $resultValue = null;
+    
+        foreach ($post_meta_product_attributes as $product_attribute) {
+    
+            if ($product_attribute["name"] == $attributesName) {
+                $resultValue = $product_attribute["value"];
+            } 
+        }
+    
+        return $resultValue;
+    }
+

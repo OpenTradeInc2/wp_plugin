@@ -3548,6 +3548,16 @@ License: GPL2
                                 $stock = get_post_meta( $product->product_id, '_stock' );
                                 $newTotal = $stock[0] - $product->quantity;
                                 update_post_meta( $product->product_id, '_stock', $newTotal );
+
+                                $totalWeight = (float)get_post_meta( $product->product_id, '_weight', true );
+
+                                $packagingWeight = (float)getAttribute($product->product_id, 'Packaging Weight (lb)');
+
+                                $purchaseWeight = $packagingWeight * $product->quantity;
+
+                                $newWeight = $totalWeight - $purchaseWeight;
+
+                                update_post_meta( $product->product_id, '_weight', $purchaseWeight );
                             }
                             $_GET['message-success'] = "Order Approved!";
                         }
